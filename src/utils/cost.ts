@@ -1,14 +1,30 @@
-// cost.ts — UC cost calculations. reads the cost scale from costScale.json and does math.
-// yes, upgrading from 98 to 99 costs 1,600 UC. no, that is not a typo.
-
 import costScaleData from '../data/costScale.json'
+import attributesData from '../data/attributes.json'
 
 interface CostBracket {
   range: string
   costPerPoint: number
 }
 
+interface AttrCategory {
+  label: string
+  _comment?: string
+  attributes: { name: string; default: number }[]
+}
+
 const brackets: CostBracket[] = costScaleData.brackets
+
+const rawAttrs = attributesData as unknown as Record<string, AttrCategory>
+const attrDefaults = new Map<string, number>()
+for (const cat of Object.values(rawAttrs)) {
+  if (cat.attributes) {
+    for (const attr of cat.attributes) {
+      if (!attrDefaults.has(attr.name)) {
+        attrDefaults.set(attr.name, attr.default)
+      }
+    }
+  }
+}
 
 function parseBracketRange(range: string): [number, number] {
   const [low, high] = range.split('-').map(Number)
@@ -40,7 +56,8 @@ export function computeAllUpgrades(
 ): { name: string; from: number; to: number; cost: number }[] {
   const upgrades: { name: string; from: number; to: number; cost: number }[] = []
   for (const [name, current] of Object.entries(currentValues)) {
-    const start = startingValues[name] ?? current
+    const defaultVal = attrDefaults.get(name) ?? 50
+    const start = startingValues[name] ?? defaultVal
     if (current > start) {
       upgrades.push({
         name,

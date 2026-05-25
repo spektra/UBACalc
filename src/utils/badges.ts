@@ -1,8 +1,3 @@
-// badges.ts — badge unlock evaluation engine.
-// parses threshold conditions like "80 Close Shot -or- 80 Driving Layup"
-// and figures out which badges you've unlocked. the threshold syntax is a little jank
-// but it works, and that's what matters.
-
 import badgesData from '../data/badges.json'
 import type { Badge, Tier } from '../types'
 
@@ -23,6 +18,10 @@ export interface BadgeCheck {
 
 const TIER_ORDER: Tier[] = ['Bronze', 'Silver', 'Gold', 'HOF']
 
+const SPLIT_OR = ' -or- '
+const SPLIT_AND = ' -and- '
+const SPLIT_AND_CAPS = ' AND '
+
 function evalCondition(condition: string, attrs: Record<string, number>): boolean {
   const upper = condition.trim()
 
@@ -32,25 +31,19 @@ function evalCondition(condition: string, attrs: Record<string, number>): boolea
     return parts.some((p) => evalCondition(p, attrs))
   }
 
-  if (upper.includes(' -or- ')) {
+  if (upper.includes(SPLIT_OR)) {
     const parts = splitOr(upper)
     return parts.some((p) => evalCondition(p, attrs))
   }
 
-  if (upper.includes(' -and- ')) {
-    const parts = upper.split(' -and- ')
+  if (upper.includes(SPLIT_AND)) {
+    const parts = upper.split(SPLIT_AND)
     return parts.every((p) => evalCondition(p, attrs))
   }
 
-  if (upper.includes(' AND ')) {
-    const parts = upper.split(' AND ')
+  if (upper.includes(SPLIT_AND_CAPS)) {
+    const parts = upper.split(SPLIT_AND_CAPS)
     return parts.every((p) => evalCondition(p, attrs))
-  }
-
-  if (upper.startsWith('EITHER ')) {
-    const inner = upper.slice(7)
-    const parts = splitOr(inner)
-    return parts.some((p) => evalCondition(p, attrs))
   }
 
   const match = upper.match(/^(\d+)\s+(.+)$/)
@@ -69,16 +62,18 @@ function splitOr(input: string): string[] {
   const parts: string[] = []
   let depth = 0
   let current = ''
-  for (let i = 0; i < input.length; i++) {
+  let i = 0
+  while (i < input.length) {
     if (input[i] === '(') depth++
     else if (input[i] === ')') depth--
-    if (depth === 0 && input.slice(i, i + 5) === ' -or- ') {
+    if (depth === 0 && input.startsWith(SPLIT_OR, i)) {
       parts.push(current.trim())
       current = ''
-      i += 5
+      i += SPLIT_OR.length
       continue
     }
     current += input[i]
+    i++
   }
   if (current.trim()) parts.push(current.trim())
   return parts
@@ -87,21 +82,16 @@ function splitOr(input: string): string[] {
 function countConditions(threshold: string): number {
   const upper = threshold.trim()
 
-  if (upper.startsWith('EITHER ')) {
+  if (upper.startsWith('EITHER ') || upper.includes(SPLIT_OR)) {
     return 1
   }
 
-  if (upper.includes(' -or- ')) {
-    return 1
+  if (upper.includes(SPLIT_AND)) {
+    return upper.split(SPLIT_AND).length
   }
 
-  if (upper.includes(' -and- ')) {
-    return upper.split(' -and- ').length
-  }
-
-  if (upper.includes(' AND ')) {
-    const count = upper.split(' AND ').length
-    if (upper.includes('EITHER')) return count
+  if (upper.includes(SPLIT_AND_CAPS)) {
+    const count = upper.split(SPLIT_AND_CAPS).length
     return count
   }
 
@@ -111,19 +101,19 @@ function countConditions(threshold: string): number {
 function countMetConditions(threshold: string, attrs: Record<string, number>): number {
   const upper = threshold.trim()
 
-  if (upper.startsWith('EITHER ') || upper.includes(' -or- ')) {
+  if (upper.startsWith('EITHER ') || upper.includes(SPLIT_OR)) {
     return evalCondition(threshold, attrs) ? 1 : 0
   }
 
-  if (upper.includes(' -and- ')) {
-    const parts = upper.split(' -and- ')
+  if (upper.includes(SPLIT_AND)) {
+    const parts = upper.split(SPLIT_AND)
     return parts.filter((p) => evalCondition(p, attrs)).length
   }
 
-  if (upper.includes(' AND ')) {
-    const parts = upper.split(' AND ')
+  if (upper.includes(SPLIT_AND_CAPS)) {
+    const parts = upper.split(SPLIT_AND_CAPS)
     return parts.map((p) => p.trim()).filter((p) => {
-      if (p.startsWith('EITHER ') || p.includes(' -or- ')) {
+      if (p.startsWith('EITHER ') || p.includes(SPLIT_OR)) {
         return evalCondition(p, attrs)
       }
       return evalCondition(p, attrs)

@@ -1,7 +1,3 @@
-// BuildSetupForm — the setup panel where players enter their name, height, weight, and archetypes.
-// also handles loading saved builds and saving the current one.
-// the autocomplete dropdown is held together by duct tape but it works.
-
 import { useState, useRef, useEffect } from 'react'
 import { useBuilderStore } from '../stores/useBuilderStore'
 import { searchBuilds } from '../utils/storage'
@@ -63,6 +59,9 @@ export function BuildSetupForm() {
     setTimeout(() => setSaved(false), 2000)
   }
 
+  const selectClass = "w-full rounded-xl border border-uba-border/60 bg-uba-surface/80 px-3 py-2.5 text-sm text-uba-text outline-none transition-all duration-200 focus:border-uba-blue/60 focus:shadow-[0_0_12px_-4px_rgba(2,76,166,0.15)] appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%238A8A92%22%3E%3Cpath%20d%3D%22M7%2010l5%205%205-5z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:20px] bg-[right_8px_center] bg-no-repeat pr-8"
+  const labelClass = "mb-1.5 block text-xs font-medium uppercase tracking-wider text-uba-text-dim"
+
   return (
     <div className="group rounded-2xl border border-uba-border/60 bg-uba-card/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
       <div className="mb-1 flex items-center justify-between">
@@ -74,11 +73,12 @@ export function BuildSetupForm() {
 
       <div className="mt-5 space-y-4">
         <div className="relative">
-          <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-uba-text-dim">
+          <label htmlFor="playerName" className={labelClass}>
             Player Name
           </label>
           <input
             ref={inputRef}
+            id="playerName"
             type="text"
             value={build.playerName}
             onChange={(e) => setBuild({ playerName: e.target.value })}
@@ -107,13 +107,14 @@ export function BuildSetupForm() {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-uba-text-dim">
+            <label htmlFor="height" className={labelClass}>
               Height
             </label>
             <select
+              id="height"
               value={build.height}
               onChange={(e) => setBuild({ height: e.target.value })}
-              className="w-full rounded-xl border border-uba-border/60 bg-uba-surface/80 px-3 py-2.5 text-sm text-uba-text outline-none transition-all duration-200 focus:border-uba-blue/60 focus:shadow-[0_0_12px_-4px_rgba(2,76,166,0.15)] appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%238A8A92%22%3E%3Cpath%20d%3D%22M7%2010l5%205%205-5z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:20px] bg-[right_8px_center] bg-no-repeat pr-8"
+              className={selectClass}
             >
               <option value="">Select</option>
               {heights.map((h) => (
@@ -122,13 +123,14 @@ export function BuildSetupForm() {
             </select>
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-uba-text-dim">
+            <label htmlFor="weight" className={labelClass}>
               Weight
             </label>
             <select
+              id="weight"
               value={build.weightClass}
               onChange={(e) => setBuild({ weightClass: e.target.value })}
-              className="w-full rounded-xl border border-uba-border/60 bg-uba-surface/80 px-3 py-2.5 text-sm text-uba-text outline-none transition-all duration-200 focus:border-uba-blue/60 focus:shadow-[0_0_12px_-4px_rgba(2,76,166,0.15)] appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%238A8A92%22%3E%3Cpath%20d%3D%22M7%2010l5%205%205-5z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:20px] bg-[right_8px_center] bg-no-repeat pr-8"
+              className={selectClass}
             >
               <option value="">Select</option>
               {weightClasses.map((w) => (
@@ -139,13 +141,14 @@ export function BuildSetupForm() {
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-uba-text-dim">
+          <label htmlFor="primary" className={labelClass}>
             Primary Strength
           </label>
           <select
+            id="primary"
             value={build.primaryArchetype}
             onChange={(e) => setBuild({ primaryArchetype: e.target.value })}
-            className="w-full rounded-xl border border-uba-border/60 bg-uba-surface/80 px-3 py-2.5 text-sm text-uba-text outline-none transition-all duration-200 focus:border-uba-blue/60 focus:shadow-[0_0_12px_-4px_rgba(2,76,166,0.15)] appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%238A8A92%22%3E%3Cpath%20d%3D%22M7%2010l5%205%205-5z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:20px] bg-[right_8px_center] bg-no-repeat pr-8"
+            className={selectClass}
           >
             <option value="">Select</option>
             {archetypes.map((a) => (
@@ -156,13 +159,14 @@ export function BuildSetupForm() {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-uba-text-dim">
+            <label htmlFor="secondary" className={labelClass}>
               Secondary
             </label>
             <select
+              id="secondary"
               value={build.secondaryArchetype}
               onChange={(e) => setBuild({ secondaryArchetype: e.target.value })}
-              className="w-full rounded-xl border border-uba-border/60 bg-uba-surface/80 px-3 py-2.5 text-sm text-uba-text outline-none transition-all duration-200 focus:border-uba-blue/60 focus:shadow-[0_0_12px_-4px_rgba(2,76,166,0.15)] appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%238A8A92%22%3E%3Cpath%20d%3D%22M7%2010l5%205%205-5z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:20px] bg-[right_8px_center] bg-no-repeat pr-8"
+              className={selectClass}
             >
               <option value="">Select</option>
               {archetypes.map((a) => (
@@ -171,13 +175,14 @@ export function BuildSetupForm() {
             </select>
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-uba-text-dim">
+            <label htmlFor="weakness" className={labelClass}>
               Weakness
             </label>
             <select
+              id="weakness"
               value={build.weakness}
               onChange={(e) => setBuild({ weakness: e.target.value })}
-              className="w-full rounded-xl border border-uba-border/60 bg-uba-surface/80 px-3 py-2.5 text-sm text-uba-text outline-none transition-all duration-200 focus:border-uba-blue/60 focus:shadow-[0_0_12px_-4px_rgba(2,76,166,0.15)] appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%238A8A92%22%3E%3Cpath%20d%3D%22M7%2010l5%205%205-5z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:20px] bg-[right_8px_center] bg-no-repeat pr-8"
+              className={selectClass}
             >
               <option value="">Select</option>
               {archetypes.map((a) => (

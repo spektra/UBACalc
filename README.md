@@ -1,73 +1,61 @@
-# React + TypeScript + Vite
+# UBA Calc — NBA 2K26 Fantasy League Upgrade Calculator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A fully client-side web app for UBA league members to plan attribute upgrades, track UC spending, and detect badge unlocks in real time.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Framework:** React 19 + TypeScript + Vite
+- **Styling:** Tailwind CSS v4
+- **State:** Zustand 5
+- **Animation:** Framer Motion 12
+- **Hosting:** Cloudflare Pages
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Build Setup** — player name, height, weight class, primary/secondary archetypes, weakness
+- **Attribute Sliders** — real-time UC cost, cap-aware (height/weight/archetype), keyboard-nudgeable, per-slider revert
+- **UC Budget Tracker** — running total vs balance, over-budget warning
+- **Badge Feed** — live badge unlock detection with framer-motion animations
+- **Build Rating** — auto-generated roast or compliment for your build
+- **Share URL** — encodes build into URL hash for sharing
+- **PWA** — installable, works offline
+- **Themes** — dark/light toggle + summer mode
+- **Save/Load** — localStorage-based player profiles
+- **Discord** — community invite in bottom-right corner
 
-## Expanding the ESLint configuration
+## Development
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev      # Vite dev server
+npm run build    # TypeScript check + production build
+npm run preview  # Preview production build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Project Structure
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+├── components/     # React components (AttributePanel, BadgeFeed, Header, etc.)
+├── data/           # Flat JSON config (badges, attributes, caps, costScale)
+├── hooks/          # Custom hooks (useAutoSave, useAudioGreeting)
+├── stores/         # Zustand stores (useBuilderStore, useThemeStore)
+├── utils/          # Utilities (caps, badges, cost, sanitize, storage, share, rating)
+├── types/          # TypeScript interfaces
+├── App.tsx         # Root component
+├── main.tsx        # Entry point + PWA registration
+└── index.css       # Tailwind + theme variables
+```
+
+## Config Data
+
+All game parameters are in `src/data/*.json` and can be updated per season without touching code:
+
+- `badges.json` — 41 badges with Bronze/Silver/Gold/HOF thresholds
+- `attributes.json` — 6 attribute categories with defaults
+- `caps.json` — height/weight tables and archetype cap modifiers
+- `costScale.json` — UC cost brackets (40-99)
+
+## Deployment
+
+Push to GitHub and connect to Cloudflare Pages. No build config needed — standard Vite output in `dist/`.

@@ -1,7 +1,3 @@
-// useBuilderStore — central state for the whole calculator.
-// stores the build setup, attribute values, UC balance, and saved player list.
-// localStorage auto-save happens in the useAutoSave hook.
-
 import { create } from 'zustand'
 import type { BuildSetup } from '../types'
 import { loadBuild, saveBuild, getSavedPlayerNames } from '../utils/storage'
@@ -59,7 +55,7 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
 
   setAttribute: (name, value) => {
     const { build } = get()
-    const cap = build.height ? getAttributeCap(name, build) : 99
+    const cap = build.height && build.primaryArchetype ? getAttributeCap(name, build) : 99
     const clamped = clampAttribute(value, 25, cap)
     set((state) => ({
       attributes: { ...state.attributes, [name]: clamped },
@@ -122,11 +118,13 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
 
   resetAttribute: (name) => {
     const { startingValues } = get()
-    const startVal = startingValues[name]
-    if (startVal !== undefined) {
-      set((state) => ({
-        attributes: { ...state.attributes, [name]: startVal },
-      }))
+    if (startingValues[name] !== undefined) {
+      set((state) => ({ attributes: { ...state.attributes, [name]: startingValues[name] } }))
+    } else {
+      set((state) => {
+        const { [name]: _, ...rest } = state.attributes
+        return { attributes: rest }
+      })
     }
   },
 

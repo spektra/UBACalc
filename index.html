@@ -10,9 +10,26 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <title>UBA Upgrade Calculator</title>
+
+    <!-- Cloudflare Web Analytics -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "%VITE_CF_ANALYTICS_TOKEN%"}'></script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Ko-fi floating donation button -->
+    <script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js"></script>
+    <script>
+      window.addEventListener('load', function() {
+        if (typeof kofiWidgetOverlay !== 'undefined') {
+          kofiWidgetOverlay.draw('mariusderomanus', {
+            type: 'floating-chat',
+            'floating-chat.donateButton.text': 'Tip Marius',
+            'floating-chat.donateButton.background-color': '#E6C693',
+          })
+        }
+      })
+    </script>
   </body>
 </html>

@@ -299,10 +299,10 @@
   {
     "name": "On-Ball Menace",
     "thresholds": {
-      "Bronze": "80 Perimeter Defense -and 80 Agility",
-      "Silver": "85 Perimeter Defense -and 85 Agility",
-      "Gold": "90 Perimeter Defense -and 90 Agility",
-      "HOF": "95 Perimeter Defense -and 95 Agility"
+      "Bronze": "80 Perimeter Defense -and- 80 Agility",
+      "Silver": "85 Perimeter Defense -and- 85 Agility",
+      "Gold": "90 Perimeter Defense -and- 90 Agility",
+      "HOF": "95 Perimeter Defense -and- 95 Agility"
     }
   },
   {
@@ -317,19 +317,19 @@
   {
     "name": "Pick Dodger",
     "thresholds": {
-      "Bronze": "80 Perimeter Defense -and 80 Agility",
-      "Silver": "85 Perimeter Defense -and 85 Agility",
-      "Gold": "90 Perimeter Defense -and 90 Agility",
-      "HOF": "95 Perimeter Defense -and 95 Agility"
+      "Bronze": "80 Perimeter Defense -and- 80 Agility",
+      "Silver": "85 Perimeter Defense -and- 85 Agility",
+      "Gold": "90 Perimeter Defense -and- 90 Agility",
+      "HOF": "95 Perimeter Defense -and- 95 Agility"
     }
   },
   {
     "name": "Post Lockdown",
     "thresholds": {
-      "Bronze": "80 Interior Defense -and 70 Strength",
-      "Silver": "85 Interior Defense -and 75 Strength",
-      "Gold": "90 Interior Defense -and 80 Strength",
-      "HOF": "95 Interior Defense -and 85 Strength"
+      "Bronze": "80 Interior Defense -and- 70 Strength",
+      "Silver": "85 Interior Defense -and- 75 Strength",
+      "Gold": "90 Interior Defense -and- 80 Strength",
+      "HOF": "95 Interior Defense -and- 85 Strength"
     }
   },
   {

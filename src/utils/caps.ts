@@ -1,7 +1,3 @@
-// caps.ts — computes per-attribute caps from height, weight, and archetype.
-// the cap system is the most important piece of this whole calculator.
-// if this is wrong, everything breaks. no pressure.
-
 import attributesData from '../data/attributes.json'
 import capsData from '../data/caps.json'
 import type { BuildSetup } from '../types'
@@ -39,7 +35,6 @@ const archetypeMods = rawCaps.archetype
 const rawAttrs = attributesData as unknown as Record<string, AttrCategory>
 const categories = Object.entries(rawAttrs).filter(([key]) => key !== '_comment')
 
-// Build a map: attribute name -> array of category keys
 const attrToCategories = new Map<string, string[]>()
 for (const [catKey, cat] of categories) {
   for (const attr of cat.attributes) {
@@ -143,8 +138,8 @@ export function getCapColor(attrName: string, build: BuildSetup): string {
 }
 
 function getPhysicalCap(attrName: string, build: BuildSetup): number {
-  const inches = heightToInches(build.height)
-  const weight = weightClasses[build.weightClass]
+  const inches = build.height ? heightToInches(build.height) : null
+  const weight = build.weightClass ? weightClasses[build.weightClass] : undefined
 
   switch (attrName) {
     case 'Vertical': {
