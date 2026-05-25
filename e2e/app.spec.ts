@@ -1,13 +1,18 @@
 import { test, expect } from '@playwright/test'
 
-async function setSlider(page, index, value) {
-  await page.locator("input[type=\"range\"]").nth(index).evaluate((el, val) => {
-    const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
-    nativeSetter.call(el, String(val))
-    el.dispatchEvent(new Event('input', { bubbles: true }))
-    el.dispatchEvent(new Event('change', { bubbles: true }))
-  }, value)
+
+async function setStore(page, key, value) {
+  await page.evaluate(({ k, v }) => {
+    window.__builderStore.getState().setAttribute(k, v)
+  }, { k: key, v: value })
 }
+
+async function setStart(page, key, value) {
+  await page.evaluate(({ k, v }) => {
+    window.__builderStore.getState().setStartingValue(k, v)
+  }, { k: key, v: value })
+}
+
 
 test.describe('Build Setup Form', () => {
   test('renders all dropdowns and inputs', async ({ page }) => {
@@ -98,19 +103,8 @@ test.describe('UC Budget Tracker', () => {
     await primary.selectOption('Shooting')
 
     await page.getByPlaceholder('0').first().fill('100')
-
-    const startInputs = page.getByRole('spinbutton')
-    await startInputs.first().click()
-    await startInputs.first().press("Backspace")
-    await startInputs.first().press("Backspace")
-    await page.keyboard.type("60")
-
-    const s = page.locator("input[type=\"range\"]").first()
-    await s.focus()
-    for (let i = 0; i < 49; i++) {
-      await page.keyboard.press("ArrowRight")
-      await page.waitForTimeout(15)
-    }
+    await setStart(page, "Mid Range", 60)
+    await setStore(page, "Mid Range", 99)
     await page.waitForTimeout(500)
     await expect(page.getByText(/Over budget by/).first()).toBeVisible()
   })
@@ -179,20 +173,10 @@ test.describe('Attribute Panel', () => {
     const primary = page.getByLabel('Primary Strength')
     await primary.selectOption('Shooting')
 
-    const startInputs = page.getByRole('spinbutton')
-    await startInputs.first().click()
-    await startInputs.first().press("Backspace")
-    await startInputs.first().press("Backspace")
-    await page.keyboard.type("60")
-
-    const s = page.locator("input[type=\"range\"]").first()
-    await s.focus()
-    for (let i = 0; i < 49; i++) {
-      await page.keyboard.press("ArrowRight")
-      await page.waitForTimeout(15)
-    }
+    await setStart(page, "Mid Range", 60)
+    await setStore(page, "Mid Range", 99)
     await page.waitForTimeout(300)
-    await expect(page.getByText(/UC/).first()).toBeVisible()
+    await expect(page.getByText(/[+]\d[\d,]* UC/).first()).toBeVisible()
   })
 
   test("per-slider revert button resets to default", async ({ page }) => {
@@ -202,12 +186,7 @@ test.describe('Attribute Panel', () => {
     const primary = page.getByLabel("Primary Strength")
     await primary.selectOption("Shooting")
 
-    const s = page.locator("input[type=\"range\"]").first()
-    await s.focus()
-    for (let i = 0; i < 10; i++) {
-      await page.keyboard.press("ArrowRight")
-      await page.waitForTimeout(15)
-    }
+    await setStore(page, "Mid Range", 90)
     await page.waitForTimeout(300)
 
     const revertBtn = page.locator("button[title=\"Revert to start\"]").first()
@@ -216,7 +195,7 @@ test.describe('Attribute Panel', () => {
     await page.waitForTimeout(300)
 
     const valAfter = await page.locator("input[type=\"range\"]").first().inputValue()
-    expect(Number(valAfter)).toBe(50)
+    expect(Number(valAfter)).toBe(80)
   })
 
   test("shorter player has higher speed cap than taller player", async ({ page }) => {
@@ -228,7 +207,7 @@ test.describe('Attribute Panel', () => {
     await heightSelect.selectOption("5'9\"")
 
     const speedSlider = page.locator('input[type="range"]').nth(25)
-    let speedCap = Number(await speedSlider.getAttribute('max'))
+    const speedCap = Number(await speedSlider.getAttribute('max'))
 
     await heightSelect.selectOption("7'3\"")
     await page.waitForTimeout(200)
@@ -275,15 +254,13 @@ test.describe('Badge Feed', () => {
     const primary = page.getByLabel('Primary Strength')
     await primary.selectOption('Shooting')
 
-    const startInputs = page.getByRole('spinbutton')
-    const count = await startInputs.count()
-    for (let i = 0; i < count; i++) {
-      await startInputs.nth(i).fill('85')
-    }
-    for (let i = 0; i < 3; i++) {
-      await setSlider(page, i, 99)
-    }
 
+    await setStart(page, "Mid Range", 60)
+    await setStore(page, "Mid Range", 99)
+    await setStart(page, "3PT", 60)
+    await setStore(page, "3PT", 99)
+    await setStart(page, "Free Throw", 60)
+    await setStore(page, "Free Throw", 99)
     await page.waitForTimeout(500)
     await expect(page.getByText(/unlocked/).or(page.getByText(/Bronze/))).toBeVisible()
   })
@@ -302,13 +279,8 @@ test.describe('Submission Output', () => {
     const primary = page.getByLabel('Primary Strength')
     await primary.selectOption('Shooting')
 
-    const startInputs = page.getByRole('spinbutton')
-    await startInputs.first().click()
-    await startInputs.first().press("Backspace")
-    await startInputs.first().press("Backspace")
-    await page.keyboard.type("60")
-
-    await setSlider(page, 0, 80)
+    await setStart(page, "Mid Range", 60)
+    await setStore(page, "Mid Range", 80)
     await page.waitForTimeout(300)
     await expect(page.getByText('Total Spent:')).toBeVisible()
   })
@@ -320,17 +292,8 @@ test.describe('Submission Output', () => {
     const primary = page.getByLabel('Primary Strength')
     await primary.selectOption('Shooting')
 
-    const startInputs = page.getByRole('spinbutton')
-    await startInputs.first().click()
-    await startInputs.first().press("Backspace")
-    await startInputs.first().press("Backspace")
-    await page.keyboard.type("60")
-    const s = page.locator("input[type=\"range\"]").first()
-    await s.focus()
-    for (let i = 0; i < 49; i++) {
-      await page.keyboard.press("ArrowRight")
-      await page.waitForTimeout(15)
-    }
+    await setStart(page, "Mid Range", 60)
+    await setStore(page, "Mid Range", 99)
     await page.waitForTimeout(500)
 
     await expect(page.getByText(/^\w/).first()).toBeVisible()
@@ -346,12 +309,8 @@ test.describe('Submission Output', () => {
     const primary = page.getByLabel('Primary Strength')
     await primary.selectOption('Shooting')
 
-    const startInputs = page.getByRole('spinbutton')
-    await startInputs.first().click()
-    await startInputs.first().press("Backspace")
-    await startInputs.first().press("Backspace")
-    await page.keyboard.type("60")
-    await setSlider(page, 0, 80)
+    await setStart(page, "Mid Range", 60)
+    await setStore(page, "Mid Range", 80)
     await page.waitForTimeout(300)
     await expect(page.getByText('🔗 Share')).toBeVisible()
   })
@@ -399,28 +358,47 @@ test.describe('Header', () => {
 test.describe('Share URL', () => {
   test('can encode build to URL and decode back', async ({ page }) => {
     await page.goto('/')
-    const input = page.getByPlaceholder(/Enter player name/)
-    await input.fill('ShareEncodeTest')
-
-    const heightSelect = page.getByLabel('Height')
-    await heightSelect.selectOption("6'6\"")
-    const weightSelect = page.getByLabel('Weight')
-    await weightSelect.selectOption('Average')
-    const primary = page.getByLabel('Primary Strength')
-    await primary.selectOption('Shooting')
-
-    const startInputs = page.getByRole('spinbutton')
-    await startInputs.first().click()
-    await startInputs.first().press("Backspace")
-    await startInputs.first().press("Backspace")
-    await page.keyboard.type("60")
-
-    await setSlider(page, 0, 80)
-
+    await page.getByPlaceholder(/Enter player name/).fill('ShareEncodeTest')
+    await page.getByLabel('Height').selectOption("6'6\"")
+    await page.getByLabel('Weight').selectOption('Average')
+    await page.getByLabel('Primary Strength').selectOption('Shooting')
+    await setStart(page, 'Mid Range', 60)
+    await setStore(page, 'Mid Range', 85)
     await page.getByPlaceholder('0').first().fill('50000')
-    await page.waitForTimeout(300)
-
+    await page.waitForTimeout(500)
     await page.getByText('🔗 Share').click()
     await expect(page.getByText('Link Copied!')).toBeVisible()
   })
 })
+
+test.describe('Sheet Import', () => {
+  test('floating import button is visible', async ({ page }) => {
+    await page.goto('/')
+    const btn = page.locator('button[title="Import player attributes from Google Sheets"]')
+    await expect(btn).toBeVisible()
+  })
+
+  test('opens drawer on click', async ({ page }) => {
+    await page.goto('/')
+    await page.locator('button[title="Import player attributes from Google Sheets"]').click()
+    await expect(page.getByText('Paste Player Attributes')).toBeVisible()
+  })
+
+  test('imports attributes from pasted data', async ({ page }) => {
+    await page.goto('/')
+    await page.getByLabel('Height').selectOption("6'6\"")
+    await page.getByLabel('Primary Strength').selectOption('Shooting')
+
+    await page.locator('button[title="Import player attributes from Google Sheets"]').click()
+    const textarea = page.locator('textarea')
+    await textarea.fill('TestPlayer\t75\t60\t70\t65\t80\t85\t90\t55\t50\t88\t70\t75\t85\t65\t60\t70\t80\t70\t75\t80\t85\t70\t65\t80\t75\t85\t70\t65\t60\t75\t70\t80\t75\t70')
+
+    await page.getByText('Apply Import').click()
+    await expect(page.getByText(/Imported/)).toBeVisible()
+
+    // Verify starting value was imported for Mid Range (column index 7 in 0-based = Mid Range)
+    const spinbutton = page.getByRole('spinbutton').nth(1)  // first spinbutton is UC, second is first attribute
+    await expect(spinbutton).toHaveValue('90')
+  })
+})
+

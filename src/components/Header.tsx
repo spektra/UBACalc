@@ -6,7 +6,7 @@ import logo from '/logo.png'
 import { useThemeStore } from '../stores/useThemeStore'
 import { useBuilderStore } from '../stores/useBuilderStore'
 
-export function Header() {
+export function Header({ onImportClick }: { onImportClick?: () => void }) {
   const { theme, toggle } = useThemeStore()
   const { build, attributes } = useBuilderStore()
 
@@ -17,7 +17,7 @@ export function Header() {
     try {
       const builds = JSON.parse(saved)
       const existing = Array.isArray(builds)
-        ? builds.find((b: any) => b.playerName?.toLowerCase() === build.playerName.toLowerCase())
+        ? builds.find((b: { playerName: string }) => b.playerName?.toLowerCase() === build.playerName.toLowerCase())
         : null
       if (!existing) return true
       const currentAttr = JSON.stringify(attributes)
@@ -58,6 +58,16 @@ export function Header() {
               </svg>
             )}
             <span className="hidden sm:inline">{theme === 'dark' ? 'Light' : 'Dark'}</span>
+          </button>
+          <button
+            onClick={onImportClick}
+            className="sheet-import-trigger flex items-center gap-1.5 rounded-xl border border-uba-gold/20 bg-uba-gold/10 px-3 py-1.5 text-xs font-medium text-uba-gold transition-all duration-200 hover:bg-uba-gold/20 hover:shadow-[0_0_12px_-4px_rgba(230,198,147,0.25)] active:scale-95"
+            title="Import player attributes from Google Sheets"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+              <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
+            </svg>
+            <span className="hidden sm:inline">Import</span>
           </button>
           <div className="flex items-center gap-2 text-sm text-uba-text-muted">
             <span className="hidden sm:inline">NBA 2K26</span>

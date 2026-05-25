@@ -4,71 +4,165 @@
     "label": "Shooting",
     "_comment": "Capped by Primary/Secondary/Weakness archetype. Shot IQ defaults to 80 and is not configurable.",
     "attributes": [
-      { "name": "Mid Range", "default": 50 },
-      { "name": "3PT", "default": 50 },
-      { "name": "Free Throw", "default": 50 }
-    ]
+      {
+        "name": "Mid Range",
+        "default": 50
+      },
+      {
+        "name": "3PT",
+        "default": 50
+      },
+      {
+        "name": "Free Throw",
+        "default": 50
+      }
+    ],
+    "color": "orange"
   },
   "slashing": {
     "label": "Slashing",
     "_comment": "Driving Layup and Driving Dunk shared with other categories. Speed With Ball shared with Playmaking.",
     "attributes": [
-      { "name": "Driving Layup", "default": 50 },
-      { "name": "Driving Dunk", "default": 50 },
-      { "name": "Draw Foul", "default": 50 },
-      { "name": "Speed With Ball", "default": 50 }
-    ]
+      {
+        "name": "Driving Layup",
+        "default": 50
+      },
+      {
+        "name": "Driving Dunk",
+        "default": 50
+      },
+      {
+        "name": "Draw Foul",
+        "default": 50
+      },
+      {
+        "name": "Speed With Ball",
+        "default": 50
+      }
+    ],
+    "color": "red"
   },
   "playmaking": {
     "label": "Playmaking",
     "_comment": "Speed With Ball is shared with Slashing. Its value is the same across both categories.",
     "attributes": [
-      { "name": "Pass Accuracy", "default": 50 },
-      { "name": "Pass Vision", "default": 50 },
-      { "name": "Ball Handle", "default": 50 },
-      { "name": "Speed With Ball", "default": 50 }
-    ]
+      {
+        "name": "Pass Accuracy",
+        "default": 50
+      },
+      {
+        "name": "Pass Vision",
+        "default": 50
+      },
+      {
+        "name": "Ball Handle",
+        "default": 50
+      },
+      {
+        "name": "Speed With Ball",
+        "default": 50
+      }
+    ],
+    "color": "yellow"
   },
   "defense": {
     "label": "Defense",
     "_comment": "Help Defense IQ is pinned at 80 baseline and is not configurable.",
     "attributes": [
-      { "name": "Steal", "default": 50 },
-      { "name": "Block", "default": 50 },
-      { "name": "Perimeter Defense", "default": 50 },
-      { "name": "Interior Defense", "default": 50 },
-      { "name": "Pass Perception", "default": 50 }
-    ]
+      {
+        "name": "Steal",
+        "default": 50
+      },
+      {
+        "name": "Block",
+        "default": 50
+      },
+      {
+        "name": "Perimeter Defense",
+        "default": 50
+      },
+      {
+        "name": "Interior Defense",
+        "default": 50
+      },
+      {
+        "name": "Pass Perception",
+        "default": 50
+      }
+    ],
+    "color": "blue"
   },
   "rebounding": {
     "label": "Rebounding & Inside Finish",
     "_comment": "Close Shot and Standing Dunk shared with Post Scoring.",
     "attributes": [
-      { "name": "Offensive Rebound", "default": 50 },
-      { "name": "Defensive Rebound", "default": 50 },
-      { "name": "Standing Dunk", "default": 50 },
-      { "name": "Close Shot", "default": 50 }
-    ]
+      {
+        "name": "Offensive Rebound",
+        "default": 50
+      },
+      {
+        "name": "Defensive Rebound",
+        "default": 50
+      },
+      {
+        "name": "Standing Dunk",
+        "default": 50
+      },
+      {
+        "name": "Close Shot",
+        "default": 50
+      }
+    ],
+    "color": "dark green"
   },
   "postScoring": {
     "label": "Post Scoring",
     "_comment": "Close Shot and Standing Dunk shared with Rebounding. Only one value per shared attribute.",
     "attributes": [
-      { "name": "Close Shot", "default": 50 },
-      { "name": "Standing Dunk", "default": 50 },
-      { "name": "Post Hook", "default": 50 },
-      { "name": "Post Control", "default": 50 },
-      { "name": "Post Fade", "default": 50 }
-    ]
+      {
+        "name": "Close Shot",
+        "default": 50
+      },
+      {
+        "name": "Standing Dunk",
+        "default": 50
+      },
+      {
+        "name": "Post Hook",
+        "default": 50
+      },
+      {
+        "name": "Post Control",
+        "default": 50
+      },
+      {
+        "name": "Post Fade",
+        "default": 50
+      }
+    ],
+    "color": "purple"
   },
   "physical": {
     "label": "Physical",
     "_comment": "These are capped by height/weight, not archetype. Speed and Agility get penalties from weight class.",
     "attributes": [
-      { "name": "Speed", "default": 50 },
-      { "name": "Agility", "default": 50 },
-      { "name": "Strength", "default": 50 },
-      { "name": "Vertical", "default": 50 }
-    ]
+      {
+        "name": "Speed",
+        "default": 50
+      },
+      {
+        "name": "Agility",
+        "default": 50
+      },
+      {
+        "name": "Strength",
+        "default": 50
+      },
+      {
+        "name": "Vertical",
+        "default": 50
+      }
+    ],
+    "color": "grey"
   }
 }

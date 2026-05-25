@@ -1,13 +1,14 @@
 // App — main layout component. handles theme sync, audio greeting, auto-save, and share URL loading.
 // on mount, checks for a build encoded in the URL hash and restores it.
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useAutoSave } from './hooks/useAutoSave'
 import { useAudioGreeting } from './hooks/useAudioGreeting'
 import { useThemeStore } from './stores/useThemeStore'
 import { useBuilderStore } from './stores/useBuilderStore'
 import { Header } from './components/Header'
+import { SheetImportDrawer } from './components/SheetImportDrawer'
 import { BuildSetupForm } from './components/BuildSetupForm'
 import { AttributePanel } from './components/AttributePanel'
 import { BudgetTracker } from './components/BudgetTracker'
@@ -34,6 +35,7 @@ function App() {
   useAudioGreeting()
   const { theme } = useThemeStore()
   const { setBuild, setUCBalance, setStartingValue } = useBuilderStore()
+  const [isImportOpen, setIsImportOpen] = useState(false)
 
   const html = document.documentElement
   html.classList.remove('dark', 'light')
@@ -61,7 +63,7 @@ function App() {
         <div className="absolute -bottom-40 left-1/4 h-[400px] w-[400px] rounded-full bg-uba-gold/5 blur-[100px]" />
       </div>
 
-      <Header />
+      <Header onImportClick={() => setIsImportOpen(true)} />
 
       <motion.main
         variants={stagger}
@@ -106,6 +108,7 @@ function App() {
         </div>
       </motion.main>
 
+      <SheetImportDrawer open={isImportOpen} onClose={() => setIsImportOpen(false)} />
       <DiscordInvite />
     </div>
   )

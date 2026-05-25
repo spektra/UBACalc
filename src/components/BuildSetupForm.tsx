@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { useBuilderStore } from '../stores/useBuilderStore'
 import { searchBuilds } from '../utils/storage'
 
@@ -18,28 +18,23 @@ const archetypes = [
 
 export function BuildSetupForm() {
   const { build, setBuild, loadPlayerBuild, resetBuild, triggerSave } = useBuilderStore()
-  const [suggestions, setSuggestions] = useState<string[]>([])
-  const [showSuggestions, setShowSuggestions] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [dismissed, setDismissed] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (!build.playerName.trim()) {
-      setSuggestions([])
-      setShowSuggestions(false)
-      return
-    }
-    const matches = searchBuilds(build.playerName).map((b) => b.playerName)
-    setSuggestions(matches)
-    setShowSuggestions(matches.length > 0)
+  const suggestions = useMemo(() => {
+    if (!build.playerName.trim()) return []
+    return searchBuilds(build.playerName).map((b: { playerName: string }) => b.playerName)
   }, [build.playerName])
+
+  const showDropdown = suggestions.length > 0 && !dismissed
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node) &&
           inputRef.current && !inputRef.current.contains(e.target as Node)) {
-        setShowSuggestions(false)
+        setDismissed(true)
       }
     }
     document.addEventListener('mousedown', handleClick)
@@ -48,8 +43,6 @@ export function BuildSetupForm() {
 
   function handleSelect(name: string) {
     loadPlayerBuild(name)
-    setSuggestions([])
-    setShowSuggestions(false)
   }
 
   function handleSave() {
@@ -57,13 +50,14 @@ export function BuildSetupForm() {
     triggerSave()
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
+    // suggestion updates are now handled by useMemo
   }
 
   const selectClass = "w-full rounded-xl border border-uba-border/60 bg-uba-surface/80 px-3 py-2.5 text-sm text-uba-text outline-none transition-all duration-200 focus:border-uba-blue/60 focus:shadow-[0_0_12px_-4px_rgba(2,76,166,0.15)] appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%238A8A92%22%3E%3Cpath%20d%3D%22M7%2010l5%205%205-5z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:20px] bg-[right_8px_center] bg-no-repeat pr-8"
   const labelClass = "mb-1.5 block text-xs font-medium uppercase tracking-wider text-uba-text-dim"
 
   return (
-    <div className="group rounded-2xl border border-uba-border/60 bg-uba-card/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
+    <div className="group rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
       <div className="mb-1 flex items-center justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-text-muted">
           Build Setup
@@ -82,12 +76,12 @@ export function BuildSetupForm() {
             type="text"
             value={build.playerName}
             onChange={(e) => setBuild({ playerName: e.target.value })}
-            onFocus={() => build.playerName.trim() && setSuggestions(searchBuilds(build.playerName).map(b => b.playerName))}
+            onFocus={() => setDismissed(false)}
             placeholder="Enter player name (auto-loads saved builds)..."
             maxLength={40}
             className="w-full rounded-xl border border-uba-border/60 bg-uba-surface/80 px-4 py-2.5 text-sm text-uba-text placeholder:text-uba-text-dim/40 outline-none transition-all duration-200 focus:border-uba-blue/60 focus:shadow-[0_0_12px_-4px_rgba(2,76,166,0.15)]"
           />
-          {showSuggestions && suggestions.length > 0 && (
+          {showDropdown && (
             <div
               ref={dropdownRef}
               className="absolute z-20 mt-1 w-full overflow-hidden rounded-xl border border-uba-border/60 bg-uba-surface shadow-lg backdrop-blur-xl"

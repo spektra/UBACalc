@@ -11,6 +11,7 @@ import attributesData from '../data/attributes.json'
 
 interface AttrCategory {
   label: string
+  color?: string
   _comment?: string
   attributes: { name: string; default: number }[]
 }
@@ -74,7 +75,7 @@ export function AttributePanel() {
   }, [attributes, startingValues])
 
   return (
-    <div className="rounded-2xl border border-uba-border/60 bg-uba-card/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
+    <div className="rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
       <div className="mb-1 flex items-center justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-text-muted">
           Attributes
@@ -97,7 +98,7 @@ export function AttributePanel() {
         {categories.map(([key, cat]) => (
           <div key={key}>
             <div className="mb-2 flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-uba-blue" />
+              <div className="h-2 w-2 rounded-full" style={{ backgroundColor: CAP_COLORS[cat.color ?? "blue"] }} />
               <h3 className="text-xs font-semibold uppercase tracking-[0.1em] text-uba-text-muted">
                 {cat.label}
               </h3>

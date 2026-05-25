@@ -4,6 +4,9 @@ import './index.css'
 import App from './App.tsx'
 import { useThemeStore } from './stores/useThemeStore'
 import { initErrorReporter } from './lib/errorReporter'
+import { useBuilderStore } from './stores/useBuilderStore'
+
+;(window as unknown as Record<string, unknown>).__builderStore = useBuilderStore
 
 initErrorReporter()
 

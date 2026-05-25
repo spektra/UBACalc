@@ -2,7 +2,8 @@ import { create } from 'zustand'
 import type { BuildSetup } from '../types'
 import { loadBuild, saveBuild, getSavedPlayerNames } from '../utils/storage'
 import { sanitizePlayerName, clampAttribute, clampUC } from '../utils/sanitize'
-import { getAttributeCap } from '../utils/caps'
+import { getAttributeCap, getAttributeBase } from '../utils/caps'
+import attributesData from '../data/attributes.json'
 
 interface BuilderState {
   build: BuildSetup
@@ -15,6 +16,7 @@ interface BuilderState {
   setBuild: (setup: Partial<BuildSetup>) => void
   setAttribute: (name: string, value: number) => void
   setStartingValue: (name: string, value: number) => void
+  setStartingValuesBatch: (values: Record<string, number>) => void
   setUCBalance: (balance: number) => void
   loadPlayerBuild: (name: string) => boolean
   resetBuild: () => void
@@ -50,7 +52,19 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     if (setup.secondaryArchetype !== undefined) sanitized.secondaryArchetype = setup.secondaryArchetype
     if (setup.weakness !== undefined) sanitized.weakness = setup.weakness
 
-    set((state) => ({ build: { ...state.build, ...sanitized } }))
+    const { build: currentBuild } = get()
+    const newBuild = { ...currentBuild, ...sanitized }
+
+    const rawAttrs = attributesData as unknown as Record<string, { label: string; attributes: { name: string; default: number }[] }>
+    const cats = Object.entries(rawAttrs).filter(([k]) => k !== '_comment')
+    const newStartingValues: Record<string, number> = {}
+    for (const [, cat] of cats) {
+      for (const attr of cat.attributes) {
+        newStartingValues[attr.name] = getAttributeBase(attr.name, newBuild)
+      }
+    }
+
+    set({ build: newBuild, startingValues: newStartingValues })
   },
 
   setAttribute: (name, value) => {
@@ -66,6 +80,16 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     const clamped = clampAttribute(value)
     set((state) => ({
       startingValues: { ...state.startingValues, [name]: clamped },
+    }))
+  },
+
+  setStartingValuesBatch: (values) => {
+    const clamped: Record<string, number> = {}
+    for (const [name, val] of Object.entries(values)) {
+      clamped[name] = clampAttribute(val)
+    }
+    set((state) => ({
+      startingValues: { ...state.startingValues, ...clamped },
     }))
   },
 
@@ -122,7 +146,8 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
       set((state) => ({ attributes: { ...state.attributes, [name]: startingValues[name] } }))
     } else {
       set((state) => {
-        const { [name]: _, ...rest } = state.attributes
+        const { [name]: _del, ...rest } = state.attributes
+        void _del
         return { attributes: rest }
       })
     }

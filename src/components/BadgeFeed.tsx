@@ -55,7 +55,7 @@ export function BadgeFeed() {
 
   if (!hasAttributes) {
     return (
-      <div className="rounded-2xl border border-uba-border/60 bg-uba-card/80 p-6 backdrop-blur-sm">
+      <div className="rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-6 backdrop-blur-sm">
         <div className="mb-1 flex items-center justify-between">
           <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-text-muted">
             Badges
@@ -76,7 +76,7 @@ export function BadgeFeed() {
   }
 
   return (
-    <div className="rounded-2xl border border-uba-border/60 bg-uba-card/80 p-6 backdrop-blur-sm">
+    <div className="rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-6 backdrop-blur-sm">
       <div className="mb-1 flex items-center justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-text-muted">
           Badges

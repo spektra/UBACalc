@@ -125,10 +125,11 @@ OpenCode should ask the following before writing any code:
 
 ### What's Built
 - Full MVP (Phase 1): build setup, attribute sliders, UC tracker, badge detection, submission output
-- Phase 2 items: animations (framer-motion), color-coded caps, dark/light theme toggle, Summer Mode
+- Phase 2 items: animations (framer-motion), color-coded caps, dark/light theme toggle, Summer Mode, accent gold card borders
 - Phase 3 items: save/load via localStorage, share URL encoding, auto-save, audio greeting
 
 ### Additional Features Added
+- **Sheet Import**: Slide-out drawer for pasting Google Sheets attribute data (`SheetImportDrawer.tsx`), maps 35 sheet columns to internal names via `sheetColumns.json`, messy-data parser in `sheetImport.ts`, bulk `setStartingValuesBatch` store action
 - **Analytics**: Cloudflare Web Analytics (free, privacy-first, no cookies)
 - **Error Tracking**: Client-side `window.onerror` + `unhandledrejection` → localStorage logger (`src/lib/errorReporter.ts`). Zero cost, no third-party.
 - **Donations**: Ko-fi floating chat button ("Tip Marius") — 0% platform fee, no backend needed
@@ -137,7 +138,7 @@ OpenCode should ask the following before writing any code:
 
 ### Testing
 - **Framework**: Playwright 1.60 (Chromium only, headless, 1 worker)
-- **34 tests** all passing — 31 e2e + 3 smoke
+- **37 tests** all passing — 34 e2e + 3 smoke
 - **Port handling**: `npm run test:run` script kills stale port 4173 before starting preview
 - **Key findings**: documented in `docs/playwright-notes.md`
 
