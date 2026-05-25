@@ -64,16 +64,16 @@ export function SubmissionOutput() {
   return (
     <div className="rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
       <div className="mb-1 flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-text-muted">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-gold">
           Submission
         </h2>
-        <div className="h-px flex-1 ml-4 bg-gradient-to-r from-uba-border/40 to-transparent" />
+        <div className="h-px flex-1 ml-4 bg-gradient-to-r from-uba-gold/40 to-transparent" />
       </div>
 
       {upgrades.length === 0 ? (
         <div className="mt-5 flex flex-col items-center justify-center py-12 text-center">
           <div className="mb-3 text-3xl text-uba-text-dim">{ }</div>
-          <p className="text-sm text-uba-text-muted">
+          <p className="text-sm text-uba-gold">
             Adjust attribute sliders above the starting values to generate upgrade text.
           </p>
           <p className="mt-1 text-xs text-uba-text-dim">
@@ -88,7 +88,7 @@ export function SubmissionOutput() {
             </div>
           )}
 
-          <div className="rounded-lg border border-uba-gold/20 bg-uba-gold/5 px-3 py-2 text-xs italic text-uba-text-muted leading-relaxed">
+          <div className="rounded-lg border border-uba-gold/20 bg-uba-gold/5 px-3 py-2 text-xs italic text-uba-gold leading-relaxed">
             {rating}
           </div>
 
@@ -110,7 +110,7 @@ export function SubmissionOutput() {
             {shareUrl && (
               <button
                 onClick={() => handleCopy(shareUrl, setShareCopied)}
-                className="rounded-xl border border-uba-border/50 bg-uba-surface/60 px-4 py-2.5 text-sm font-medium text-uba-text-muted transition-all duration-200 hover:border-uba-blue/30 hover:text-uba-blue-light active:scale-[0.98]"
+                className="rounded-xl border border-uba-border/50 bg-uba-surface/60 px-4 py-2.5 text-sm font-medium text-uba-gold transition-all duration-200 hover:border-uba-blue/30 hover:text-uba-blue-light active:scale-[0.98]"
                 title="Copy share link"
               >
                 {shareCopied ? 'Link Copied!' : '🔗 Share'}

@@ -12,6 +12,22 @@ const weightClasses = [
   "Very Light", "Light", "Average", "Above Average", "Heavy", "Very Heavy",
 ]
 
+const LBS_RANGES: [number, number, string][] = [
+  [160, 174, "Very Light"],
+  [175, 189, "Light"],
+  [190, 214, "Average"],
+  [215, 234, "Above Average"],
+  [235, 254, "Heavy"],
+  [255, 275, "Very Heavy"],
+]
+
+function lbsToWeightClass(lbs: number): string | null {
+  for (const [lo, hi, klass] of LBS_RANGES) {
+    if (lbs >= lo && lbs <= hi) return klass
+  }
+  return null
+}
+
 const archetypes = [
   "Shooting", "Slashing", "Playmaking", "Defense", "Rebounding", "Post Scoring",
 ]
@@ -20,6 +36,7 @@ export function BuildSetupForm() {
   const { build, setBuild, loadPlayerBuild, resetBuild, triggerSave } = useBuilderStore()
   const [saved, setSaved] = useState(false)
   const [dismissed, setDismissed] = useState(false)
+  const [weightLbs, setWeightLbs] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -59,7 +76,7 @@ export function BuildSetupForm() {
   return (
     <div className="group rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
       <div className="mb-1 flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-text-muted">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-gold">
           Build Setup
         </h2>
         <div className="h-px flex-1 ml-4 bg-gradient-to-r from-uba-border/40 to-transparent" />
@@ -120,17 +137,50 @@ export function BuildSetupForm() {
             <label htmlFor="weight" className={labelClass}>
               Weight
             </label>
-            <select
-              id="weight"
-              value={build.weightClass}
-              onChange={(e) => setBuild({ weightClass: e.target.value })}
-              className={selectClass}
-            >
-              <option value="">Select</option>
-              {weightClasses.map((w) => (
-                <option key={w} value={w}>{w}</option>
-              ))}
-            </select>
+            <div className="flex gap-2">
+              <select
+                id="weight"
+                value={build.weightClass}
+                onChange={(e) => {
+                  setBuild({ weightClass: e.target.value })
+                  setWeightLbs('')
+                }}
+                className={selectClass + " flex-1"}
+              >
+                <option value="">Select</option>
+                {weightClasses.map((w) => (
+                  <option key={w} value={w}>{w}</option>
+                ))}
+              </select>
+              <div className="flex items-center gap-1 rounded-xl border border-uba-border/60 bg-uba-surface/80 px-2.5">
+                <input
+                  type="number"
+                  min={160}
+                  max={275}
+                  value={weightLbs}
+                  onChange={(e) => setWeightLbs(e.target.value)}
+                  onBlur={() => {
+                    const lbs = parseInt(weightLbs, 10)
+                    if (!isNaN(lbs)) {
+                      const klass = lbsToWeightClass(lbs)
+                      if (klass) setBuild({ weightClass: klass })
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const lbs = parseInt(weightLbs, 10)
+                      if (!isNaN(lbs)) {
+                        const klass = lbsToWeightClass(lbs)
+                        if (klass) setBuild({ weightClass: klass })
+                      }
+                    }
+                  }}
+                  placeholder="lbs"
+                  className="w-14 rounded-md bg-transparent py-2.5 text-sm text-uba-text placeholder:text-uba-text-dim/40 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <span className="text-xs text-uba-text-dim">lbs</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -195,7 +245,7 @@ export function BuildSetupForm() {
           </button>
           <button
             onClick={resetBuild}
-            className="rounded-xl border border-uba-border/50 bg-uba-surface/60 px-3 py-2 text-xs text-uba-text-muted transition-all duration-200 hover:bg-uba-surface active:scale-[0.98]"
+            className="rounded-xl border border-uba-border/50 bg-uba-surface/60 px-3 py-2 text-xs text-uba-gold transition-all duration-200 hover:bg-uba-surface active:scale-[0.98]"
           >
             Reset
           </button>

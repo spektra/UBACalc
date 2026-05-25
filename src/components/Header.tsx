@@ -72,7 +72,7 @@ export function Header({ onImportClick }: { onImportClick?: () => void }) {
           <div className="flex items-center gap-2 text-sm text-uba-text-muted">
             <span className="hidden sm:inline">NBA 2K26</span>
             <span className="hidden sm:inline">·</span>
-            <span>Season 1</span>
+            <span>Season 3</span>
           </div>
         </div>
       </div>

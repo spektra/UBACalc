@@ -77,7 +77,7 @@ export function AttributePanel() {
   return (
     <div className="rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
       <div className="mb-1 flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-text-muted">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-gold">
           Attributes
         </h2>
         <div className="flex items-center gap-2">
@@ -99,7 +99,7 @@ export function AttributePanel() {
           <div key={key}>
             <div className="mb-2 flex items-center gap-2">
               <div className="h-2 w-2 rounded-full" style={{ backgroundColor: CAP_COLORS[cat.color ?? "blue"] }} />
-              <h3 className="text-xs font-semibold uppercase tracking-[0.1em] text-uba-text-muted">
+              <h3 className="text-xs font-semibold uppercase tracking-[0.1em] text-uba-gold">
                 {cat.label}
               </h3>
               <div className="h-px flex-1 bg-gradient-to-r from-uba-border/30 to-transparent" />
@@ -156,7 +156,7 @@ export function AttributePanel() {
                             className="w-11 rounded-md border border-uba-border/40 bg-uba-surface/60 px-1 py-0.5 text-center text-xs text-uba-text outline-none transition-all focus:border-uba-blue/60 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                         </div>
-                        <span className="text-uba-text-muted">→</span>
+                        <span className="text-uba-gold">→</span>
                         <div className="flex items-center gap-1">
                           <span className={`min-w-[1.5rem] text-right font-semibold tabular-nums ${
                             isUpgraded ? 'text-uba-gold' : 'text-uba-text'

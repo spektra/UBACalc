@@ -24,10 +24,7 @@ export function SheetImportDrawer({ open, onClose }: Props) {
       setBuild({ playerName: parsed.playerName })
     }
     setStartingValuesBatch(parsed.startingValues)
-    setResult({
-      ok: true,
-      msg: `Imported ${parsed.parsed} attributes for ${parsed.playerName || 'player'} (${parsed.skipped} skipped).`,
-    })
+    onClose()
   }, [text, setBuild, setStartingValuesBatch])
 
   const handleClose = useCallback(() => {

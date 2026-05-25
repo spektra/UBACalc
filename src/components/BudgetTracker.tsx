@@ -31,10 +31,10 @@ export function BudgetTracker() {
   return (
     <div className="rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
       <div className="mb-1 flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-text-muted">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-gold">
           UC Budget
         </h2>
-        <div className="h-px flex-1 ml-4 bg-gradient-to-r from-uba-border/40 to-transparent" />
+        <div className="h-px flex-1 ml-4 bg-gradient-to-r from-uba-gold/40 to-transparent" />
       </div>
 
       <div className="mt-5 flex flex-wrap items-end gap-3">

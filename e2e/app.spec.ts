@@ -394,10 +394,11 @@ test.describe('Sheet Import', () => {
     await textarea.fill('TestPlayer\t75\t60\t70\t65\t80\t85\t90\t55\t50\t88\t70\t75\t85\t65\t60\t70\t80\t70\t75\t80\t85\t70\t65\t80\t75\t85\t70\t65\t60\t75\t70\t80\t75\t70')
 
     await page.getByText('Apply Import').click()
-    await expect(page.getByText(/Imported/)).toBeVisible()
+    await page.waitForTimeout(500)
 
-    // Verify starting value was imported for Mid Range (column index 7 in 0-based = Mid Range)
-    const spinbutton = page.getByRole('spinbutton').nth(1)  // first spinbutton is UC, second is first attribute
+    // Drawer auto-closes on success. Verify starting value was imported.
+    // nth(2) = first attribute input (0=lbs, 1=UC balance, 2=Mid Range start)
+    const spinbutton = page.getByRole('spinbutton').nth(2)
     await expect(spinbutton).toHaveValue('90')
   })
 })
