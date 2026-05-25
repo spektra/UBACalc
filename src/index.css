@@ -17,17 +17,24 @@
   --color-uba-text-dim: #5A5A62;
   --color-uba-danger: #E8494A;
   --color-uba-success: #3DCF8F;
+  --uba-track-upgrade: #E6C693;
+  --uba-track-base: #2A2A32;
 }
 
 .light {
-  --color-uba-canvas: #F5F2ED;
-  --color-uba-surface: #EDE8E0;
-  --color-uba-card: #FFFFFF;
-  --color-uba-card-hover: #F8F5F0;
-  --color-uba-border: #D4CFC5;
+  --color-uba-canvas: #E8E3DB;
+  --color-uba-surface: #DDD8CE;
+  --color-uba-card: #F5F2ED;
+  --color-uba-card-hover: #EDE8E0;
+  --color-uba-border: #C8C2B7;
   --color-uba-text: #1A1A1E;
-  --color-uba-text-muted: #6B6B76;
-  --color-uba-text-dim: #9A9AA2;
+  --color-uba-text-muted: #5A5A65;
+  --color-uba-text-dim: #555560;
+  --color-uba-gold: #024CA6;
+  --color-uba-gold-light: #1A6FD4;
+  --color-uba-gold-dark: #013A82;
+  --uba-track-upgrade: #024CA6;
+  --uba-track-base: #C8C2B7;
 }
 
 .summer {

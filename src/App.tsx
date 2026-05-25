@@ -16,6 +16,8 @@ import { BadgeFeed } from './components/BadgeFeed'
 import { SubmissionOutput } from './components/SubmissionOutput'
 import wall2k from '/wall2k.png'
 import wall from '/wall.jpeg'
+import walllight from '/walllight.png'
+import wall2klight from '/wall2klight.png'
 import { DiscordInvite } from './components/DiscordInvite'
 import { decodeBuild } from './utils/share'
 
@@ -61,8 +63,17 @@ function App() {
   return (
     <div className="relative min-h-screen bg-uba-canvas">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <img src={wall2k} alt="" className="absolute inset-0 h-full w-full object-cover opacity-10 dark:opacity-15" />
-        <img src={wall} alt="" className="absolute inset-0 h-full w-full object-cover opacity-5 dark:opacity-[0.08]" />
+        {theme === 'light' ? (
+          <>
+            <img src={wall2klight} alt="" className="absolute inset-0 h-full w-full object-cover opacity-[0.06]" />
+            <img src={walllight} alt="" className="absolute inset-0 h-full w-full object-cover opacity-[0.04]" />
+          </>
+        ) : (
+          <>
+            <img src={wall2k} alt="" className="absolute inset-0 h-full w-full object-cover opacity-10 dark:opacity-15" />
+            <img src={wall} alt="" className="absolute inset-0 h-full w-full object-cover opacity-5 dark:opacity-[0.08]" />
+          </>
+        )}
         <div className="absolute -top-40 right-1/4 h-[500px] w-[500px] rounded-full bg-uba-blue/10 blur-[120px]" />
         <div className="absolute -bottom-40 left-1/4 h-[400px] w-[400px] rounded-full bg-uba-gold/5 blur-[100px]" />
       </div>

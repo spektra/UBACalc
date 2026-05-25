@@ -123,7 +123,7 @@ export function AttributePanel() {
                   <div key={attr.name}>
                     <div className="mb-1 flex items-center justify-between text-xs">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-uba-text-dim">{attr.name}</span>
+                        <span className="text-uba-text-dim [.light_&]:font-semibold">{attr.name}</span>
                         {hasCap && (
                           <span
                             className="rounded px-1 py-0.5 text-[10px] font-medium uppercase tracking-wider"
@@ -205,8 +205,8 @@ export function AttributePanel() {
                         [&::-moz-range-thumb]:shadow-md"
                       style={{
                         background: isUpgraded
-                          ? `linear-gradient(to right, ${hexColor}40 0%, ${hexColor} ${startPct}%, #E6C693 ${startPct}%, #E6C693 ${currentPct}%, #2A2A32 ${currentPct}%)`
-                          : `linear-gradient(to right, ${hexColor} 0%, ${hexColor} ${currentPct}%, #2A2A32 ${currentPct}%)`,
+                          ? `linear-gradient(to right, ${hexColor}40 0%, ${hexColor} ${startPct}%, var(--uba-track-upgrade) ${startPct}%, var(--uba-track-upgrade) ${currentPct}%, var(--uba-track-base) ${currentPct}%)`
+                          : `linear-gradient(to right, ${hexColor} 0%, ${hexColor} ${currentPct}%, var(--uba-track-base) ${currentPct}%)`,
                       }}
                     />
                   </div>
