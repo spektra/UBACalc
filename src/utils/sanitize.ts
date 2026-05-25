@@ -3,7 +3,7 @@
 
 export function sanitizePlayerName(input: string): string {
   if (typeof input !== 'string') return ''
-  return input.replace(/[<>"']/g, '').trim().slice(0, 40)
+  return input.replace(/[<>"']/g, '').slice(0, 40)
 }
 
 export function clampAttribute(value: number, min = 25, max = 99): number {

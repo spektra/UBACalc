@@ -118,3 +118,38 @@ OpenCode should ask the following before writing any code:
 - All badge threshold and cap data should be stored in editable JSON so the league admin can update it each season without touching code
 - The submission output format must exactly match the UBA league format
 - Do not hardcode any badge thresholds or cap values into components - always read from config files
+
+---
+
+## Implementation Progress (May 25, 2026)
+
+### What's Built
+- Full MVP (Phase 1): build setup, attribute sliders, UC tracker, badge detection, submission output
+- Phase 2 items: animations (framer-motion), color-coded caps, dark/light theme toggle, Summer Mode
+- Phase 3 items: save/load via localStorage, share URL encoding, auto-save, audio greeting
+
+### Additional Features Added
+- **Analytics**: Cloudflare Web Analytics (free, privacy-first, no cookies)
+- **Error Tracking**: Client-side `window.onerror` + `unhandledrejection` → localStorage logger (`src/lib/errorReporter.ts`). Zero cost, no third-party.
+- **Donations**: Ko-fi floating chat button ("Tip Marius") — 0% platform fee, no backend needed
+- **PWA**: Service worker for offline support, manifest for installability
+- **Build Rating**: Auto-generated roast/compliment text generation
+
+### Testing
+- **Framework**: Playwright 1.60 (Chromium only, headless, 1 worker)
+- **34 tests** all passing — 31 e2e + 3 smoke
+- **Port handling**: `npm run test:run` script kills stale port 4173 before starting preview
+- **Key findings**: documented in `docs/playwright-notes.md`
+
+### Known Quirks
+- `fill()` on range sliders and number inputs does NOT trigger React 19 onChange → must use keyboard events in tests
+- `startingValues` in store is empty until user interacts with spinbutton → per-slider revert falls back to `attr.default` (50)
+- Badge delimiter ` -and- ` vs ` -and ` required data normalization in 3 badges
+- Three badges (`On-Ball Menace`, `Pick Dodger`, `Post Lockdown`) had mismatched delimiters
+
+### Next Steps
+- Push to GitHub, connect Cloudflare Pages
+- Have league admin audit/update `caps.json` and `badges.json` before launch
+- Mobile responsiveness improvements (Phase 2)
+- Multi-player save/load (Phase 3)
+- Tendency change calculator (Phase 3)
