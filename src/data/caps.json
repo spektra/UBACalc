@@ -1,0 +1,54 @@
+{
+  "_comment": "Height and weight cap tables. edit these when the league updates their caps — don't touch the components.",
+  "height": {
+    "description": "Height brackets in inches. Each entry: vertical cap and speed base cap.",
+    "values": {
+      "68": { "vertical": 99, "speed": 95 },
+      "69": { "vertical": 99, "speed": 94 },
+      "70": { "vertical": 99, "speed": 93 },
+      "71": { "vertical": 98, "speed": 92 },
+      "72": { "vertical": 97, "speed": 91 },
+      "73": { "vertical": 96, "speed": 90 },
+      "74": { "vertical": 94, "speed": 89 },
+      "75": { "vertical": 93, "speed": 88 },
+      "76": { "vertical": 91, "speed": 87 },
+      "77": { "vertical": 89, "speed": 86 },
+      "78": { "vertical": 87, "speed": 85 },
+      "79": { "vertical": 85, "speed": 83 },
+      "80": { "vertical": 83, "speed": 82 },
+      "81": { "vertical": 80, "speed": 80 },
+      "82": { "vertical": 78, "speed": 78 },
+      "83": { "vertical": 75, "speed": 76 },
+      "84": { "vertical": 72, "speed": 74 },
+      "85": { "vertical": 70, "speed": 72 },
+      "86": { "vertical": 68, "speed": 70 },
+      "87": { "vertical": 65, "speed": 68 },
+      "88": { "vertical": 62, "speed": 65 }
+    }
+  },
+  "weight": {
+    "description": "Weight class penalties and strength cap ceiling. lighter=less penalty, heavier=more strength ceiling.",
+    "classes": {
+      "Very Light": { "speedPenalty": 0, "agilityPenalty": 0, "strengthCap": 65 },
+      "Light": { "speedPenalty": 2, "agilityPenalty": 2, "strengthCap": 75 },
+      "Average": { "speedPenalty": 5, "agilityPenalty": 5, "strengthCap": 85 },
+      "Above Average": { "speedPenalty": 8, "agilityPenalty": 8, "strengthCap": 90 },
+      "Heavy": { "speedPenalty": 12, "agilityPenalty": 12, "strengthCap": 95 },
+      "Very Heavy": { "speedPenalty": 15, "agilityPenalty": 15, "strengthCap": 99 }
+    }
+  },
+  "archetype": {
+    "description": "Cap modifiers per archetype status. primary gets 99, secondary gets 95, neutral gets 90, weakness gets 75.",
+    "primary": { "cap": 99, "base": 80, "color": "blue" },
+    "secondary": { "cap": 95, "base": 70, "color": "purple" },
+    "neutral": { "cap": 90, "base": 50, "color": "cyan" },
+    "weakness": { "cap": 75, "base": 40, "color": "red" }
+  },
+  "positionHeightRanges": {
+    "PG": ["5'8\"", "6'7\""],
+    "SG": ["6'1\"", "6'9\""],
+    "SF": ["6'3\"", "6'10\""],
+    "PF": ["6'4\"", "7'0\""],
+    "C": ["6'6\"", "7'4\""]
+  }
+}

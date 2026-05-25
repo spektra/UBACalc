@@ -1,0 +1,23 @@
+{
+  "name": "UBA Upgrade Calculator",
+  "short_name": "UBA Calc",
+  "description": "NBA 2K26 fantasy league upgrade calculator — build setup, attribute sliders, UC tracking, and badge detection.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0A0C",
+  "theme_color": "#024CA6",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

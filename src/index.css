@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@theme {
+  --color-uba-blue: #024CA6;
+  --color-uba-blue-dark: #013A82;
+  --color-uba-blue-light: #1A6FD4;
+  --color-uba-gold: #E6C693;
+  --color-uba-gold-light: #F0D9B5;
+  --color-uba-gold-dark: #C9A84C;
+  --color-uba-canvas: #0A0A0C;
+  --color-uba-surface: #121214;
+  --color-uba-card: #1A1A1E;
+  --color-uba-card-hover: #222228;
+  --color-uba-border: #2A2A32;
+  --color-uba-text: #EDEDE8;
+  --color-uba-text-muted: #8A8A92;
+  --color-uba-text-dim: #5A5A62;
+  --color-uba-danger: #E8494A;
+  --color-uba-success: #3DCF8F;
+}
+
+.light {
+  --color-uba-canvas: #F5F2ED;
+  --color-uba-surface: #EDE8E0;
+  --color-uba-card: #FFFFFF;
+  --color-uba-card-hover: #F8F5F0;
+  --color-uba-border: #D4CFC5;
+  --color-uba-text: #1A1A1E;
+  --color-uba-text-muted: #6B6B76;
+  --color-uba-text-dim: #9A9AA2;
+}
+
+.summer {
+  --color-uba-gold: #E8913A;
+  --color-uba-gold-light: #F0B06B;
+  --color-uba-gold-dark: #D07020;
+  --color-uba-blue: #3A8FE8;
+  --color-uba-blue-dark: #2A70C0;
+  --color-uba-blue-light: #6AAAF0;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2A2A32 transparent;
+}
+
+body {
+  background-color: var(--color-uba-canvas);
+  color: var(--color-uba-text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: rgba(2, 76, 166, 0.4);
+  color: #EDEDE8;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
