@@ -63,6 +63,11 @@ export function BadgeFeed() {
 
   const badgeCount = results.filter((r) => r.highestEarned).length
 
+  useEffect(() => {
+    prevTiersRef.current = null
+    setSessionUnlocked(new Set())
+  }, [previouslyUnlocked])
+
   const flushBannerQueue = useCallback(function fn() {
     if (bannerQueueRef.current.length === 0) {
       bannerTimerRef.current = null

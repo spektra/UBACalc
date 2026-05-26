@@ -47,12 +47,15 @@ export interface AttributeCategory {
 export interface HeightCap {
   vertical: number
   speed: number
+  speedBase: number
+  verticalBase: number
 }
 
 export interface WeightClass {
   speedPenalty: number
   agilityPenalty: number
   strengthCap: number
+  strengthBase: number
 }
 
 export interface ArchetypeModifier {
@@ -73,6 +76,7 @@ export interface BuildSetup {
   primaryArchetype: string
   secondaryArchetype: string
   weakness: string
+  weightLbs: string
 }
 
 export interface PlayerBuild extends BuildSetup {

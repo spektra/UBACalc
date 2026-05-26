@@ -9,11 +9,11 @@ interface AttrCategory {
 }
 
 interface HeightCaps {
-  [inches: string]: { vertical: number; speed: number }
+  [inches: string]: { vertical: number; speed: number; speedBase: number; verticalBase: number }
 }
 
 interface WeightClasses {
-  [className: string]: { speedPenalty: number; agilityPenalty: number; strengthCap: number }
+  [className: string]: { speedPenalty: number; agilityPenalty: number; strengthCap: number; strengthBase: number }
 }
 
 interface ArchetypeModifier {
@@ -93,15 +93,49 @@ export function getAttributeCap(attrName: string, build: BuildSetup): number {
 
 export function getAttributeBase(attrName: string, build: BuildSetup): number {
   const physicalAttrs = ['Speed', 'Agility', 'Strength', 'Vertical']
-  if (physicalAttrs.includes(attrName)) return 50
+  if (physicalAttrs.includes(attrName)) {
+    const inches = build.height ? heightToInches(build.height) : null
+    const weight = build.weightClass ? weightClasses[build.weightClass] : undefined
+
+    switch (attrName) {
+      case 'Speed': {
+        if (!inches || !heightCaps[String(inches)]) return 50
+        return Math.max(25, heightCaps[String(inches)].speedBase - (weight?.speedPenalty ?? 0))
+      }
+      case 'Agility':
+        return 50
+      case 'Strength':
+        return weight?.strengthBase ?? 50
+      case 'Vertical': {
+        if (!inches || !heightCaps[String(inches)]) return 50
+        return heightCaps[String(inches)].verticalBase
+      }
+    }
+    return 50
+  }
 
   const mod = archetypeMods[resolveBestStatus(attrName, build)]
   return mod?.base ?? 50
 }
 
+function capValueToColor(cap: number): string {
+  if (cap >= 99) return 'blue'
+  if (cap >= 95) return 'purple'
+  if (cap >= 94) return 'magenta'
+  if (cap >= 90) return 'cyan'
+  if (cap >= 85) return 'green'
+  if (cap >= 80) return 'orange'
+  if (cap >= 75) return 'red'
+  if (cap >= 70) return 'grey'
+  if (cap >= 60) return 'yellow'
+  return 'darkGreen'
+}
+
 export function getCapColor(attrName: string, build: BuildSetup): string {
   const physicalAttrs = ['Speed', 'Agility', 'Strength', 'Vertical']
-  if (physicalAttrs.includes(attrName)) return 'green'
+  if (physicalAttrs.includes(attrName)) {
+    return capValueToColor(getPhysicalCap(attrName, build))
+  }
 
   const mod = archetypeMods[resolveBestStatus(attrName, build)]
   return mod?.color ?? 'cyan'

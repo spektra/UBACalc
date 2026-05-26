@@ -36,7 +36,6 @@ export function BuildSetupForm() {
   const { build, setBuild, loadPlayerBuild, resetBuild, triggerSave, deletePlayerBuild } = useBuilderStore()
   const [saved, setSaved] = useState(false)
   const [dismissed, setDismissed] = useState(false)
-  const [weightLbs, setWeightLbs] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -153,13 +152,12 @@ export function BuildSetupForm() {
             <label htmlFor="weight" className={labelClass}>
               Weight
             </label>
-            <div className="flex gap-2">
+              <div className="flex gap-2">
               <select
                 id="weight"
                 value={build.weightClass}
                 onChange={(e) => {
-                  setBuild({ weightClass: e.target.value })
-                  setWeightLbs('')
+                  setBuild({ weightClass: e.target.value, weightLbs: '' })
                 }}
                 className={selectClass + " flex-1"}
               >
@@ -173,14 +171,14 @@ export function BuildSetupForm() {
                   type="number"
                   min={160}
                   max={275}
-                  value={weightLbs}
+                  value={build.weightLbs}
                   onChange={(e) => {
                     const raw = e.target.value
-                    setWeightLbs(raw)
+                    setBuild({ weightLbs: raw })
                     const lbs = parseInt(raw, 10)
                     if (!isNaN(lbs) && lbs >= 160 && lbs <= 275) {
                       const klass = lbsToWeightClass(lbs)
-                      if (klass) setBuild({ weightClass: klass })
+                      if (klass) setBuild({ weightClass: klass, weightLbs: raw })
                     }
                   }}
                   placeholder="lbs"

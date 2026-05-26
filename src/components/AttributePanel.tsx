@@ -22,11 +22,11 @@ const CAP_COLORS: Record<string, string> = {
   magenta: '#D946EF',
   cyan: '#06B6D4',
   green: '#10B981',
-  orange: '#F59E0B',
+  orange: '#F97316',
   red: '#EF4444',
   grey: '#6B7280',
   yellow: '#EAB308',
-  'dark green': '#047857',
+  darkGreen: '#059669',
 }
 
 export function AttributePanel() {

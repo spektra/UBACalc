@@ -35,6 +35,7 @@ const defaultBuild: BuildSetup = {
   primaryArchetype: '',
   secondaryArchetype: '',
   weakness: '',
+  weightLbs: '',
 }
 
 export const useBuilderStore = create<BuilderState>((set, get) => ({
@@ -53,6 +54,7 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     if (setup.primaryArchetype !== undefined) sanitized.primaryArchetype = setup.primaryArchetype
     if (setup.secondaryArchetype !== undefined) sanitized.secondaryArchetype = setup.secondaryArchetype
     if (setup.weakness !== undefined) sanitized.weakness = setup.weakness
+    if (setup.weightLbs !== undefined) sanitized.weightLbs = setup.weightLbs
 
     const { build: currentBuild, startingValues: currentSV } = get()
     const newBuild = { ...currentBuild, ...sanitized }
