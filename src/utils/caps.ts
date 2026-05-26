@@ -8,12 +8,15 @@ interface AttrCategory {
   attributes: { name: string; default: number }[]
 }
 
-interface HeightCaps {
-  [inches: string]: { vertical: number; speed: number; speedBase: number; verticalBase: number }
+interface SpeedRange {
+  label: string
+  maxInches: number
+  cap: number
+  base: number
 }
 
 interface WeightClasses {
-  [className: string]: { speedPenalty: number; agilityPenalty: number; strengthCap: number; strengthBase: number }
+  [className: string]: { speedPenalty: number; agilityPenalty: number; strengthCap: number; strengthBase: number; verticalCap: number; verticalBase: number }
 }
 
 interface ArchetypeModifier {
@@ -23,14 +26,31 @@ interface ArchetypeModifier {
 }
 
 const rawCaps = capsData as unknown as {
-  height: { values: HeightCaps }
+  speedRanges: SpeedRange[]
   weight: { classes: WeightClasses }
   archetype: Record<string, ArchetypeModifier>
 }
 
-const heightCaps = rawCaps.height.values
+export const LBS_RANGES: [number, number, string][] = [
+  [160, 174, 'Very Light'],
+  [175, 188, 'Light'],
+  [189, 213, 'Below Average'],
+  [214, 233, 'Average'],
+  [234, 253, 'Above Average'],
+  [254, 274, 'Heavy'],
+  [275, 300, 'Very Heavy'],
+]
+
+export function lbsToWeightClass(lbs: number): string | null {
+  for (const [lo, hi, klass] of LBS_RANGES) {
+    if (lbs >= lo && lbs <= hi) return klass
+  }
+  return null
+}
+
 const weightClasses = rawCaps.weight.classes
 const archetypeMods = rawCaps.archetype
+const speedRanges = [...rawCaps.speedRanges].sort((a, b) => a.maxInches - b.maxInches)
 
 const rawAttrs = attributesData as unknown as Record<string, AttrCategory>
 const categories = Object.entries(rawAttrs).filter(([key]) => key !== '_comment')
@@ -49,6 +69,13 @@ function heightToInches(height: string): number | null {
   const match = normalised.match(/(\d+)'(\d+)"/)
   if (!match) return null
   return parseInt(match[1]) * 12 + parseInt(match[2])
+}
+
+function findSpeedRange(inches: number): SpeedRange {
+  for (const r of speedRanges) {
+    if (inches <= r.maxInches) return r
+  }
+  return speedRanges[speedRanges.length - 1]
 }
 
 function getArchetypeStatus(categoryKey: string, build: BuildSetup): string {
@@ -99,17 +126,16 @@ export function getAttributeBase(attrName: string, build: BuildSetup): number {
 
     switch (attrName) {
       case 'Speed': {
-        if (!inches || !heightCaps[String(inches)]) return 50
-        return Math.max(25, heightCaps[String(inches)].speedBase - (weight?.speedPenalty ?? 0))
+        if (!inches) return 50
+        const range = findSpeedRange(inches)
+        return Math.max(25, range.base)
       }
       case 'Agility':
         return 50
       case 'Strength':
         return weight?.strengthBase ?? 50
-      case 'Vertical': {
-        if (!inches || !heightCaps[String(inches)]) return 50
-        return heightCaps[String(inches)].verticalBase
-      }
+      case 'Vertical':
+        return weight?.verticalBase ?? 50
     }
     return 50
   }
@@ -145,24 +171,22 @@ function getPhysicalCap(attrName: string, build: BuildSetup): number {
   const inches = build.height ? heightToInches(build.height) : null
   const weight = build.weightClass ? weightClasses[build.weightClass] : undefined
 
+  if (!weight && build.weightClass) {
+    console.warn(`[caps] Weight class "${build.weightClass}" not found in caps.json`)
+  }
+
   switch (attrName) {
-    case 'Vertical': {
-      if (!inches || !heightCaps[String(inches)]) return 99
-      return heightCaps[String(inches)].vertical
-    }
+    case 'Vertical':
+      return weight?.verticalCap ?? 99
     case 'Speed': {
-      if (!inches || !heightCaps[String(inches)]) return 99
-      const base = heightCaps[String(inches)].speed
-      const penalty = weight?.speedPenalty ?? 0
-      return Math.max(25, base - penalty)
+      if (!inches) return 99
+      const range = findSpeedRange(inches)
+      return range.cap
     }
-    case 'Agility': {
-      const penalty = weight?.agilityPenalty ?? 0
-      return Math.max(25, 99 - penalty)
-    }
-    case 'Strength': {
+    case 'Agility':
+      return 99
+    case 'Strength':
       return weight?.strengthCap ?? 99
-    }
     default:
       return 99
   }

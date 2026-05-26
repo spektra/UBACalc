@@ -206,6 +206,19 @@ export function checkBadges(
       tiers.push({ tier, state, conditions })
     }
 
+    const prev = previouslyUnlocked[badge.name] ?? null
+    if (prev) {
+      const prevIdx = TIER_ORDER.indexOf(prev)
+      for (const tr of tiers) {
+        if (TIER_ORDER.indexOf(tr.tier) <= prevIdx) {
+          tr.state = 'EARNED'
+        }
+      }
+      if (!highestEarned || TIER_ORDER.indexOf(highestEarned) < prevIdx) {
+        highestEarned = prev
+      }
+    }
+
     let highestAchievable: Tier | null = null
     for (let i = TIER_ORDER.length - 1; i >= 0; i--) {
       const tr = tiers.find((t) => t.tier === TIER_ORDER[i])
@@ -215,7 +228,6 @@ export function checkBadges(
       }
     }
 
-    const prev = previouslyUnlocked[badge.name] ?? null
     let newlyUnlocked: Tier | null = null
     if (highestEarned && (!prev || TIER_ORDER.indexOf(highestEarned) > TIER_ORDER.indexOf(prev))) {
       newlyUnlocked = highestEarned

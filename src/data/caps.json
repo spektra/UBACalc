@@ -1,40 +1,21 @@
 {
-  "_comment": "Height and weight cap tables. edit these when the league updates their caps — don't touch the components.",
-  "height": {
-    "description": "Height brackets in inches. Each entry: vertical cap, speed cap, speed base (starting value), and vertical base.",
-    "values": {
-      "68": { "vertical": 99, "speed": 95, "speedBase": 70, "verticalBase": 60 },
-      "69": { "vertical": 99, "speed": 94, "speedBase": 70, "verticalBase": 60 },
-      "70": { "vertical": 99, "speed": 93, "speedBase": 70, "verticalBase": 60 },
-      "71": { "vertical": 98, "speed": 92, "speedBase": 70, "verticalBase": 60 },
-      "72": { "vertical": 97, "speed": 91, "speedBase": 70, "verticalBase": 60 },
-      "73": { "vertical": 96, "speed": 90, "speedBase": 70, "verticalBase": 60 },
-      "74": { "vertical": 94, "speed": 89, "speedBase": 70, "verticalBase": 60 },
-      "75": { "vertical": 93, "speed": 88, "speedBase": 70, "verticalBase": 60 },
-      "76": { "vertical": 91, "speed": 87, "speedBase": 60, "verticalBase": 55 },
-      "77": { "vertical": 89, "speed": 86, "speedBase": 60, "verticalBase": 55 },
-      "78": { "vertical": 87, "speed": 85, "speedBase": 60, "verticalBase": 55 },
-      "79": { "vertical": 85, "speed": 83, "speedBase": 60, "verticalBase": 55 },
-      "80": { "vertical": 83, "speed": 82, "speedBase": 50, "verticalBase": 50 },
-      "81": { "vertical": 80, "speed": 80, "speedBase": 50, "verticalBase": 50 },
-      "82": { "vertical": 78, "speed": 78, "speedBase": 50, "verticalBase": 50 },
-      "83": { "vertical": 75, "speed": 76, "speedBase": 40, "verticalBase": 40 },
-      "84": { "vertical": 72, "speed": 74, "speedBase": 40, "verticalBase": 40 },
-      "85": { "vertical": 70, "speed": 72, "speedBase": 40, "verticalBase": 40 },
-      "86": { "vertical": 68, "speed": 70, "speedBase": 40, "verticalBase": 40 },
-      "87": { "vertical": 65, "speed": 68, "speedBase": 40, "verticalBase": 40 },
-      "88": { "vertical": 62, "speed": 65, "speedBase": 40, "verticalBase": 40 }
-    }
-  },
+  "_comment": "Height and weight cap tables. Edit these when the league updates their caps — don't touch the components.",
+  "speedRanges": [
+    { "label": "\u22646'3\"", "maxInches": 75, "cap": 99, "base": 70 },
+    { "label": "6'4\"-6'7\"", "maxInches": 79, "cap": 95, "base": 60 },
+    { "label": "6'8\"-6'10\"", "maxInches": 82, "cap": 90, "base": 50 },
+    { "label": "\u22676'11\"", "maxInches": 999, "cap": 85, "base": 40 }
+  ],
   "weight": {
-    "description": "Weight class penalties and strength cap ceiling. lighter=less penalty, heavier=more strength ceiling.",
+    "description": "Weight class penalties, strength caps/bases, and vertical caps/bases. Lighter = less penalty, heavier = more strength ceiling.",
     "classes": {
-      "Very Light": { "speedPenalty": 0, "agilityPenalty": 0, "strengthCap": 50, "strengthBase": 40 },
-      "Light": { "speedPenalty": 2, "agilityPenalty": 2, "strengthCap": 60, "strengthBase": 40 },
-      "Average": { "speedPenalty": 5, "agilityPenalty": 5, "strengthCap": 70, "strengthBase": 50 },
-      "Above Average": { "speedPenalty": 8, "agilityPenalty": 8, "strengthCap": 90, "strengthBase": 65 },
-      "Heavy": { "speedPenalty": 12, "agilityPenalty": 12, "strengthCap": 95, "strengthBase": 70 },
-      "Very Heavy": { "speedPenalty": 15, "agilityPenalty": 15, "strengthCap": 99, "strengthBase": 75 }
+      "Very Light": { "speedPenalty": 0, "agilityPenalty": 0, "strengthCap": 50, "strengthBase": 40, "verticalCap": 99, "verticalBase": 60 },
+      "Light": { "speedPenalty": 2, "agilityPenalty": 2, "strengthCap": 50, "strengthBase": 40, "verticalCap": 99, "verticalBase": 60 },
+      "Below Average": { "speedPenalty": 4, "agilityPenalty": 4, "strengthCap": 50, "strengthBase": 40, "verticalCap": 95, "verticalBase": 55 },
+      "Average": { "speedPenalty": 6, "agilityPenalty": 6, "strengthCap": 80, "strengthBase": 60, "verticalCap": 90, "verticalBase": 50 },
+      "Above Average": { "speedPenalty": 8, "agilityPenalty": 8, "strengthCap": 90, "strengthBase": 65, "verticalCap": 85, "verticalBase": 45 },
+      "Heavy": { "speedPenalty": 12, "agilityPenalty": 12, "strengthCap": 95, "strengthBase": 70, "verticalCap": 80, "verticalBase": 40 },
+      "Very Heavy": { "speedPenalty": 16, "agilityPenalty": 16, "strengthCap": 99, "strengthBase": 75, "verticalCap": 75, "verticalBase": 40 }
     }
   },
   "archetype": {

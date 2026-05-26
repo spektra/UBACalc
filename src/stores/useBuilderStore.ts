@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import type { BuildSetup, Tier } from '../types'
 import { loadBuild, saveBuild, getSavedPlayerNames, deleteBuild } from '../utils/storage'
 import { sanitizePlayerName, clampAttribute, clampUC } from '../utils/sanitize'
-import { getAttributeCap, getAttributeBase } from '../utils/caps'
+import { getAttributeCap, getAttributeBase, lbsToWeightClass } from '../utils/caps'
 import attributesData from '../data/attributes.json'
 
 interface BuilderState {
@@ -116,8 +116,14 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     try {
       const saved = loadBuild(name)
       if (!saved) return false
+      const build = { ...saved.build }
+      const lbs = parseInt(build.weightLbs, 10)
+      if (!isNaN(lbs) && lbs >= 160 && lbs <= 300) {
+        const derived = lbsToWeightClass(lbs)
+        if (derived) build.weightClass = derived
+      }
       set({
-        build: { ...saved.build },
+        build,
         startingValues: { ...saved.startingValues },
         attributes: {},
         ucBalance: saved.ucBalance,

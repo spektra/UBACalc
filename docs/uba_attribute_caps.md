@@ -67,10 +67,25 @@ C:  6'6" - 7'4"
 
 ### Weight Class Distributions
 ```text
-Very Light:     160 - 174 lbs
-Light:          175 - 189 lbs
-Average:        195 - 214 lbs
-Above Average:  215 - 234 lbs
-Heavy:          235 - 254 lbs
-Very Heavy:     255 - 275 lbs
+Very Light:     160 - 174 lbs   | Strength 50/40, Vertical 99/60
+Light:          175 - 188 lbs   | Strength 50/40, Vertical 99/60
+Below Average:  189 - 213 lbs   | Strength 50/40, Vertical 95/55
+Average:        214 - 233 lbs   | Strength 80/60, Vertical 90/50
+Above Average:  234 - 253 lbs   | Strength 90/65, Vertical 85/45
+Heavy:          254 - 274 lbs   | Strength 95/70, Vertical 80/40
+Very Heavy:     275 - 300 lbs   | Strength 99/75, Vertical 75/40
 ```
+
+### Speed Caps by Height Range
+```text
+≤ 6'3"  (≤ 75"):   Speed 99/70
+6'4" - 6'7" (76-79"):  Speed 95/60
+6'8" - 6'10" (80-82"): Speed 90/50
+≥ 6'11" (≥ 83"):  Speed 85/40
+```
+
+### Physical Attribute Rules
+- **Speed**: cap/base determined by height range. No weight penalty subtraction.
+- **Agility**: Always cap 99, base 50.
+- **Strength**: cap/base determined by weight class.
+- **Vertical**: cap/base determined by weight class (heavier = lower vertical ceiling).

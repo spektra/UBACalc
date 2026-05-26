@@ -52,7 +52,7 @@ Fully client-side. No backend. All game parameters in flat JSON for season-to-se
 
 ### Additional Features
 - [x] **Sheet Import** — slide-out drawer (`SheetImportDrawer.tsx`) pastes tab/comma/space-separated data from the 35-column league export format. Column-to-attribute mapping in `src/data/sheetColumns.json`. Auto-sets player name and all starting values. Badge import via 41-column mapping in `badgeColumns.json`. Uses `findDataLine` to skip header rows.
-- [x] **Weight lbs Input** — number field (160-275) next to weight dropdown. Auto-detects weight class on blur from 6 classes (Very Light through Very Heavy).
+- [x] **Weight lbs Input** — number field (160-300) next to weight dropdown. Auto-detects weight class on blur from 7 classes (Very Light through Very Heavy, including Below Average).
 - [x] **Badge Previously-Unlocked Tracking** — imported badges stored in `previouslyUnlocked` state, persisted in localStorage, correctly diffed against current stat-based unlocks so previously-owned badges aren't re-announced as "new."
 - [x] **Per-Slider Revert** — each attribute has a "Revert to start" button that resets to the starting value, plus "↩ All" to reset all upgrades.
 
@@ -125,6 +125,12 @@ Full audit of all 24 source files, 4 doc files, 4 data files, 2 test files, and 
 | `parseBracketRange` missing NaN guard | `src/utils/cost.ts` | Added `Number.isNaN` check |
 | `heightToInches` strict regex — silent 99 fallback on format mismatch | `src/utils/caps.ts` | Added `replace(/\s+/g, '')` before regex match |
 | Archetype priority loop copy-pasted 3x | `src/utils/caps.ts` | Extracted `resolveBestStatus()` helper, removed 25 duplicated lines |
+| Weight penalty subtracted from speed/agility caps AND starting values | `src/utils/caps.ts` | Removed all penalty subtraction. Speed cap = range.cap, Agility cap = 99, base values also raw (no `- penalty`). Speed/agility penalties still in caps.json for reference but unused in code. |
+| `previouslyUnlocked` not reflected in badge state after load | `src/utils/badges.ts` | `checkBadges` now merges stored tier: forces all lower tiers to EARNED, sets highestEarned, so saved unlocks persist through badge re-evaluation |
+| Weight class stale on load (dropdown default, not re-derived) | `src/stores/useBuilderStore.ts` | `loadPlayerBuild` now calls `lbsToWeightClass(weightLbs)` to re-derive correct weight class from stored pounds |
+| Session baseline stale on previouslyUnlocked change | `src/components/BadgeFeed.tsx` | Added `previouslyUnlocked` to baseline effect deps, used `resultsRef` for latest value to avoid stale closure |
+| Badge engine: `countConditions`, `countMetConditions`, `parseConditionDetails` checked OR before AND (same bug as evalCondition) | `src/utils/badges.ts` | Reordered all three functions to split on ` AND ` before checking `-or-`/`EITHER`, matching evalCondition/canEverAchieve precedence. Affected: Post Lockdown, Boxout Beast, Aerial Wizard, Post Prodigy, Paint Patroller |
+| `lbsToWeightClass` duplicated between caps.ts and BuildSetupForm.tsx | `src/utils/caps.ts`, `src/components/BuildSetupForm.tsx` | Extracted `LBS_RANGES` array and `lbsToWeightClass()` function into caps.ts as named exports; BuildSetupForm imports from caps.ts |
 
 ### Minor Observations (No Fix Needed)
 - `storage.ts` `saveBuild()` takes 7 positional params — could be refactored to accept `SavedBuild` object
@@ -151,14 +157,15 @@ Full audit of all 24 source files, 4 doc files, 4 data files, 2 test files, and 
 
 ### Cap System
 Caps derived from three inputs:
-1. **Height** — affects Vertical cap and base Speed/Agility caps
-2. **Weight class** — Speed/Agility penalty, Strength cap ceiling
+1. **Height** — determines Speed cap/base via height ranges (4 ranges: ≤6'3"=99/70, 6'4-6'7=95/60, 6'8-6'10=90/50, ≥6'11=85/40)
+2. **Weight class** — determines Strength cap/base (VL=50/40 through VH=99/75) and Vertical cap/base (VL=99/60 through VH=75/40). 7 classes: Very Light through Very Heavy.
 3. **Archetype (Primary/Secondary/Weakness)** — sets skill attribute caps per category:
    - Primary Strength → Blue (99 cap), baseline 80
    - Secondary Strength → Purple (95 cap), baseline 70
    - Neutral → Cyan (90 cap), baseline 50
    - Weakness → Red (75 cap), baseline 40
-   - Physical (calculated from height/weight)
+   - Physical (calculated from height/weight — no weight penalty subtraction)
+- **Agility**: Always cap 99, base 50 (flat).
 
 ---
 

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { useBuilderStore } from '../stores/useBuilderStore'
 import { searchBuilds } from '../utils/storage'
+import { lbsToWeightClass } from '../utils/caps'
 
 const heights = [
   "5'8\"", "5'9\"", "5'10\"", "5'11\"", "6'0\"", "6'1\"", "6'2\"", "6'3\"",
@@ -9,24 +10,8 @@ const heights = [
 ]
 
 const weightClasses = [
-  "Very Light", "Light", "Average", "Above Average", "Heavy", "Very Heavy",
+  "Very Light", "Light", "Below Average", "Average", "Above Average", "Heavy", "Very Heavy",
 ]
-
-const LBS_RANGES: [number, number, string][] = [
-  [160, 174, "Very Light"],
-  [175, 189, "Light"],
-  [190, 214, "Average"],
-  [215, 234, "Above Average"],
-  [235, 254, "Heavy"],
-  [255, 275, "Very Heavy"],
-]
-
-function lbsToWeightClass(lbs: number): string | null {
-  for (const [lo, hi, klass] of LBS_RANGES) {
-    if (lbs >= lo && lbs <= hi) return klass
-  }
-  return null
-}
 
 const archetypes = [
   "Shooting", "Slashing", "Playmaking", "Defense", "Rebounding", "Post Scoring",
@@ -170,13 +155,13 @@ export function BuildSetupForm() {
                 <input
                   type="number"
                   min={160}
-                  max={275}
+                  max={300}
                   value={build.weightLbs}
                   onChange={(e) => {
                     const raw = e.target.value
                     setBuild({ weightLbs: raw })
                     const lbs = parseInt(raw, 10)
-                    if (!isNaN(lbs) && lbs >= 160 && lbs <= 275) {
+                    if (!isNaN(lbs) && lbs >= 160 && lbs <= 300) {
                       const klass = lbsToWeightClass(lbs)
                       if (klass) setBuild({ weightClass: klass, weightLbs: raw })
                     }

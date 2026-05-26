@@ -44,11 +44,11 @@ export interface AttributeCategory {
   attributes: Attribute[]
 }
 
-export interface HeightCap {
-  vertical: number
-  speed: number
-  speedBase: number
-  verticalBase: number
+export interface SpeedRange {
+  label: string
+  maxInches: number
+  cap: number
+  base: number
 }
 
 export interface WeightClass {
@@ -56,6 +56,8 @@ export interface WeightClass {
   agilityPenalty: number
   strengthCap: number
   strengthBase: number
+  verticalCap: number
+  verticalBase: number
 }
 
 export interface ArchetypeModifier {

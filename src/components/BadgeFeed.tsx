@@ -40,6 +40,7 @@ export function BadgeFeed() {
   const prevTiersRef = useRef<Record<string, Tier | null> | null>(null)
   const bannerQueueRef = useRef<{ name: string; tier: Tier }[]>([])
   const bannerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const sessionBaselineRef = useRef<Record<string, Tier | null> | null>(null)
 
   const effectiveAttrs = useMemo(
     () => ({ ...startingValues, ...attributes }),
@@ -62,6 +63,16 @@ export function BadgeFeed() {
   )
 
   const badgeCount = results.filter((r) => r.highestEarned).length
+
+  const resultsRef = useRef(results)
+  resultsRef.current = results
+
+  useEffect(() => {
+    const baseline: Record<string, Tier | null> = {}
+    for (const r of resultsRef.current) baseline[r.name] = r.highestEarned
+    sessionBaselineRef.current = baseline
+    setSessionUnlocked(new Set())
+  }, [build.playerName, previouslyUnlocked])
 
   useEffect(() => {
     prevTiersRef.current = null
@@ -211,7 +222,11 @@ export function BadgeFeed() {
         <div className="mt-3 max-h-[60vh] sm:max-h-80 space-y-1.5 overflow-y-auto pr-1">
           <AnimatePresence mode="popLayout">
             {results
-              .filter((r) => !showNewOnly || sessionUnlocked.has(r.name))
+              .filter((r) => !showNewOnly || (
+                sessionBaselineRef.current !== null &&
+                r.highestEarned !== null &&
+                r.highestEarned !== (sessionBaselineRef.current[r.name] ?? null)
+              ))
               .map((r) => {
                 const isNew = sessionUnlocked.has(r.name)
                 const tier = r.highestEarned
@@ -283,7 +298,11 @@ export function BadgeFeed() {
               })}
           </AnimatePresence>
 
-          {showNewOnly && sessionUnlocked.size === 0 && (
+          {showNewOnly && !results.some((r) =>
+            sessionBaselineRef.current !== null &&
+            r.highestEarned !== null &&
+            r.highestEarned !== (sessionBaselineRef.current[r.name] ?? null)
+          ) && (
             <div className="py-8 text-center text-sm text-uba-text-dim">
               No new badges unlocked yet.
             </div>
