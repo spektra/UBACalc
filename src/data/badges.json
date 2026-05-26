@@ -36,7 +36,7 @@
     }
   },
   {
-    "name": "Paint Prodogy",
+    "name": "Paint Prodigy",
     "thresholds": {
       "Bronze": "80 Close Shot -and- 80 Post Control",
       "Silver": "85 Close Shot -and- 85 Post Control",
@@ -45,7 +45,7 @@
     }
   },
   {
-    "name": "Phyical Finisher",
+    "name": "Physical Finisher",
     "thresholds": {
       "Bronze": "70 Strength -and- 80 Driving Layup",
       "Silver": "80 Strength -and- 85 Driving Layup",
@@ -92,10 +92,10 @@
   {
     "name": "Lightning Launch",
     "thresholds": {
-      "Bronze": "80 Speed W/ Ball",
-      "Silver": "85 Speed W/ Ball",
-      "Gold": "90 Speed W/ Ball",
-      "HOF": "95 Speed W/ Ball"
+      "Bronze": "80 Speed With Ball",
+      "Silver": "85 Speed With Ball",
+      "Gold": "90 Speed With Ball",
+      "HOF": "95 Speed With Ball"
     }
   },
   {
@@ -110,37 +110,37 @@
   {
     "name": "Deadeye",
     "thresholds": {
-      "Bronze": "80 Mid Range -or- 80 Three Pointer",
-      "Silver": "85 Mid Range -or- 85 Three Pointer",
-      "Gold": "90 Mid Range -or- 90 Three Pointer",
-      "HOF": "95 Mid Range -or- 95 Three Pointer"
+      "Bronze": "80 Mid Range -or- 80 3PT",
+      "Silver": "85 Mid Range -or- 85 3PT",
+      "Gold": "90 Mid Range -or- 90 3PT",
+      "HOF": "95 Mid Range -or- 95 3PT"
     }
   },
   {
     "name": "Limitless Range",
     "thresholds": {
-      "Bronze": "80 Three Pointer",
-      "Silver": "85 Three Pointer",
-      "Gold": "90 Three Pointer",
-      "HOF": "95 Three Pointer"
+      "Bronze": "80 3PT",
+      "Silver": "85 3PT",
+      "Gold": "90 3PT",
+      "HOF": "95 3PT"
     }
   },
   {
-    "name": "Mini Marksmanship",
+    "name": "Mini Marksman",
     "thresholds": {
-      "Bronze": "80 Mid Range -or- 80 Three Pointer",
-      "Silver": "85 Mid Range -or- 85 Three Pointer",
-      "Gold": "90 Mid Range -or- 90 Three Pointer",
-      "HOF": "95 Mid Range -or- 95 Three Pointer"
+      "Bronze": "80 Mid Range -or- 80 3PT",
+      "Silver": "85 Mid Range -or- 85 3PT",
+      "Gold": "90 Mid Range -or- 90 3PT",
+      "HOF": "95 Mid Range -or- 95 3PT"
     }
   },
   {
     "name": "Set Shot Specialist",
     "thresholds": {
-      "Bronze": "80 Mid Range -or- 80 Three Pointer",
-      "Silver": "85 Mid Range -or- 85 Three Pointer",
-      "Gold": "90 Mid Range -or- 90 Three Pointer",
-      "HOF": "95 Mid Range -or- 95 Three Pointer"
+      "Bronze": "80 Mid Range -or- 80 3PT",
+      "Silver": "85 Mid Range -or- 85 3PT",
+      "Gold": "90 Mid Range -or- 90 3PT",
+      "HOF": "95 Mid Range -or- 95 3PT"
     }
   },
   {
@@ -155,14 +155,14 @@
   {
     "name": "Shifty Shooter",
     "thresholds": {
-      "Bronze": "80 Agility AND EITHER 80 Mid Range -or- 80 Three Pointer",
-      "Silver": "85 Agility AND EITHER 85 Mid Range -or- 85 Three Pointer",
-      "Gold": "90 Agility AND EITHER 90 Mid Range -or- 90 Three Pointer",
-      "HOF": "95 Agility AND EITHER 95 Mid Range -or- 95 Three Pointer"
+      "Bronze": "80 Agility AND EITHER 80 Mid Range -or- 80 3PT",
+      "Silver": "85 Agility AND EITHER 85 Mid Range -or- 85 3PT",
+      "Gold": "90 Agility AND EITHER 90 Mid Range -or- 90 3PT",
+      "HOF": "95 Agility AND EITHER 95 Mid Range -or- 95 3PT"
     }
   },
   {
-    "name": "Ankle Assassian",
+    "name": "Ankle Assassin",
     "thresholds": {
       "Bronze": "80 Ball Handle",
       "Silver": "85 Ball Handle",
@@ -225,7 +225,7 @@
     }
   },
   {
-    "name": "Versatile Visonary",
+    "name": "Versatile Visionary",
     "thresholds": {
       "Bronze": "80 Pass Vision",
       "Silver": "85 Pass Vision",
@@ -335,19 +335,19 @@
   {
     "name": "Boxout Beast",
     "thresholds": {
-      "Bronze": "75 Strength AND EITHER 80 Offensive Rebounding -or- 80 Defensive Rebound",
-      "Silver": "80 Strength AND EITHER 85 Offensive Rebounding -or- 85 Defensive Rebound",
-      "Gold": "80 Strength AND EITHER 90 Offensive Rebounding -or- 90 Defensive Rebound",
-      "HOF": "85 Strength AND EITHER 95 Offensive Rebounding -or- 95 Defensive Rebound"
+      "Bronze": "75 Strength AND EITHER 80 Offensive Rebound -or- 80 Defensive Rebound",
+      "Silver": "80 Strength AND EITHER 85 Offensive Rebound -or- 85 Defensive Rebound",
+      "Gold": "80 Strength AND EITHER 90 Offensive Rebound -or- 90 Defensive Rebound",
+      "HOF": "85 Strength AND EITHER 95 Offensive Rebound -or- 95 Defensive Rebound"
     }
   },
   {
     "name": "Rebound Chaser",
     "thresholds": {
-      "Bronze": "80 Offensive Rebounding -or- 80 Defensive Rebound",
-      "Silver": "85 Offensive Rebounding -or- 85 Defensive Rebound",
-      "Gold": "90 Offensive Rebounding -or- 90 Defensive Rebound",
-      "HOF": "95 Offensive Rebounding -or- 95 Defensive Rebound"
+      "Bronze": "80 Offensive Rebound -or- 80 Defensive Rebound",
+      "Silver": "85 Offensive Rebound -or- 85 Defensive Rebound",
+      "Gold": "90 Offensive Rebound -or- 90 Defensive Rebound",
+      "HOF": "95 Offensive Rebound -or- 95 Defensive Rebound"
     }
   },
   {

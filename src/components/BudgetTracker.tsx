@@ -19,17 +19,16 @@ export function BudgetTracker() {
   const overBudget = remaining < 0
 
   function handleUCInput(raw: string) {
-    const val = parseInt(raw, 10)
-    if (raw === '' || raw === '0') {
+    const cleaned = raw.replace(/[^0-9]/g, '')
+    if (cleaned === '') {
       setUCBalance(0)
       return
     }
-    if (isNaN(val)) return
-    setUCBalance(val)
+    setUCBalance(parseInt(cleaned, 10))
   }
 
   return (
-    <div className="rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
+    <div className="rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-4 sm:p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
       <div className="mb-1 flex items-center justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-gold">
           UC Budget
@@ -37,7 +36,7 @@ export function BudgetTracker() {
         <div className="h-px flex-1 ml-4 bg-gradient-to-r from-uba-gold/40 to-transparent" />
       </div>
 
-      <div className="mt-5 flex flex-wrap items-end gap-3">
+      <div className="mt-5 flex flex-col sm:flex-row flex-wrap items-end gap-3">
         <div className="min-w-[140px] flex-1">
           <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-uba-text-dim">
             Current Balance
@@ -45,7 +44,8 @@ export function BudgetTracker() {
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-uba-text-dim">UC</span>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={ucBalance || ''}
               onChange={(e) => handleUCInput(e.target.value)}
               placeholder="0"

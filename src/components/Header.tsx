@@ -8,7 +8,7 @@ import { useBuilderStore } from '../stores/useBuilderStore'
 
 export function Header({ onImportClick }: { onImportClick?: () => void }) {
   const { theme, toggle } = useThemeStore()
-  const { build, attributes } = useBuilderStore()
+  const { build, attributes, startingValues, ucBalance } = useBuilderStore()
 
   const hasUnsaved = useMemo(() => {
     if (!build.playerName.trim()) return false
@@ -22,23 +22,27 @@ export function Header({ onImportClick }: { onImportClick?: () => void }) {
       if (!existing) return true
       const currentAttr = JSON.stringify(attributes)
       const savedAttr = JSON.stringify(existing.attributes || {})
-      return currentAttr !== savedAttr
+      const currentSV = JSON.stringify(startingValues)
+      const savedSV = JSON.stringify(existing.startingValues || {})
+      const currentUC = ucBalance
+      const savedUC = existing.ucBalance ?? 0
+      return currentAttr !== savedAttr || currentSV !== savedSV || currentUC !== savedUC
     } catch {
       return false
     }
-  }, [build.playerName, attributes])
+  }, [build.playerName, attributes, startingValues, ucBalance])
 
   return (
     <header className="relative z-10 border-b border-uba-border/50 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-3">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-2 sm:px-6 sm:py-3">
+        <div className="flex items-center gap-1.5 sm:gap-3">
           <div className="relative">
-            <img src={logo} alt="UBA" className="h-10 w-10 rounded-lg object-cover ring-1 ring-uba-gold/20" />
+            <img src={logo} alt="UBA" className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg object-cover ring-1 ring-uba-gold/20" />
             {hasUnsaved && (
               <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.6)]" />
             )}
           </div>
-          <span className="text-lg font-semibold tracking-tight text-uba-text">
+          <span className="text-sm sm:text-lg font-semibold tracking-tight text-uba-text">
             UBA <span className="text-uba-gold">Upgrade Calculator</span>
           </span>
         </div>

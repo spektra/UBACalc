@@ -68,3 +68,26 @@ body {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
+
+@keyframes badge-pop {
+  0% { box-shadow: 0 0 0 0 rgba(230, 198, 147, 0); }
+  50% { box-shadow: 0 0 20px 6px rgba(230, 198, 147, 0.35); }
+  100% { box-shadow: 0 0 0 0 rgba(230, 198, 147, 0); }
+}
+
+.badge-pop {
+  animation: badge-pop 800ms ease-out;
+}
+
+/* mobile: bigger slider thumbs for fat fingers */
+@media (hover: none) and (pointer: coarse) {
+  input[type="range"]::-webkit-slider-thumb {
+    height: 22px !important;
+    width: 22px !important;
+  }
+  input[type="range"]::-moz-range-thumb {
+    height: 22px !important;
+    width: 22px !important;
+  }
+}
+

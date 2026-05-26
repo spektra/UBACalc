@@ -38,12 +38,14 @@ function App() {
   useAutoSave()
   useAudioGreeting()
   const { theme } = useThemeStore()
-  const { setBuild, setUCBalance, setStartingValue } = useBuilderStore()
+  const { setBuild, setUCBalance, setStartingValue, setAttribute } = useBuilderStore()
   const [isImportOpen, setIsImportOpen] = useState(false)
 
-  const html = document.documentElement
-  html.classList.remove('dark', 'light')
-  html.classList.add(theme)
+  useEffect(() => {
+    const html = document.documentElement
+    html.classList.remove('dark', 'light')
+    html.classList.add(theme)
+  }, [theme])
 
   useEffect(() => {
     if (window.location.hash) {
@@ -53,6 +55,11 @@ function App() {
         setUCBalance(data.u)
         for (const [name, val] of Object.entries(data.s)) {
           setStartingValue(name, val)
+        }
+        if (data.a) {
+          for (const [name, val] of Object.entries(data.a)) {
+            setAttribute(name, val)
+          }
         }
         window.location.hash = ''
       }
@@ -84,7 +91,7 @@ function App() {
         variants={stagger}
         initial="hidden"
         animate="show"
-        className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12"
+        className="relative z-10 mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-12"
       >
         <motion.div variants={fadeUp} className="mb-12 text-center">
           <div className="mb-4 flex items-center justify-center gap-4">
@@ -94,7 +101,7 @@ function App() {
             </span>
             <div className="h-px w-12 bg-gradient-to-l from-transparent to-uba-gold/40" />
           </div>
-          <h1 className="bg-gradient-to-b from-uba-gold via-uba-gold to-uba-gold/60 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
+          <h1 className="bg-gradient-to-b from-uba-gold via-uba-gold to-uba-gold/60 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl lg:text-6xl pb-1.5">
             Build Your Player
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-base text-uba-text-muted sm:text-lg">

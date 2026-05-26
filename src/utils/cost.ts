@@ -28,6 +28,7 @@ for (const cat of Object.values(rawAttrs)) {
 
 function parseBracketRange(range: string): [number, number] {
   const [low, high] = range.split('-').map(Number)
+  if (isNaN(low) || isNaN(high)) return [0, 0]
   return [low, high]
 }
 

@@ -4,11 +4,12 @@
 import { useMemo, useState } from 'react'
 import { useBuilderStore } from '../stores/useBuilderStore'
 import { computeAllUpgrades, formatUpgradeText } from '../utils/cost'
+import { checkBadges } from '../utils/badges'
 import { generateBuildRating } from '../utils/rating'
 import { buildShareUrl } from '../utils/share'
 
 export function SubmissionOutput() {
-  const { build, attributes, startingValues, ucBalance } = useBuilderStore()
+  const { build, attributes, startingValues, ucBalance, previouslyUnlocked } = useBuilderStore()
   const [copied, setCopied] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
   const [copyError, setCopyError] = useState('')
@@ -21,6 +22,16 @@ export function SubmissionOutput() {
   const text = useMemo(
     () => formatUpgradeText(build.playerName, upgrades),
     [build.playerName, upgrades],
+  )
+
+  const badgeResults = useMemo(
+    () => checkBadges({ ...startingValues, ...attributes }, {}, previouslyUnlocked),
+    [attributes, startingValues, previouslyUnlocked],
+  )
+
+  const unlockedBadges = useMemo(
+    () => badgeResults.filter((r) => r.newlyUnlocked !== null),
+    [badgeResults],
   )
 
   const totalCost = upgrades.reduce((s, u) => s + u.cost, 0)
@@ -62,7 +73,7 @@ export function SubmissionOutput() {
   }
 
   return (
-    <div className="rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
+    <div className="rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-4 sm:p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
       <div className="mb-1 flex items-center justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-gold">
           Submission
@@ -92,6 +103,28 @@ export function SubmissionOutput() {
             {rating}
           </div>
 
+          {unlockedBadges.length > 0 && (
+            <div className="rounded-lg border border-uba-blue/30 bg-uba-blue/10 px-3 py-2">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-uba-blue-light mb-1">Badges Unlocked</p>
+              <div className="flex flex-wrap gap-1.5">
+                {unlockedBadges.map((b) => (
+                  <span
+                    key={b.name}
+                    className="rounded-md bg-gradient-to-r px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-black"
+                    style={{
+                      backgroundImage: b.newlyUnlocked === 'Bronze' ? 'linear-gradient(to right, #92400e, #d97706)' :
+                        b.newlyUnlocked === 'Silver' ? 'linear-gradient(to right, #64748b, #cbd5e1)' :
+                        b.newlyUnlocked === 'Gold' ? 'linear-gradient(to right, #ca8a04, #facc15)' :
+                        'linear-gradient(to right, #7c3aed, #a78bfa)'
+                    }}
+                  >
+                    {b.name} {b.newlyUnlocked}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           <pre className="overflow-x-auto rounded-xl border border-uba-border/40 bg-uba-surface/60 p-4 font-mono text-sm leading-relaxed text-uba-text whitespace-pre-wrap">
             {text}
           </pre>
@@ -100,7 +133,7 @@ export function SubmissionOutput() {
             <p className="text-xs text-uba-danger">{copyError}</p>
           )}
 
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <button
               onClick={() => handleCopy(text, setCopied)}
               className="flex-1 rounded-xl border border-uba-gold/30 bg-uba-gold/10 px-4 py-2.5 text-sm font-medium text-uba-gold transition-all duration-200 hover:bg-uba-gold/20 hover:shadow-[0_0_16px_-4px_rgba(230,198,147,0.2)] active:scale-[0.98]"

@@ -45,7 +45,8 @@ for (const [catKey, cat] of categories) {
 }
 
 function heightToInches(height: string): number | null {
-  const match = height.match(/(\d+)'(\d+)"/)
+  const normalised = height.replace(/\s+/g, '')
+  const match = normalised.match(/(\d+)'(\d+)"/)
   if (!match) return null
   return parseInt(match[1]) * 12 + parseInt(match[2])
 }
@@ -66,19 +67,11 @@ const STATUS_PRIORITY: Record<string, number> = {
   weakness: 1,
 }
 
-export function getAttributeCap(attrName: string, build: BuildSetup): number {
-  const physicalAttrs = ['Speed', 'Agility', 'Strength', 'Vertical']
-
-  if (physicalAttrs.includes(attrName)) {
-    return getPhysicalCap(attrName, build)
-  }
-
+function resolveBestStatus(attrName: string, build: BuildSetup): string {
   const cats = attrToCategories.get(attrName)
-  if (!cats || cats.length === 0) return 90
-
+  if (!cats || cats.length === 0) return 'neutral'
   let bestStatus = 'neutral'
   let bestPriority = 0
-
   for (const cat of cats) {
     const status = getArchetypeStatus(cat, build)
     const priority = STATUS_PRIORITY[status] || 0
@@ -87,8 +80,14 @@ export function getAttributeCap(attrName: string, build: BuildSetup): number {
       bestStatus = status
     }
   }
+  return bestStatus
+}
 
-  const mod = archetypeMods[bestStatus]
+export function getAttributeCap(attrName: string, build: BuildSetup): number {
+  const physicalAttrs = ['Speed', 'Agility', 'Strength', 'Vertical']
+  if (physicalAttrs.includes(attrName)) return getPhysicalCap(attrName, build)
+
+  const mod = archetypeMods[resolveBestStatus(attrName, build)]
   return mod?.cap ?? 90
 }
 
@@ -96,22 +95,7 @@ export function getAttributeBase(attrName: string, build: BuildSetup): number {
   const physicalAttrs = ['Speed', 'Agility', 'Strength', 'Vertical']
   if (physicalAttrs.includes(attrName)) return 50
 
-  const cats = attrToCategories.get(attrName)
-  if (!cats || cats.length === 0) return 50
-
-  let bestStatus = 'neutral'
-  let bestPriority = 0
-
-  for (const cat of cats) {
-    const status = getArchetypeStatus(cat, build)
-    const priority = STATUS_PRIORITY[status] || 0
-    if (priority > bestPriority) {
-      bestPriority = priority
-      bestStatus = status
-    }
-  }
-
-  const mod = archetypeMods[bestStatus]
+  const mod = archetypeMods[resolveBestStatus(attrName, build)]
   return mod?.base ?? 50
 }
 
@@ -119,21 +103,7 @@ export function getCapColor(attrName: string, build: BuildSetup): string {
   const physicalAttrs = ['Speed', 'Agility', 'Strength', 'Vertical']
   if (physicalAttrs.includes(attrName)) return 'green'
 
-  const cats = attrToCategories.get(attrName)
-  if (!cats || cats.length === 0) return 'cyan'
-
-  let bestStatus = 'neutral'
-  let bestPriority = 0
-  for (const cat of cats) {
-    const status = getArchetypeStatus(cat, build)
-    const priority = STATUS_PRIORITY[status] || 0
-    if (priority > bestPriority) {
-      bestPriority = priority
-      bestStatus = status
-    }
-  }
-
-  const mod = archetypeMods[bestStatus]
+  const mod = archetypeMods[resolveBestStatus(attrName, build)]
   return mod?.color ?? 'cyan'
 }
 

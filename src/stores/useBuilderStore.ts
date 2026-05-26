@@ -1,6 +1,6 @@
 import { create } from 'zustand'
-import type { BuildSetup } from '../types'
-import { loadBuild, saveBuild, getSavedPlayerNames } from '../utils/storage'
+import type { BuildSetup, Tier } from '../types'
+import { loadBuild, saveBuild, getSavedPlayerNames, deleteBuild } from '../utils/storage'
 import { sanitizePlayerName, clampAttribute, clampUC } from '../utils/sanitize'
 import { getAttributeCap, getAttributeBase } from '../utils/caps'
 import attributesData from '../data/attributes.json'
@@ -10,17 +10,19 @@ interface BuilderState {
   attributes: Record<string, number>
   startingValues: Record<string, number>
   ucBalance: number
-  previouslyUnlocked: Record<string, 'Bronze' | 'Silver' | 'Gold' | 'HOF'>
+  previouslyUnlocked: Record<string, Tier>
   savedPlayers: string[]
 
   setBuild: (setup: Partial<BuildSetup>) => void
   setAttribute: (name: string, value: number) => void
   setStartingValue: (name: string, value: number) => void
   setStartingValuesBatch: (values: Record<string, number>) => void
+  setPreviouslyUnlockedBatch: (badges: Record<string, Tier>) => void
   setUCBalance: (balance: number) => void
   loadPlayerBuild: (name: string) => boolean
   resetBuild: () => void
   triggerSave: () => void
+  deletePlayerBuild: (name: string) => void
   refreshSavedPlayers: () => void
   resetAttribute: (name: string) => void
   resetAllAttributes: () => void
@@ -52,19 +54,23 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     if (setup.secondaryArchetype !== undefined) sanitized.secondaryArchetype = setup.secondaryArchetype
     if (setup.weakness !== undefined) sanitized.weakness = setup.weakness
 
-    const { build: currentBuild } = get()
+    const { build: currentBuild, startingValues: currentSV } = get()
     const newBuild = { ...currentBuild, ...sanitized }
 
-    const rawAttrs = attributesData as unknown as Record<string, { label: string; attributes: { name: string; default: number }[] }>
-    const cats = Object.entries(rawAttrs).filter(([k]) => k !== '_comment')
-    const newStartingValues: Record<string, number> = {}
-    for (const [, cat] of cats) {
-      for (const attr of cat.attributes) {
-        newStartingValues[attr.name] = getAttributeBase(attr.name, newBuild)
+    const hasStartingValues = Object.keys(currentSV).length > 0
+    if (!hasStartingValues) {
+      const rawAttrs = attributesData as unknown as Record<string, { label: string; attributes: { name: string; default: number }[] }>
+      const cats = Object.entries(rawAttrs).filter(([k]) => k !== '_comment')
+      const newStartingValues: Record<string, number> = {}
+      for (const [, cat] of cats) {
+        for (const attr of cat.attributes) {
+          newStartingValues[attr.name] = getAttributeBase(attr.name, newBuild)
+        }
       }
+      set({ build: newBuild, startingValues: newStartingValues })
+    } else {
+      set({ build: newBuild })
     }
-
-    set({ build: newBuild, startingValues: newStartingValues })
   },
 
   setAttribute: (name, value) => {
@@ -93,6 +99,12 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     }))
   },
 
+  setPreviouslyUnlockedBatch: (badges) => {
+    set((state) => ({
+      previouslyUnlocked: { ...state.previouslyUnlocked, ...badges },
+    }))
+  },
+
   setUCBalance: (balance) => {
     const clamped = clampUC(balance)
     set({ ucBalance: clamped })
@@ -107,7 +119,7 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
         startingValues: { ...saved.startingValues },
         attributes: {},
         ucBalance: saved.ucBalance,
-        previouslyUnlocked: {},
+        previouslyUnlocked: saved.previouslyUnlocked ?? {},
       })
       return true
     } catch {
@@ -126,10 +138,19 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
   },
 
   triggerSave: () => {
-    const { build, startingValues, ucBalance } = get()
+    const { build, startingValues, ucBalance, previouslyUnlocked } = get()
     if (!build.playerName.trim()) return
-    saveBuild(build.playerName, build, startingValues, ucBalance)
+    saveBuild(build.playerName, build, startingValues, ucBalance, previouslyUnlocked)
     get().refreshSavedPlayers()
+  },
+
+  deletePlayerBuild: (name) => {
+    try {
+      deleteBuild(name)
+      get().refreshSavedPlayers()
+    } catch {
+      // storage unavailable
+    }
   },
 
   refreshSavedPlayers: () => {

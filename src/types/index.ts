@@ -1,9 +1,38 @@
 export interface Badge {
   name: string
-  thresholds: Record<Tier, string>
+  thresholds: Partial<Record<Tier, string>>
 }
 
-export type Tier = 'Bronze' | 'Silver' | 'Gold' | 'HOF'
+export type Tier = 'Bronze' | 'Silver' | 'Gold' | 'HOF' | 'Legend'
+
+export type BadgeTierState = 'EARNED' | 'ACHIEVABLE' | 'LOCKED'
+
+export interface BadgeConditionDetail {
+  attrName: string
+  threshold: number
+  currentValue: number
+  hardCap: number
+  met: boolean
+  cappedBelow: boolean
+}
+
+export interface BadgeTierResult {
+  tier: Tier
+  state: BadgeTierState
+  conditions: BadgeConditionDetail[]
+}
+
+export interface BadgeResult {
+  name: string
+  tiers: BadgeTierResult[]
+  highestEarned: Tier | null
+  highestAchievable: Tier | null
+  previouslyUnlocked: Tier | null
+  newlyUnlocked: Tier | null
+  progress: number
+  totalConditions: number
+  metConditions: number
+}
 
 export interface Attribute {
   name: string

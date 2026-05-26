@@ -33,7 +33,7 @@ const archetypes = [
 ]
 
 export function BuildSetupForm() {
-  const { build, setBuild, loadPlayerBuild, resetBuild, triggerSave } = useBuilderStore()
+  const { build, setBuild, loadPlayerBuild, resetBuild, triggerSave, deletePlayerBuild } = useBuilderStore()
   const [saved, setSaved] = useState(false)
   const [dismissed, setDismissed] = useState(false)
   const [weightLbs, setWeightLbs] = useState('')
@@ -74,7 +74,7 @@ export function BuildSetupForm() {
   const labelClass = "mb-1.5 block text-xs font-medium uppercase tracking-wider text-uba-text-dim"
 
   return (
-    <div className="group rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
+    <div className="group rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-4 sm:p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
       <div className="mb-1 flex items-center justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-gold">
           Build Setup
@@ -104,13 +104,29 @@ export function BuildSetupForm() {
               className="absolute z-20 mt-1 w-full overflow-hidden rounded-xl border border-uba-border/60 bg-uba-surface shadow-lg backdrop-blur-xl"
             >
               {suggestions.map((name) => (
-                <button
+                <div
                   key={name}
-                  onClick={() => handleSelect(name)}
-                  className="w-full px-4 py-2.5 text-left text-sm text-uba-text transition-colors hover:bg-uba-blue/10"
+                  className="group/item flex items-center justify-between px-4 py-2.5 transition-colors hover:bg-uba-blue/10"
                 >
-                  {name}
-                </button>
+                  <button
+                    onClick={() => handleSelect(name)}
+                    className="flex-1 text-left text-sm text-uba-text truncate"
+                  >
+                    {name}
+                  </button>
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    aria-label={`Delete ${name}`}
+                    title={`Delete ${name}`}
+                    onClick={(e) => { e.stopPropagation(); deletePlayerBuild(name); }}
+                    className="ml-2 rounded p-1 text-uba-text-dim opacity-0 transition-all group-hover/item:opacity-100 hover:opacity-100 hover:text-uba-danger focus:opacity-100 focus:text-uba-danger"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                      <path fillRule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c-.84 0-1.673.025-2.5.075V3.75c0-.69.56-1.25 1.25-1.25h2.5c.69 0 1.25.56 1.25 1.25v.325C11.673 4.025 10.84 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
               ))}
             </div>
           )}
@@ -158,21 +174,13 @@ export function BuildSetupForm() {
                   min={160}
                   max={275}
                   value={weightLbs}
-                  onChange={(e) => setWeightLbs(e.target.value)}
-                  onBlur={() => {
-                    const lbs = parseInt(weightLbs, 10)
-                    if (!isNaN(lbs)) {
+                  onChange={(e) => {
+                    const raw = e.target.value
+                    setWeightLbs(raw)
+                    const lbs = parseInt(raw, 10)
+                    if (!isNaN(lbs) && lbs >= 160 && lbs <= 275) {
                       const klass = lbsToWeightClass(lbs)
                       if (klass) setBuild({ weightClass: klass })
-                    }
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      const lbs = parseInt(weightLbs, 10)
-                      if (!isNaN(lbs)) {
-                        const klass = lbsToWeightClass(lbs)
-                        if (klass) setBuild({ weightClass: klass })
-                      }
                     }
                   }}
                   placeholder="lbs"

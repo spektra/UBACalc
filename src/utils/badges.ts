@@ -1,62 +1,11 @@
 import badgesData from '../data/badges.json'
-import type { Badge, Tier } from '../types'
+import type { Badge, Tier, BadgeTierState, BadgeConditionDetail, BadgeTierResult, BadgeResult } from '../types'
 
-export interface BadgeResult {
-  name: string
-  tier: Tier
-  unlocked: boolean
-}
-
-export interface BadgeCheck {
-  name: string
-  previouslyUnlocked: Tier | null
-  newlyUnlocked: Tier | null
-  progress: number
-  totalConditions: number
-  metConditions: number
-}
-
-const TIER_ORDER: Tier[] = ['Bronze', 'Silver', 'Gold', 'HOF']
+const TIER_ORDER: Tier[] = ['Bronze', 'Silver', 'Gold', 'HOF', 'Legend']
 
 const SPLIT_OR = ' -or- '
 const SPLIT_AND = ' -and- '
-const SPLIT_AND_CAPS = ' AND '
-
-function evalCondition(condition: string, attrs: Record<string, number>): boolean {
-  const upper = condition.trim()
-
-  if (upper.startsWith('EITHER ')) {
-    const inner = upper.slice(7)
-    const parts = splitOr(inner)
-    return parts.some((p) => evalCondition(p, attrs))
-  }
-
-  if (upper.includes(SPLIT_OR)) {
-    const parts = splitOr(upper)
-    return parts.some((p) => evalCondition(p, attrs))
-  }
-
-  if (upper.includes(SPLIT_AND)) {
-    const parts = upper.split(SPLIT_AND)
-    return parts.every((p) => evalCondition(p, attrs))
-  }
-
-  if (upper.includes(SPLIT_AND_CAPS)) {
-    const parts = upper.split(SPLIT_AND_CAPS)
-    return parts.every((p) => evalCondition(p, attrs))
-  }
-
-  const match = upper.match(/^(\d+)\s+(.+)$/)
-  if (!match) return false
-
-  const requiredVal = Number(match[1])
-  const attrName = match[2].trim()
-
-  const currentVal = attrs[attrName]
-  if (currentVal === undefined) return false
-
-  return currentVal >= requiredVal
-}
+const SPLIT_AND_CAPS = ' AND '  // non-depth-aware — fine as no data nests AND inside EITHER
 
 function splitOr(input: string): string[] {
   const parts: string[] = []
@@ -79,45 +28,147 @@ function splitOr(input: string): string[] {
   return parts
 }
 
+function getAttrValue(condition: string, lookup: Record<string, number>): { threshold: number; attrName: string; value: number } | null {
+  const match = condition.match(/^(\d+)\s+(.+)$/)
+  if (!match) return null
+  const threshold = Number(match[1])
+  const attrName = match[2].trim()
+  const value = lookup[attrName] ?? 0
+  return { threshold, attrName, value }
+}
+
+function evalCondition(condition: string, attrs: Record<string, number>): boolean {
+  const s = condition.trim()
+
+  if (s.startsWith('EITHER ')) {
+    const inner = s.slice(7)
+    const parts = splitOr(inner)
+    return parts.some((p) => evalCondition(p, attrs))
+  }
+
+  if (s.includes(SPLIT_AND_CAPS)) {
+    const parts = s.split(SPLIT_AND_CAPS)
+    return parts.every((p) => evalCondition(p, attrs))
+  }
+
+  if (s.includes(SPLIT_OR)) {
+    const parts = splitOr(s)
+    return parts.some((p) => evalCondition(p, attrs))
+  }
+
+  if (s.includes(SPLIT_AND)) {
+    const parts = s.split(SPLIT_AND)
+    return parts.every((p) => evalCondition(p, attrs))
+  }
+
+  const resolved = getAttrValue(s, attrs)
+  if (!resolved) return false
+  return resolved.value >= resolved.threshold
+}
+
+function canEverAchieve(condition: string, caps: Record<string, number>): boolean {
+  const s = condition.trim()
+
+  if (s.startsWith('EITHER ')) {
+    const inner = s.slice(7)
+    const parts = splitOr(inner)
+    return parts.some((p) => canEverAchieve(p, caps))
+  }
+
+  if (s.includes(SPLIT_AND_CAPS)) {
+    const parts = s.split(SPLIT_AND_CAPS)
+    return parts.every((p) => canEverAchieve(p, caps))
+  }
+
+  if (s.includes(SPLIT_OR)) {
+    const parts = splitOr(s)
+    return parts.some((p) => canEverAchieve(p, caps))
+  }
+
+  if (s.includes(SPLIT_AND)) {
+    const parts = s.split(SPLIT_AND)
+    return parts.every((p) => canEverAchieve(p, caps))
+  }
+
+  const match = s.match(/^(\d+)\s+(.+)$/)
+  if (!match) return false
+  const requiredVal = Number(match[1])
+  const attrName = match[2].trim()
+  const cap = caps[attrName] ?? 99
+  return cap >= requiredVal
+}
+
+function parseConditionDetails(
+  condition: string,
+  attrs: Record<string, number>,
+  caps: Record<string, number>,
+): BadgeConditionDetail[] {
+  const s = condition.trim()
+
+  if (s.includes(SPLIT_AND_CAPS)) {
+    const parts = s.split(SPLIT_AND_CAPS)
+    return parts.flatMap((p) => parseConditionDetails(p, attrs, caps))
+  }
+
+  if (s.includes(SPLIT_AND)) {
+    const parts = s.split(SPLIT_AND)
+    return parts.flatMap((p) => parseConditionDetails(p, attrs, caps))
+  }
+
+  if (s.startsWith('EITHER ') || s.includes(SPLIT_OR)) {
+    return []
+  }
+
+  const match = s.match(/^(\d+)\s+(.+)$/)
+  if (!match) return []
+  const threshold = Number(match[1])
+  const attrName = match[2].trim()
+  const currentValue = attrs[attrName] ?? 0
+  const hardCap = caps[attrName] ?? 99
+
+  return [{
+    attrName,
+    threshold,
+    currentValue,
+    hardCap,
+    met: currentValue >= threshold,
+    cappedBelow: hardCap < threshold,
+  }]
+}
+
 function countConditions(threshold: string): number {
-  const upper = threshold.trim()
+  const s = threshold.trim()
 
-  if (upper.startsWith('EITHER ') || upper.includes(SPLIT_OR)) {
+  if (s.includes(SPLIT_AND_CAPS)) {
+    return s.split(SPLIT_AND_CAPS).length
+  }
+
+  if (s.includes(SPLIT_AND)) {
+    return s.split(SPLIT_AND).length
+  }
+
+  if (s.startsWith('EITHER ') || s.includes(SPLIT_OR)) {
     return 1
-  }
-
-  if (upper.includes(SPLIT_AND)) {
-    return upper.split(SPLIT_AND).length
-  }
-
-  if (upper.includes(SPLIT_AND_CAPS)) {
-    const count = upper.split(SPLIT_AND_CAPS).length
-    return count
   }
 
   return 1
 }
 
 function countMetConditions(threshold: string, attrs: Record<string, number>): number {
-  const upper = threshold.trim()
+  const s = threshold.trim()
 
-  if (upper.startsWith('EITHER ') || upper.includes(SPLIT_OR)) {
-    return evalCondition(threshold, attrs) ? 1 : 0
-  }
-
-  if (upper.includes(SPLIT_AND)) {
-    const parts = upper.split(SPLIT_AND)
+  if (s.includes(SPLIT_AND_CAPS)) {
+    const parts = s.split(SPLIT_AND_CAPS)
     return parts.filter((p) => evalCondition(p, attrs)).length
   }
 
-  if (upper.includes(SPLIT_AND_CAPS)) {
-    const parts = upper.split(SPLIT_AND_CAPS)
-    return parts.map((p) => p.trim()).filter((p) => {
-      if (p.startsWith('EITHER ') || p.includes(SPLIT_OR)) {
-        return evalCondition(p, attrs)
-      }
-      return evalCondition(p, attrs)
-    }).length
+  if (s.includes(SPLIT_AND)) {
+    const parts = s.split(SPLIT_AND)
+    return parts.filter((p) => evalCondition(p, attrs)).length
+  }
+
+  if (s.startsWith('EITHER ') || s.includes(SPLIT_OR)) {
+    return evalCondition(threshold, attrs) ? 1 : 0
   }
 
   return evalCondition(threshold, attrs) ? 1 : 0
@@ -125,37 +176,76 @@ function countMetConditions(threshold: string, attrs: Record<string, number>): n
 
 export function checkBadges(
   attrs: Record<string, number>,
+  caps: Record<string, number>,
   previouslyUnlocked: Record<string, Tier>,
-): BadgeCheck[] {
-  const results: BadgeCheck[] = []
+): BadgeResult[] {
+  const results: BadgeResult[] = []
 
   for (const badge of badgesData as Badge[]) {
-    let newlyUnlockedTier: Tier | null = null
-    let totalConditions = 1
-    let metConditions = 0
+    const tiers: BadgeTierResult[] = []
+    let highestEarned: Tier | null = null
 
     for (const tier of TIER_ORDER) {
       const threshold = badge.thresholds[tier]
-      if (!threshold) break
+      if (!threshold) continue
 
-      totalConditions = countConditions(threshold)
-      const met = countMetConditions(threshold, attrs)
-      metConditions = met
+      const currentMet = evalCondition(threshold, attrs)
+      const feasible = canEverAchieve(threshold, caps)
+      const conditions = parseConditionDetails(threshold, attrs, caps)
 
-      if (evalCondition(threshold, attrs)) {
-        if (!previouslyUnlocked[badge.name] || TIER_ORDER.indexOf(previouslyUnlocked[badge.name]) < TIER_ORDER.indexOf(tier)) {
-          newlyUnlockedTier = tier
-        }
+      let state: BadgeTierState
+      if (currentMet) {
+        state = 'EARNED'
+        highestEarned = tier
+      } else if (feasible) {
+        state = 'ACHIEVABLE'
       } else {
+        state = 'LOCKED'
+      }
+
+      tiers.push({ tier, state, conditions })
+    }
+
+    let highestAchievable: Tier | null = null
+    for (let i = TIER_ORDER.length - 1; i >= 0; i--) {
+      const tr = tiers.find((t) => t.tier === TIER_ORDER[i])
+      if (tr?.state === 'ACHIEVABLE') {
+        highestAchievable = TIER_ORDER[i]
         break
       }
     }
 
+    const prev = previouslyUnlocked[badge.name] ?? null
+    let newlyUnlocked: Tier | null = null
+    if (highestEarned && (!prev || TIER_ORDER.indexOf(highestEarned) > TIER_ORDER.indexOf(prev))) {
+      newlyUnlocked = highestEarned
+    }
+
+    let progress = 0
+    let totalConditions = 0
+    let metConditions = 0
+
+    for (const tr of tiers) {
+      if (tr.state === 'EARNED') continue
+      if (tr.state === 'ACHIEVABLE') {
+        const threshold = badge.thresholds[tr.tier]
+        if (threshold) {
+          totalConditions = countConditions(threshold)
+          metConditions = countMetConditions(threshold, attrs)
+          progress = totalConditions > 0 ? metConditions / totalConditions : 0
+        }
+      }
+      break  // only care about progress toward first non-earned tier
+    }
+
     results.push({
       name: badge.name,
-      previouslyUnlocked: previouslyUnlocked[badge.name] ?? null,
-      newlyUnlocked: newlyUnlockedTier,
-      progress: metConditions / Math.max(totalConditions, 1),
+      tiers,
+      highestEarned,
+      highestAchievable,
+      previouslyUnlocked: prev,
+      newlyUnlocked,
+      progress,
       totalConditions,
       metConditions,
     })

@@ -2,7 +2,7 @@
 // if localStorage breaks (safari private mode, storage full, your cat walked on the keyboard),
 // we just return empty results and move on.
 
-import type { BuildSetup } from '../types'
+import type { BuildSetup, Tier } from '../types'
 
 const STORAGE_KEY = 'uba-saved-builds'
 const MAX_BUILDS = 50
@@ -12,6 +12,8 @@ export interface SavedBuild {
   build: BuildSetup
   startingValues: Record<string, number>
   ucBalance: number
+  previouslyUnlocked?: Record<string, Tier>
+  touchedStartingValues?: Record<string, true>
   updatedAt: string
 }
 
@@ -65,6 +67,8 @@ export function saveBuild(
   build: BuildSetup,
   startingValues: Record<string, number>,
   ucBalance: number,
+  previouslyUnlocked?: Record<string, Tier>,
+  touchedStartingValues?: Record<string, true>,
 ): void {
   if (!playerName.trim()) return
 
@@ -75,6 +79,8 @@ export function saveBuild(
       build,
       startingValues,
       ucBalance,
+      previouslyUnlocked: previouslyUnlocked || {},
+      touchedStartingValues: touchedStartingValues || {},
       updatedAt: new Date().toISOString(),
     }
 

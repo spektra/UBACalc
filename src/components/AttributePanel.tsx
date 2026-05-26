@@ -75,7 +75,7 @@ export function AttributePanel() {
   }, [attributes, startingValues])
 
   return (
-    <div className="rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
+    <div className="rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-4 sm:p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
       <div className="mb-1 flex items-center justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-gold">
           Attributes
@@ -128,6 +128,7 @@ export function AttributePanel() {
                           <span
                             className="rounded px-1 py-0.5 text-[10px] font-medium uppercase tracking-wider"
                             style={{ backgroundColor: `${hexColor}20`, color: hexColor }}
+                            title={`Attribute cap for ${attr.name} with this build: ${cap}`}
                           >
                             {cap}
                           </span>
@@ -136,7 +137,7 @@ export function AttributePanel() {
                           <button
                             onClick={() => resetAttribute(attr.name)}
                             className="rounded p-0.5 text-uba-text-dim transition-all hover:text-uba-danger"
-                            title="Revert to start"
+                            title={`Revert ${attr.name} to start`}
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
                               <path fillRule="evenodd" d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.39zm1.23-3.723a.75.75 0 00.219-.53V2.929a.75.75 0 00-1.5 0V5.36l-.31-.31A7 7 0 003.239 8.188a.75.75 0 101.448.389A5.5 5.5 0 0113.89 6.11l.311.31h-2.432a.75.75 0 000 1.5h4.243a.75.75 0 00.53-.219z" clipRule="evenodd" />
@@ -150,7 +151,7 @@ export function AttributePanel() {
                           <input
                             type="number"
                             min={25}
-                            max={99}
+                            max={cap}
                             value={startVal}
                             onChange={(e) => handleStartInput(attr.name, e.target.value)}
                             className="w-11 rounded-md border border-uba-border/40 bg-uba-surface/60 px-1 py-0.5 text-center text-xs text-uba-text outline-none transition-all focus:border-uba-blue/60 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
