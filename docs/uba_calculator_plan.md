@@ -157,7 +157,7 @@ Full audit of all 24 source files, 4 doc files, 4 data files, 2 test files, and 
 
 ### Cap System
 Caps derived from three inputs:
-1. **Height** — determines Speed cap/base via height ranges (4 ranges: ≤6'3"=99/70, 6'4-6'7=95/60, 6'8-6'10=90/50, ≥6'11=85/40)
+1. **Height** — determines Speed & Agility cap/base via height ranges (4 ranges: ≤6'3"=99/70, 6'4-6'7=95/60, 6'8-6'10=90/50, ≥6'11=85/40). Speed and Agility always match.
 2. **Weight class** — determines Strength cap/base (VL=50/40 through VH=99/75) and Vertical cap/base (VL=99/60 through VH=75/40). 7 classes: Very Light through Very Heavy.
 3. **Archetype (Primary/Secondary/Weakness)** — sets skill attribute caps per category:
    - Primary Strength → Blue (99 cap), baseline 80
@@ -165,7 +165,7 @@ Caps derived from three inputs:
    - Neutral → Cyan (90 cap), baseline 50
    - Weakness → Red (75 cap), baseline 40
    - Physical (calculated from height/weight — no weight penalty subtraction)
-- **Agility**: Always cap 99, base 50 (flat).
+- **Agility**: Always matches Speed cap/base (same height-range formula).
 
 ---
 

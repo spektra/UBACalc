@@ -130,8 +130,11 @@ export function getAttributeBase(attrName: string, build: BuildSetup): number {
         const range = findSpeedRange(inches)
         return Math.max(25, range.base)
       }
-      case 'Agility':
-        return 50
+      case 'Agility': {
+        if (!inches) return 50
+        const range = findSpeedRange(inches)
+        return Math.max(25, range.base)
+      }
       case 'Strength':
         return weight?.strengthBase ?? 50
       case 'Vertical':
@@ -183,8 +186,11 @@ function getPhysicalCap(attrName: string, build: BuildSetup): number {
       const range = findSpeedRange(inches)
       return range.cap
     }
-    case 'Agility':
-      return 99
+    case 'Agility': {
+      if (!inches) return 99
+      const range = findSpeedRange(inches)
+      return range.cap
+    }
     case 'Strength':
       return weight?.strengthCap ?? 99
     default:

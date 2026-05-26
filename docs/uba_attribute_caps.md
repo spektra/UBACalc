@@ -76,16 +76,15 @@ Heavy:          254 - 274 lbs   | Strength 95/70, Vertical 80/40
 Very Heavy:     275 - 300 lbs   | Strength 99/75, Vertical 75/40
 ```
 
-### Speed Caps by Height Range
+### Speed & Agility Caps by Height Range
 ```text
-≤ 6'3"  (≤ 75"):   Speed 99/70
-6'4" - 6'7" (76-79"):  Speed 95/60
-6'8" - 6'10" (80-82"): Speed 90/50
-≥ 6'11" (≥ 83"):  Speed 85/40
+≤ 6'3"  (≤ 75"):   Speed 99/70, Agility 99/70
+6'4" - 6'7" (76-79"):  Speed 95/60, Agility 95/60
+6'8" - 6'10" (80-82"): Speed 90/50, Agility 90/50
+≥ 6'11" (≥ 83"):  Speed 85/40, Agility 85/40
 ```
 
 ### Physical Attribute Rules
-- **Speed**: cap/base determined by height range. No weight penalty subtraction.
-- **Agility**: Always cap 99, base 50.
+- **Speed & Agility**: cap/base determined by height range. Always identical values. No weight penalty subtraction.
 - **Strength**: cap/base determined by weight class.
 - **Vertical**: cap/base determined by weight class (heavier = lower vertical ceiling).
