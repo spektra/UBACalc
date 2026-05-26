@@ -85,6 +85,11 @@ Very Heavy:     275 - 300 lbs   | Strength 99/75, Vertical 75/40
 ```
 
 ### Physical Attribute Rules
-- **Speed & Agility**: cap/base determined by height range. Always identical values. No weight penalty subtraction.
+- **Speed & Agility**: cap/base from height range, then weight penalty subtracts from cap only:
+  - Above Average: −5 cap
+  - Heavy: −10 cap
+  - Very Heavy: −15 cap
+  - Others: no penalty
+  Starting value (base) is never penalized.
 - **Strength**: cap/base determined by weight class.
 - **Vertical**: cap/base determined by weight class (heavier = lower vertical ceiling).

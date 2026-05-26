@@ -10,12 +10,12 @@
     "description": "Weight class penalties, strength caps/bases, and vertical caps/bases. Lighter = less penalty, heavier = more strength ceiling.",
     "classes": {
       "Very Light": { "speedPenalty": 0, "agilityPenalty": 0, "strengthCap": 50, "strengthBase": 40, "verticalCap": 99, "verticalBase": 60 },
-      "Light": { "speedPenalty": 2, "agilityPenalty": 2, "strengthCap": 50, "strengthBase": 40, "verticalCap": 99, "verticalBase": 60 },
-      "Below Average": { "speedPenalty": 4, "agilityPenalty": 4, "strengthCap": 50, "strengthBase": 40, "verticalCap": 95, "verticalBase": 55 },
-      "Average": { "speedPenalty": 6, "agilityPenalty": 6, "strengthCap": 80, "strengthBase": 60, "verticalCap": 90, "verticalBase": 50 },
-      "Above Average": { "speedPenalty": 8, "agilityPenalty": 8, "strengthCap": 90, "strengthBase": 65, "verticalCap": 85, "verticalBase": 45 },
-      "Heavy": { "speedPenalty": 12, "agilityPenalty": 12, "strengthCap": 95, "strengthBase": 70, "verticalCap": 80, "verticalBase": 40 },
-      "Very Heavy": { "speedPenalty": 16, "agilityPenalty": 16, "strengthCap": 99, "strengthBase": 75, "verticalCap": 75, "verticalBase": 40 }
+      "Light": { "speedPenalty": 0, "agilityPenalty": 0, "strengthCap": 50, "strengthBase": 40, "verticalCap": 99, "verticalBase": 60 },
+      "Below Average": { "speedPenalty": 0, "agilityPenalty": 0, "strengthCap": 50, "strengthBase": 40, "verticalCap": 95, "verticalBase": 55 },
+      "Average": { "speedPenalty": 0, "agilityPenalty": 0, "strengthCap": 80, "strengthBase": 60, "verticalCap": 90, "verticalBase": 50 },
+      "Above Average": { "speedPenalty": 5, "agilityPenalty": 5, "strengthCap": 90, "strengthBase": 65, "verticalCap": 85, "verticalBase": 45 },
+      "Heavy": { "speedPenalty": 10, "agilityPenalty": 10, "strengthCap": 95, "strengthBase": 70, "verticalCap": 80, "verticalBase": 40 },
+      "Very Heavy": { "speedPenalty": 15, "agilityPenalty": 15, "strengthCap": 99, "strengthBase": 75, "verticalCap": 75, "verticalBase": 40 }
     }
   },
   "archetype": {

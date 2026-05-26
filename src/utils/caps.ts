@@ -184,12 +184,12 @@ function getPhysicalCap(attrName: string, build: BuildSetup): number {
     case 'Speed': {
       if (!inches) return 99
       const range = findSpeedRange(inches)
-      return range.cap
+      return Math.max(25, range.cap - (weight?.speedPenalty ?? 0))
     }
     case 'Agility': {
       if (!inches) return 99
       const range = findSpeedRange(inches)
-      return range.cap
+      return Math.max(25, range.cap - (weight?.agilityPenalty ?? 0))
     }
     case 'Strength':
       return weight?.strengthCap ?? 99
