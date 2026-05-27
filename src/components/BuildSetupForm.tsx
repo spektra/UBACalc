@@ -2,20 +2,9 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import { useBuilderStore } from '../stores/useBuilderStore'
 import { searchBuilds } from '../utils/storage'
 import { lbsToWeightClass } from '../utils/caps'
+import buildOptions from '../data/buildOptions.json'
 
-const heights = [
-  "5'8\"", "5'9\"", "5'10\"", "5'11\"", "6'0\"", "6'1\"", "6'2\"", "6'3\"",
-  "6'4\"", "6'5\"", "6'6\"", "6'7\"", "6'8\"", "6'9\"", "6'10\"", "6'11\"",
-  "7'0\"", "7'1\"", "7'2\"", "7'3\"", "7'4\"",
-]
-
-const weightClasses = [
-  "Very Light", "Light", "Below Average", "Average", "Above Average", "Heavy", "Very Heavy",
-]
-
-const archetypes = [
-  "Shooting", "Slashing", "Playmaking", "Defense", "Rebounding", "Post Scoring",
-]
+const { heights, weightClasses, archetypes } = buildOptions
 
 export function BuildSetupForm() {
   const { build, setBuild, loadPlayerBuild, resetBuild, triggerSave, deletePlayerBuild } = useBuilderStore()
@@ -48,10 +37,26 @@ export function BuildSetupForm() {
 
   function handleSave() {
     if (!build.playerName.trim()) return
-    triggerSave()
+    triggerSave(true)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
     // suggestion updates are now handled by useMemo
+  }
+
+  function handleArchetypeChange(field: 'primaryArchetype' | 'secondaryArchetype' | 'weakness', value: string) {
+    setBuild({
+      [field]: value,
+      ...(field !== 'primaryArchetype' && build.primaryArchetype === value ? { primaryArchetype: '' } : {}),
+      ...(field !== 'secondaryArchetype' && build.secondaryArchetype === value ? { secondaryArchetype: '' } : {}),
+      ...(field !== 'weakness' && build.weakness === value ? { weakness: '' } : {}),
+    })
+  }
+
+  function isArchetypeUsedElsewhere(field: 'primaryArchetype' | 'secondaryArchetype' | 'weakness', value: string) {
+    if (!value) return false
+    return (field !== 'primaryArchetype' && build.primaryArchetype === value) ||
+      (field !== 'secondaryArchetype' && build.secondaryArchetype === value) ||
+      (field !== 'weakness' && build.weakness === value)
   }
 
   const selectClass = "w-full rounded-xl border border-uba-border/60 bg-uba-surface/80 px-3 py-2.5 text-sm text-uba-text outline-none transition-all duration-200 focus:border-uba-blue/60 focus:shadow-[0_0_12px_-4px_rgba(2,76,166,0.15)] appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%238A8A92%22%3E%3Cpath%20d%3D%22M7%2010l5%205%205-5z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:20px] bg-[right_8px_center] bg-no-repeat pr-8"
@@ -128,9 +133,9 @@ export function BuildSetupForm() {
               className={selectClass}
             >
               <option value="">Select</option>
-              {heights.map((h) => (
-                <option key={h} value={h}>{h}</option>
-              ))}
+            {heights.map((h: string) => (
+              <option key={h} value={h}>{h}</option>
+            ))}
             </select>
           </div>
           <div>
@@ -147,7 +152,7 @@ export function BuildSetupForm() {
                 className={selectClass + " flex-1"}
               >
                 <option value="">Select</option>
-                {weightClasses.map((w) => (
+                {weightClasses.map((w: string) => (
                   <option key={w} value={w}>{w}</option>
                 ))}
               </select>
@@ -182,12 +187,12 @@ export function BuildSetupForm() {
           <select
             id="primary"
             value={build.primaryArchetype}
-            onChange={(e) => setBuild({ primaryArchetype: e.target.value })}
+            onChange={(e) => handleArchetypeChange('primaryArchetype', e.target.value)}
             className={selectClass}
           >
             <option value="">Select</option>
-            {archetypes.map((a) => (
-              <option key={a} value={a}>{a}</option>
+            {archetypes.map((a: string) => (
+              <option key={a} value={a} disabled={isArchetypeUsedElsewhere('primaryArchetype', a)}>{a}</option>
             ))}
           </select>
         </div>
@@ -200,12 +205,12 @@ export function BuildSetupForm() {
             <select
               id="secondary"
               value={build.secondaryArchetype}
-              onChange={(e) => setBuild({ secondaryArchetype: e.target.value })}
+              onChange={(e) => handleArchetypeChange('secondaryArchetype', e.target.value)}
               className={selectClass}
             >
               <option value="">Select</option>
-              {archetypes.map((a) => (
-                <option key={a} value={a}>{a}</option>
+              {archetypes.map((a: string) => (
+                <option key={a} value={a} disabled={isArchetypeUsedElsewhere('secondaryArchetype', a)}>{a}</option>
               ))}
             </select>
           </div>
@@ -216,12 +221,12 @@ export function BuildSetupForm() {
             <select
               id="weakness"
               value={build.weakness}
-              onChange={(e) => setBuild({ weakness: e.target.value })}
+              onChange={(e) => handleArchetypeChange('weakness', e.target.value)}
               className={selectClass}
             >
               <option value="">Select</option>
-              {archetypes.map((a) => (
-                <option key={a} value={a}>{a}</option>
+              {archetypes.map((a: string) => (
+                <option key={a} value={a} disabled={isArchetypeUsedElsewhere('weakness', a)}>{a}</option>
               ))}
             </select>
           </div>

@@ -8,7 +8,7 @@ import { useBuilderStore } from '../stores/useBuilderStore'
 
 export function Header({ onImportClick }: { onImportClick?: () => void }) {
   const { theme, toggle } = useThemeStore()
-  const { build, attributes, startingValues, ucBalance } = useBuilderStore()
+  const { build, attributes, startingValues, ucBalance, previouslyUnlocked } = useBuilderStore()
 
   const hasUnsaved = useMemo(() => {
     if (!build.playerName.trim()) return false
@@ -20,17 +20,25 @@ export function Header({ onImportClick }: { onImportClick?: () => void }) {
         ? builds.find((b: { playerName: string }) => b.playerName?.toLowerCase() === build.playerName.toLowerCase())
         : null
       if (!existing) return true
+      const currentBuild = JSON.stringify(build)
+      const savedBuild = JSON.stringify(existing.build || {})
       const currentAttr = JSON.stringify(attributes)
       const savedAttr = JSON.stringify(existing.attributes || {})
       const currentSV = JSON.stringify(startingValues)
       const savedSV = JSON.stringify(existing.startingValues || {})
+      const currentPreviouslyUnlocked = JSON.stringify(previouslyUnlocked)
+      const savedPreviouslyUnlocked = JSON.stringify(existing.previouslyUnlocked || {})
       const currentUC = ucBalance
       const savedUC = existing.ucBalance ?? 0
-      return currentAttr !== savedAttr || currentSV !== savedSV || currentUC !== savedUC
+      return currentBuild !== savedBuild ||
+        currentAttr !== savedAttr ||
+        currentSV !== savedSV ||
+        currentPreviouslyUnlocked !== savedPreviouslyUnlocked ||
+        currentUC !== savedUC
     } catch {
       return false
     }
-  }, [build.playerName, attributes, startingValues, ucBalance])
+  }, [build, attributes, startingValues, previouslyUnlocked, ucBalance])
 
   return (
     <header className="relative z-10 border-b border-uba-border/50 backdrop-blur-xl">

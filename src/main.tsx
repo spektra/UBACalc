@@ -6,7 +6,7 @@ import { useThemeStore } from './stores/useThemeStore'
 import { initErrorReporter } from './lib/errorReporter'
 import { useBuilderStore } from './stores/useBuilderStore'
 
-if (import.meta.env.DEV) {
+if (import.meta.env.DEV || import.meta.env.VITE_E2E === 'true') {
   ;(window as unknown as Record<string, unknown>).__builderStore = useBuilderStore
 }
 

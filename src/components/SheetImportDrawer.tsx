@@ -17,7 +17,7 @@ export function SheetImportDrawer({ open, onClose }: Props) {
   const [text, setText] = useState('')
   const [result, setResult] = useState<{ ok: boolean; msg: string } | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const { setBuild, setStartingValuesBatch, setPreviouslyUnlockedBatch } = useBuilderStore()
+  const { importPlayerAttributes, replacePreviouslyUnlocked } = useBuilderStore()
 
   const handleApply = useCallback(() => {
     if (tab === 'attributes') {
@@ -26,18 +26,12 @@ export function SheetImportDrawer({ open, onClose }: Props) {
         setResult({ ok: false, msg: 'Could not parse any attributes. Try pasting a row of tab-separated numbers.' })
         return
       }
-      if (parsed.playerName) {
-        setBuild({ playerName: parsed.playerName })
-      }
-      setStartingValuesBatch(parsed.startingValues)
       const badgeResults = checkBadges(parsed.startingValues, {}, {})
       const ownedBadges: Record<string, Tier> = {}
       for (const r of badgeResults) {
         if (r.newlyUnlocked) ownedBadges[r.name] = r.newlyUnlocked
       }
-      if (Object.keys(ownedBadges).length > 0) {
-        setPreviouslyUnlockedBatch(ownedBadges)
-      }
+      importPlayerAttributes(parsed.playerName, parsed.startingValues, ownedBadges)
       setResult({ ok: true, msg: `Imported ${parsed.parsed} attributes for ${parsed.playerName || 'player'} (${parsed.skipped} skipped).` })
     } else {
       const parsed = parsePastedBadges(text)
@@ -46,10 +40,10 @@ export function SheetImportDrawer({ open, onClose }: Props) {
         setResult({ ok: false, msg: 'Could not parse any badges. Try pasting a row of tab-separated tiers (Bronze, Silver, Gold, HOF).' })
         return
       }
-      setPreviouslyUnlockedBatch(parsed)
+      replacePreviouslyUnlocked(parsed)
       setResult({ ok: true, msg: `Imported ${count} owned badges.` })
     }
-  }, [tab, text, setBuild, setStartingValuesBatch, setPreviouslyUnlockedBatch])
+  }, [tab, text, importPlayerAttributes, replacePreviouslyUnlocked])
 
   const handleClose = useCallback(() => {
     onClose()

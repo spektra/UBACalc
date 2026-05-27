@@ -20,7 +20,7 @@ A fully client-side web app for UBA league members to plan attribute upgrades, t
 - **Badge Feed** — live badge unlock detection with framer-motion animations
 - **Build Rating** — auto-generated roast or compliment for your build
 - **Share URL** — encodes build into URL hash for sharing
-- **PWA** — installable, works offline
+- **PWA** — installable, caches app shell and same-origin assets after first load
 - **Themes** — dark/light toggle + summer mode
 - **Save/Load** — localStorage-based player profiles
 - **Discord** — community invite in bottom-right corner
@@ -34,8 +34,9 @@ npm install
 npm run dev            # Vite dev server
 npm run build          # TypeScript check + production build
 npm run preview        # Preview production build
-npm run test           # Playwright tests (requires preview running)
-npm run test:run       # Kills stale port, starts preview, runs tests
+npm run test           # Playwright tests using configured webServer
+npm run test:run       # Kills stale port, lets Playwright start dev server, runs tests
+npm run test:unit      # Vitest unit tests for core calculator utilities
 ```
 
 ## Project Structure
@@ -58,8 +59,9 @@ src/
 
 All game parameters are in `src/data/*.json` and can be updated per season without touching code:
 
-- `badges.json` — 41 badges with Bronze/Silver/Gold/HOF thresholds
+- `badges.json` — 40 badges with Bronze/Silver/Gold/HOF thresholds
 - `attributes.json` — 6 attribute categories with defaults
+- `buildOptions.json` — setup dropdown options for height, weight class, and archetypes
 - `caps.json` — height/weight tables and archetype cap modifiers
 - `costScale.json` — UC cost brackets (40-99)
 
@@ -67,7 +69,7 @@ All game parameters are in `src/data/*.json` and can be updated per season witho
 
 Push to GitHub and connect to Cloudflare Pages. No build config needed — standard Vite output in `dist/`.
 
-To enable analytics, add your Cloudflare Web Analytics token in the Cloudflare dashboard (Pages → your project → Web Analytics).
+Cloudflare Web Analytics is configured in `index.html` with the public site token. If the site changes Cloudflare projects, update the token there.
 
 ## Donations
 

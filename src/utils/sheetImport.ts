@@ -1,6 +1,6 @@
 import sheetColumns from '../data/sheetColumns.json'
 import badgeColumns from '../data/badgeColumns.json'
-import { clampAttribute } from './sanitize'
+import { clampAttribute, sanitizePlainText, sanitizePlayerName } from './sanitize'
 import type { Tier } from '../types'
 
 interface ParseResult {
@@ -11,8 +11,9 @@ interface ParseResult {
 }
 
 export function parsePastedAttributes(raw: string): ParseResult {
+  const safeRaw = sanitizePlainText(raw, 20000)
   const map = (sheetColumns as { columns: (string | null)[] }).columns
-  const lines = raw
+  const lines = safeRaw
     .replace(/\r\n?/g, '\n')
     .split('\n')
     .map((l) => l.trim())
@@ -33,7 +34,7 @@ export function parsePastedAttributes(raw: string): ParseResult {
     const attrName = map[i]
     const rawVal = cells[i].trim()
     if (attrName === null) {
-      if (i === 0) playerName = rawVal.replace(/^["']|["']$/g, '')
+      if (i === 0) playerName = sanitizePlayerName(rawVal.replace(/^["']|["']$/g, ''))
       skipped++
       continue
     }
@@ -83,8 +84,9 @@ const TIER_MAP: Record<string, Tier> = {
 }
 
 export function parsePastedBadges(raw: string): Record<string, Tier> {
+  const safeRaw = sanitizePlainText(raw, 20000)
   const map = (badgeColumns as { columns: (string | null)[] }).columns
-  const lines = raw
+  const lines = safeRaw
     .replace(/\r\n?/g, '\n')
     .split('\n')
     .map((l) => l.trim())

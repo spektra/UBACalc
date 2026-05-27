@@ -1,4 +1,34 @@
 import { test, expect } from '@playwright/test'
+import { readFileSync } from 'node:fs'
+
+const importSample = readFileSync(new URL('../docs/ImportSample.md', import.meta.url), 'utf8')
+
+function sampleSection(playerName) {
+  const start = importSample.indexOf(`## ${playerName}`)
+  if (start === -1) throw new Error(`Missing import sample section for ${playerName}`)
+  const next = importSample.indexOf('\n## ', start + 1)
+  return importSample.slice(start, next === -1 ? undefined : next)
+}
+
+function sampleRow(playerName, label) {
+  const section = sampleSection(playerName)
+  const start = section.indexOf(`${label} row:`)
+  if (start === -1) throw new Error(`Missing ${label} row for ${playerName}`)
+  const match = section.slice(start).match(/```tsv\n([^`]+?)\n```/)
+  if (!match) throw new Error(`Missing ${label} TSV block for ${playerName}`)
+  return match[1].trim()
+}
+
+async function closeImportDrawer(page) {
+  await page.locator('div.fixed.right-0.top-0 button').first().click({ force: true })
+  await expect(page.getByText('Paste from Sheet')).toBeHidden()
+}
+
+async function clickDrawerButton(page, name) {
+  await page.locator('div.fixed.right-0.top-0').getByRole('button', { name }).evaluate((el) => {
+    ;(el as HTMLButtonElement).click()
+  })
+}
 
 // ─── helpers ───
 async function setStart(page, key, value) {
@@ -478,6 +508,194 @@ test.describe('Sheet Import', () => {
     // Posterizer should be newly unlocked (not in previouslyUnlocked)
     expect(finalState.previouslyUnlocked['Posterizer']).toBeUndefined()
   })
+
+  test('imports documented sample players with varied build styles', async ({ page }) => {
+    test.setTimeout(45_000)
+
+    const players = [
+      {
+        name: 'Ivy Arcwright',
+        height: '6\'3"',
+        weight: 'Below Average',
+        primary: 'Shooting',
+        secondary: 'Playmaking',
+        weakness: 'Rebounding',
+        expectedAttrs: { '3PT': 94, 'Mid Range': 92, 'Driving Dunk': 45 },
+        expectedBadges: { Deadeye: 'Gold', 'Limitless Range': 'Silver', Posterizer: null },
+      },
+      {
+        name: 'Rook Paintwall',
+        height: '7\'0"',
+        weight: 'Very Heavy',
+        primary: 'Rebounding',
+        secondary: 'Defense',
+        weakness: 'Shooting',
+        expectedAttrs: { 'Defensive Rebound': 95, Strength: 95, '3PT': 32 },
+        expectedBadges: { 'Rebound Chaser': 'HOF', 'Brick Wall': 'Gold', Deadeye: null },
+      },
+      {
+        name: 'Nova Slash',
+        height: '6\'6"',
+        weight: 'Average',
+        primary: 'Slashing',
+        secondary: 'Defense',
+        weakness: 'Post Scoring',
+        expectedAttrs: { 'Driving Dunk': 92, Vertical: 92, 'Post Hook': 30 },
+        expectedBadges: { Posterizer: 'Gold', 'Aerial Wizard': 'Gold', 'Rebound Chaser': null },
+      },
+    ]
+
+    for (const player of players) {
+      await page.goto('/')
+      await page.getByLabel('Height').selectOption(player.height)
+      await page.getByLabel('Weight').selectOption(player.weight)
+      await page.getByLabel('Primary Strength').selectOption(player.primary)
+      await page.getByLabel('Secondary').selectOption(player.secondary)
+      await page.getByLabel('Weakness').selectOption(player.weakness)
+
+      await page.locator('button[title="Import player attributes from Google Sheets"]').click({ force: true })
+      await page.locator('textarea').fill(sampleRow(player.name, 'Attribute'))
+      await clickDrawerButton(page, 'Apply Import')
+      await expect(page.getByText(new RegExp(`Imported \\d+ attributes for ${player.name}`))).toBeVisible()
+      await clickDrawerButton(page, 'Badges')
+      await page.locator('textarea').fill(sampleRow(player.name, 'Badge'))
+      await clickDrawerButton(page, 'Apply Import')
+      await expect(page.getByText(/Imported \d+ owned badges/)).toBeVisible()
+
+      const state = await page.evaluate(() => {
+        const s = window.__builderStore.getState()
+        return {
+          playerName: s.build.playerName,
+          startingValues: { ...s.startingValues },
+          previouslyUnlocked: { ...s.previouslyUnlocked },
+        }
+      })
+
+      expect(state.playerName).toBe(player.name)
+      for (const [attribute, value] of Object.entries(player.expectedAttrs)) {
+        expect(state.startingValues[attribute]).toBe(value)
+      }
+      for (const [badge, tier] of Object.entries(player.expectedBadges)) {
+        expect(state.previouslyUnlocked[badge] ?? null).toBe(tier)
+      }
+
+      await closeImportDrawer(page)
+    }
+  })
+
+  test('saves and reloads imported attributes, upgrades, and badge history', async ({ page }) => {
+    await page.goto('/')
+    await page.getByLabel('Height').selectOption('6\'6"')
+    await page.getByLabel('Weight').selectOption('Average')
+    await page.getByLabel('Primary Strength').selectOption('Slashing')
+    await page.getByLabel('Secondary').selectOption('Defense')
+    await page.getByLabel('Weakness').selectOption('Post Scoring')
+
+    await page.locator('button[title="Import player attributes from Google Sheets"]').click({ force: true })
+    await page.locator('textarea').fill(sampleRow('Nova Slash', 'Attribute'))
+    await clickDrawerButton(page, 'Apply Import')
+    await clickDrawerButton(page, 'Badges')
+    await page.locator('textarea').fill(sampleRow('Nova Slash', 'Badge'))
+    await clickDrawerButton(page, 'Apply Import')
+    await closeImportDrawer(page)
+    await page.evaluate(() => {
+      window.__builderStore.getState().setAttribute('Driving Dunk', 95)
+    })
+
+    await page.getByText('Save Build').click()
+    await page.getByText('Saved!').waitFor()
+    await page.getByText('Reset').click()
+    await page.getByPlaceholder(/Enter player name/).fill('Nova Slash')
+    await page.getByText('Nova Slash').click()
+
+    const reloaded = await page.evaluate(() => {
+      const s = window.__builderStore.getState()
+      return {
+        playerName: s.build.playerName,
+        startDrivingDunk: s.startingValues['Driving Dunk'],
+        currentDrivingDunk: s.attributes['Driving Dunk'],
+        posterizer: s.previouslyUnlocked['Posterizer'] ?? null,
+      }
+    })
+
+    expect(reloaded.playerName).toBe('Nova Slash')
+    expect(reloaded.startDrivingDunk).toBe(92)
+    expect(reloaded.currentDrivingDunk).toBe(95)
+    expect(reloaded.posterizer).toBe('Gold')
+  })
+
+  test('importing a second player replaces prior imported upgrades and badge history', async ({ page }) => {
+    await page.goto('/')
+
+    await page.locator('button[title="Import player attributes from Google Sheets"]').click({ force: true })
+    await page.locator('textarea').fill(sampleRow('Nova Slash', 'Attribute'))
+    await clickDrawerButton(page, 'Apply Import')
+    await clickDrawerButton(page, 'Badges')
+    await page.locator('textarea').fill(sampleRow('Nova Slash', 'Badge'))
+    await clickDrawerButton(page, 'Apply Import')
+    await page.evaluate(() => {
+      window.__builderStore.getState().setAttribute('Driving Dunk', 95)
+    })
+    await closeImportDrawer(page)
+
+    await page.locator('button[title="Import player attributes from Google Sheets"]').click({ force: true })
+    await clickDrawerButton(page, 'Attributes')
+    await page.locator('textarea').fill(sampleRow('Ivy Arcwright', 'Attribute'))
+    await clickDrawerButton(page, 'Apply Import')
+
+    const replaced = await page.evaluate(() => {
+      const s = window.__builderStore.getState()
+      return {
+        playerName: s.build.playerName,
+        attributes: { ...s.attributes },
+        drivingDunkStart: s.startingValues['Driving Dunk'],
+        threePointStart: s.startingValues['3PT'],
+        posterizer: s.previouslyUnlocked['Posterizer'] ?? null,
+        deadeye: s.previouslyUnlocked['Deadeye'] ?? null,
+      }
+    })
+
+    expect(replaced.playerName).toBe('Ivy Arcwright')
+    expect(replaced.attributes['Driving Dunk']).toBeUndefined()
+    expect(replaced.drivingDunkStart).toBe(45)
+    expect(replaced.threePointStart).toBe(94)
+    expect(replaced.posterizer).toBeNull()
+    expect(replaced.deadeye).toBe('Gold')
+  })
+
+  test('typing an existing saved name does not auto-overwrite that saved build', async ({ page }) => {
+    await page.goto('/')
+    await page.getByPlaceholder(/Enter player name/).fill('Overwrite Guard')
+    await page.getByLabel('Height').selectOption('6\'3"')
+    await page.getByLabel('Primary Strength').selectOption('Shooting')
+    await page.evaluate(() => {
+      window.__builderStore.getState().setStartingValue('3PT', 70)
+      window.__builderStore.getState().setAttribute('3PT', 88)
+    })
+    await page.getByText('Save Build').click()
+    await page.getByText('Saved!').waitFor()
+
+    await page.getByText('Reset').click()
+    await page.getByPlaceholder(/Enter player name/).fill('Overwrite Guard')
+    await page.getByLabel('Height').selectOption('7\'0"')
+    await page.waitForTimeout(1800)
+    await page.getByText('Reset').click()
+    await page.getByPlaceholder(/Enter player name/).fill('Overwrite Guard')
+    await page.getByText('Overwrite Guard').click()
+
+    const loaded = await page.evaluate(() => {
+      const s = window.__builderStore.getState()
+      return {
+        height: s.build.height,
+        startThree: s.startingValues['3PT'],
+        currentThree: s.attributes['3PT'],
+      }
+    })
+
+    expect(loaded.height).toBe('6\'3"')
+    expect(loaded.startThree).toBe(70)
+    expect(loaded.currentThree).toBe(88)
+  })
 })
 
 test.describe('Badge previouslyUnlocked', () => {
@@ -550,5 +768,25 @@ test.describe('Badge Import', () => {
     expect(state.riseUp).toBe('Bronze')
     expect(state.posterizer).toBeNull()
   })
-})
 
+  test('badge import replaces old owned badges instead of merging stale badges', async ({ page }) => {
+    await page.goto('/')
+    await page.locator('button[title="Import player attributes from Google Sheets"]').click({ force: true })
+    await clickDrawerButton(page, 'Badges')
+    await page.locator('textarea').fill(sampleRow('Nova Slash', 'Badge'))
+    await clickDrawerButton(page, 'Apply Import')
+    await page.locator('textarea').fill(sampleRow('Ivy Arcwright', 'Badge'))
+    await clickDrawerButton(page, 'Apply Import')
+
+    const state = await page.evaluate(() => {
+      const s = window.__builderStore.getState()
+      return {
+        posterizer: s.previouslyUnlocked['Posterizer'] ?? null,
+        deadeye: s.previouslyUnlocked['Deadeye'] ?? null,
+      }
+    })
+
+    expect(state.posterizer).toBeNull()
+    expect(state.deadeye).toBe('Gold')
+  })
+})

@@ -12,7 +12,7 @@
     <title>UBA Upgrade Calculator</title>
 
     <!-- Cloudflare Web Analytics -->
-    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "%VITE_CF_ANALYTICS_TOKEN%"}'></script>
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "bbc17174aafc4f76bbf57c0a5136c84c"}'></script>
   </head>
   <body>
     <div id="root"></div>
@@ -20,6 +20,11 @@
 
     <!-- Ko-fi floating donation button -->
     <script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js"></script>
+    <style>
+      [class*="floatingchat"] a, [class*="floatingchat"] span, [class*="kofi-floating"] a, [class*="kofi-floating"] span {
+        color: #024CA6 !important;
+      }
+    </style>
     <script>
       window.addEventListener('load', function() {
         if (typeof kofiWidgetOverlay !== 'undefined') {

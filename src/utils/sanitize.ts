@@ -3,7 +3,20 @@
 
 export function sanitizePlayerName(input: string): string {
   if (typeof input !== 'string') return ''
-  return input.replace(/[<>"']/g, '').slice(0, 40)
+  return sanitizePlainText(input, 40).replace(/[\t\r\n<>"'`]/g, '')
+}
+
+export function sanitizePlainText(input: string, maxLength = 2000): string {
+  if (typeof input !== 'string') return ''
+  return Array.from(input.normalize('NFKC'))
+    .filter((char) => {
+      const code = char.charCodeAt(0)
+      const allowedWhitespace = char === '\t' || char === '\n' || char === '\r'
+      return allowedWhitespace || (code >= 32 && code !== 127)
+    })
+    .join('')
+    .replace(/[<>]/g, '')
+    .slice(0, maxLength)
 }
 
 export function clampAttribute(value: number, min = 25, max = 99): number {

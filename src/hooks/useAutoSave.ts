@@ -8,7 +8,9 @@ import { useBuilderStore } from '../stores/useBuilderStore'
 export function useAutoSave(delay = 1500) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const build = useBuilderStore((s) => s.build)
+  const attributes = useBuilderStore((s) => s.attributes)
   const startingValues = useBuilderStore((s) => s.startingValues)
+  const previouslyUnlocked = useBuilderStore((s) => s.previouslyUnlocked)
   const ucBalance = useBuilderStore((s) => s.ucBalance)
   const triggerSave = useBuilderStore((s) => s.triggerSave)
 
@@ -18,11 +20,11 @@ export function useAutoSave(delay = 1500) {
     if (timerRef.current) clearTimeout(timerRef.current)
 
     timerRef.current = setTimeout(() => {
-      triggerSave()
+      triggerSave(false)
     }, delay)
 
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
-  }, [build, startingValues, ucBalance, delay, triggerSave])
+  }, [build, attributes, startingValues, previouslyUnlocked, ucBalance, delay, triggerSave])
 }

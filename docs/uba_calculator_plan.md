@@ -12,15 +12,15 @@ Fully client-side. No backend. All game parameters in flat JSON for season-to-se
 
 | Layer | Choice |
 |---|---|
-| Framework | React 19 + TypeScript + Vite 6 |
+| Framework | React 19 + TypeScript + Vite 8 |
 | Styling | Tailwind CSS v4 |
 | State | Zustand 5 |
 | Animation | Framer Motion 12 |
 | Hosting | Cloudflare Pages |
 | Analytics | Cloudflare Web Analytics (free, no cookies) |
 | Error Tracking | Client-side `window.onerror` + `unhandledrejection` → localStorage logger |
-| PWA | Service worker + manifest (installable, offline-capable) |
-| Testing | Playwright 1.60 (Chromium, headless, 40 tests) |
+| PWA | Service worker + manifest (installable, app-shell/runtime caching) |
+| Testing | Playwright 1.60 (Chromium, headless, 40 e2e/smoke tests) + Vitest 4 unit tests |
 | Donations | Ko-fi floating button ("Tip Marius") |
 
 ---
@@ -44,17 +44,19 @@ Fully client-side. No backend. All game parameters in flat JSON for season-to-se
 - [x] Background images — 2K-style wallpapers with gradient overlays
 
 ### Phase 3: Advanced Features ✅ Built
-- [x] Save/load via localStorage — `saveBuild()` / `loadBuild()`, auto-save on attribute change
+- [x] Save/load via localStorage — `saveBuild()` / `loadBuild()`, including current upgrades, starting values, UC balance, and imported badge history
 - [x] Share URL encoding — `encodeBuild()`/`decodeBuild()` via base64 JSON in URL hash
-- [x] Auto-save — `useAutoSave` hook debounces store changes to localStorage
+- [x] Auto-save — `useAutoSave` hook debounces setup, attribute, starting-value, UC, and imported badge changes to localStorage
 - [x] Audio greeting — `useAudioGreeting` hook plays `welcome.mp3` on first visit (once per session)
 - [x] Build Rating — auto-generated roast/compliment text from `rating.ts`
 
 ### Additional Features
-- [x] **Sheet Import** — slide-out drawer (`SheetImportDrawer.tsx`) pastes tab/comma/space-separated data from the 35-column league export format. Column-to-attribute mapping in `src/data/sheetColumns.json`. Auto-sets player name and all starting values. Badge import via 41-column mapping in `badgeColumns.json`. Uses `findDataLine` to skip header rows.
+- [x] **Sheet Import** — slide-out drawer (`SheetImportDrawer.tsx`) pastes tab/comma/space-separated data from the 35-column league export format. Column-to-attribute mapping in `src/data/sheetColumns.json`. Auto-sets sanitized player name and all starting values. Badge import via 41-column mapping in `badgeColumns.json`. Uses `findDataLine` to skip header rows.
 - [x] **Weight lbs Input** — number field (160-300) next to weight dropdown. Auto-detects weight class on blur from 7 classes (Very Light through Very Heavy, including Below Average).
 - [x] **Badge Previously-Unlocked Tracking** — imported badges stored in `previouslyUnlocked` state, persisted in localStorage, correctly diffed against current stat-based unlocks so previously-owned badges aren't re-announced as "new."
 - [x] **Per-Slider Revert** — each attribute has a "Revert to start" button that resets to the starting value, plus "↩ All" to reset all upgrades.
+- [x] **Data-driven setup options** — height, weight class, and archetype dropdown values live in `src/data/buildOptions.json`.
+- [x] **Client input hardening** — pasted sheet text, imported names, share URLs, and UC/attribute values are sanitized/clamped before use.
 
 ### Phase 4: Badge Engine Overhaul ✅ Built
 - [x] **Operator precedence fix** — `evalCondition`, `canEverAchieve`, `countConditions`, `countMetConditions`, and `parseConditionDetails` all evaluate ` AND ` before ` -or- `, fixing false positives on AND-EITHER-or patterns (e.g. Boxout Beast)
@@ -70,23 +72,23 @@ Fully client-side. No backend. All game parameters in flat JSON for season-to-se
 
 ## Testing
 
-- **Framework:** Playwright 1.60, Chromium only, headless, 1 worker
-- **Coverage:** 40 tests all passing — 37 e2e (`app.spec.ts` + `smoke.spec.ts`) + 3 smoke
+- **E2E Framework:** Playwright 1.60, Chromium only, headless, 1 worker
+- **Unit Framework:** Vitest 4 for pure utility regression tests
+- **Coverage:** 40 Playwright tests passing + 17 Vitest unit tests passing
 - **Key testing quirks** documented in `docs/playwright-notes.md`:
-  - `fill()` on range sliders and number inputs does NOT trigger React 19 onChange → must use keyboard events
-  - `startingValues` empty until first interaction → per-slider revert falls back to `attr.default` (50)
+  - `fill()` on range sliders and number inputs does NOT trigger React 19 onChange reliably → tests use keyboard events where needed
+  - Playwright owns the Vite dev server through `webServer`; tests can use the dev/test-only `window.__builderStore` hook without exposing it in production preview
   - Three badges had mismatched ` -and ` vs ` -and- ` delimiters (fixed by normalizing `badges.json`)
-- **Port handling:** `npm run test:run` kills stale port 4173 before starting preview
+- **Port handling:** `npm run test:run` kills stale port 4173, then lets Playwright start/stop the Vite dev server
 
 ---
 
 ## Known Quirks & Limitations
 
-- `startingValues` is stored per-slider on first interaction, not populated from sheet import immediately; the import does populate it via `setStartingValuesBatch`
 - Badge `progress` field in `checkBadges()` only reflects the last iterated tier, not cumulative progress across all tiers (design limitation of `BadgeCheck` type)
 - `caps.json` has an unused `positionHeightRanges` field — leftover from original spec, never referenced in code
 - Share URL uses `btoa(encodeURIComponent(json))` — theoretically can throw on characters outside BMP (> U+FFFF), but practically impossible with JSON-encoded build data
-- No unit tests for business logic (`caps.ts`, `badges.ts`, `cost.ts`) — only e2e tests
+- Shared attributes such as `Speed With Ball`, `Close Shot`, and `Standing Dunk` intentionally appear in multiple UI categories but are stored/costed once by attribute name
 - Summer mode `--uba-track-upgrade` CSS var is hardcoded blue in `.light` block instead of using the gold/orange summer palette
 
 ---
@@ -125,7 +127,7 @@ Full audit of all 24 source files, 4 doc files, 4 data files, 2 test files, and 
 | `parseBracketRange` missing NaN guard | `src/utils/cost.ts` | Added `Number.isNaN` check |
 | `heightToInches` strict regex — silent 99 fallback on format mismatch | `src/utils/caps.ts` | Added `replace(/\s+/g, '')` before regex match |
 | Archetype priority loop copy-pasted 3x | `src/utils/caps.ts` | Extracted `resolveBestStatus()` helper, removed 25 duplicated lines |
-| Weight penalty subtracted from speed/agility caps AND starting values | `src/utils/caps.ts` | Removed all penalty subtraction. Speed cap = range.cap, Agility cap = 99, base values also raw (no `- penalty`). Speed/agility penalties still in caps.json for reference but unused in code. |
+| Weight penalty subtracted from speed/agility caps AND starting values | `src/utils/caps.ts` | Current rule keeps height-based base values unpenalized and applies weight penalty to Speed/Agility caps only, matching `docs/uba_attribute_caps.md`. |
 | `previouslyUnlocked` not reflected in badge state after load | `src/utils/badges.ts` | `checkBadges` now merges stored tier: forces all lower tiers to EARNED, sets highestEarned, so saved unlocks persist through badge re-evaluation |
 | Weight class stale on load (dropdown default, not re-derived) | `src/stores/useBuilderStore.ts` | `loadPlayerBuild` now calls `lbsToWeightClass(weightLbs)` to re-derive correct weight class from stored pounds |
 | Session baseline stale on previouslyUnlocked change | `src/components/BadgeFeed.tsx` | Added `previouslyUnlocked` to baseline effect deps, used `resultsRef` for latest value to avoid stale closure |
@@ -154,6 +156,7 @@ Full audit of all 24 source files, 4 doc files, 4 data files, 2 test files, and 
 | `costScale.json` | UC cost brackets: 40-50 (50), 51-60 (100), 61-70 (200), 71-80 (400), 81-90 (800), 91-99 (1600) |
 | `sheetColumns.json` | Column→attribute mapping for 35-column league export |
 | `badgeColumns.json` | Column→badge name mapping for 41-column badge import |
+| `buildOptions.json` | Build setup dropdown options: heights, weight classes, archetypes |
 
 ### Cap System
 Caps derived from three inputs:
@@ -189,7 +192,7 @@ Save/load, share URL, auto-save, audio greeting, build rating, sheet import, wei
 - [ ] Multi-player save/load profiles
 - [ ] Tendency change calculator
 - [ ] "Recommend an Upgrade" button with reasoning
-- [ ] Unit tests for `caps.ts`, `badges.ts`, `cost.ts`
+- [x] Unit tests for core utilities (`badges.ts`, `caps.ts`, `cost.ts`, `sheetImport.ts`, `share.ts`, `sanitize.ts`)
 - [ ] Refactor `storage.ts` `saveBuild()` to accept a `SavedBuild` object
 - [ ] Add `findDataLine`-equivalent validation to badge sheet import
 - [ ] Legend badge threshold data for `badges.json` (currently placeholder gaps)

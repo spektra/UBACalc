@@ -3,6 +3,7 @@
 // there's also a "revert all" button in the header, because sometimes you just want to start over.
 
 import { useMemo, useState, useCallback } from 'react'
+import type { CSSProperties } from 'react'
 import { motion } from 'framer-motion'
 import { useBuilderStore } from '../stores/useBuilderStore'
 import { computeUpgradeCost } from '../utils/cost'
@@ -35,6 +36,21 @@ export function AttributePanel() {
 
   const rawAttrs = attributesData as unknown as Record<string, AttrCategory>
   const categories = Object.entries(rawAttrs).filter(([key]) => key !== '_comment')
+  const sharedAttributes = useMemo(() => {
+    const counts = new Map<string, number>()
+
+    for (const [, category] of categories) {
+      for (const attr of category.attributes) {
+        counts.set(attr.name, (counts.get(attr.name) ?? 0) + 1)
+      }
+    }
+
+    return new Set(
+      Array.from(counts.entries())
+        .filter(([, count]) => count > 1)
+        .map(([name]) => name),
+    )
+  }, [categories])
 
   const handleRevertAll = useCallback(() => {
     if (revertCooldown) return
@@ -93,6 +109,9 @@ export function AttributePanel() {
           <div className="h-px w-8 bg-gradient-to-r from-uba-border/40 to-transparent" />
         </div>
       </div>
+      <p className="mt-2 text-[11px] leading-relaxed text-uba-text-dim">
+        Shared attributes use one value and one UC cost everywhere they appear.
+      </p>
 
       <div className="mt-5 space-y-5">
         {categories.map(([key, cat]) => (
@@ -110,7 +129,7 @@ export function AttributePanel() {
                 const currentVal = attributes[attr.name] ?? startingValues[attr.name] ?? attr.default
                 const startVal = startingValues[attr.name] ?? attr.default
                 const isUpgraded = currentVal > startVal
-                const hasCap = !!(build.height && build.primaryArchetype)
+                const hasCap = !!(build.height || build.weightClass || build.primaryArchetype || build.secondaryArchetype || build.weakness)
                 const cap = hasCap ? getAttributeCap(attr.name, build) : 99
                 const capColor = hasCap ? getCapColor(attr.name, build) : 'blue'
                 const hexColor = CAP_COLORS[capColor] || CAP_COLORS.blue
@@ -118,12 +137,26 @@ export function AttributePanel() {
 
                 const startPct = ((startVal - 25) / (cap - 25)) * 100
                 const currentPct = ((currentVal - 25) / (cap - 25)) * 100
+                const sliderStyle = {
+                  '--slider-glow': hexColor,
+                  background: isUpgraded
+                    ? `linear-gradient(to right, ${hexColor}40 0%, ${hexColor} ${startPct}%, var(--uba-track-upgrade) ${startPct}%, var(--uba-track-upgrade) ${currentPct}%, var(--uba-track-base) ${currentPct}%)`
+                    : `linear-gradient(to right, ${hexColor} 0%, ${hexColor} ${currentPct}%, var(--uba-track-base) ${currentPct}%)`,
+                } as CSSProperties
 
                 return (
                   <div key={attr.name}>
                     <div className="mb-1 flex items-center justify-between text-xs">
                       <div className="flex items-center gap-1.5">
                         <span className="text-uba-text-dim [.light_&]:font-semibold">{attr.name}</span>
+                        {sharedAttributes.has(attr.name) && (
+                          <span
+                            className="rounded-full border border-uba-border/50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-uba-text-dim"
+                            title={`${attr.name} is shared across categories. Editing it here updates the same value everywhere.`}
+                          >
+                            Shared
+                          </span>
+                        )}
                         {hasCap && (
                           <span
                             className="rounded px-1 py-0.5 text-[10px] font-medium uppercase tracking-wider"
@@ -184,7 +217,8 @@ export function AttributePanel() {
                       value={currentVal}
                       onKeyDown={(e) => handleKeyDown(attr.name, e, currentVal)}
                       onChange={(e) => handleSliderInput(attr.name, e.target.value)}
-                      className="w-full h-1.5 rounded-full appearance-none bg-uba-border/40 outline-none
+                      data-upgraded={isUpgraded}
+                      className="attribute-slider w-full h-1.5 rounded-full appearance-none bg-uba-border/40 outline-none
                         [&::-webkit-slider-thumb]:appearance-none
                         [&::-webkit-slider-thumb]:h-4
                         [&::-webkit-slider-thumb]:w-4
@@ -204,11 +238,7 @@ export function AttributePanel() {
                         [&::-moz-range-thumb]:border-uba-gold
                         [&::-moz-range-thumb]:bg-uba-card
                         [&::-moz-range-thumb]:shadow-md"
-                      style={{
-                        background: isUpgraded
-                          ? `linear-gradient(to right, ${hexColor}40 0%, ${hexColor} ${startPct}%, var(--uba-track-upgrade) ${startPct}%, var(--uba-track-upgrade) ${currentPct}%, var(--uba-track-base) ${currentPct}%)`
-                          : `linear-gradient(to right, ${hexColor} 0%, ${hexColor} ${currentPct}%, var(--uba-track-base) ${currentPct}%)`,
-                      }}
+                      style={sliderStyle}
                     />
                   </div>
                 )

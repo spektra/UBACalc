@@ -11,6 +11,7 @@ export interface SavedBuild {
   playerName: string
   build: BuildSetup
   startingValues: Record<string, number>
+  attributes: Record<string, number>
   ucBalance: number
   previouslyUnlocked?: Record<string, Tier>
   touchedStartingValues?: Record<string, true>
@@ -66,6 +67,7 @@ export function saveBuild(
   playerName: string,
   build: BuildSetup,
   startingValues: Record<string, number>,
+  attributes: Record<string, number>,
   ucBalance: number,
   previouslyUnlocked?: Record<string, Tier>,
   touchedStartingValues?: Record<string, true>,
@@ -78,6 +80,7 @@ export function saveBuild(
       playerName: playerName.trim(),
       build,
       startingValues,
+      attributes,
       ucBalance,
       previouslyUnlocked: previouslyUnlocked || {},
       touchedStartingValues: touchedStartingValues || {},

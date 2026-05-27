@@ -27,9 +27,9 @@ await input.press('Backspace')
 await page.keyboard.type('60')
 ```
 
-### 3. hasUpgrades requires startingValues to be set
+### 3. Starting values now derive from build setup until touched
 
-The `↩ All` button (`hasUpgrades`) and `resetAttribute` both check `startingValues[name] !== undefined`. If users never set a starting value (which they can't do via fill()), the revert-all button won't appear and per-slider revert silently does nothing.
+Untouched `startingValues` are recalculated when height, weight, primary, secondary, or weakness changes. Imported or manually edited starting values are marked touched and preserved.
 
 **Per-slider revert button** uses `button[title="Revert to start"]` as locator.
 
@@ -39,11 +39,11 @@ The `↩ All` button (`hasUpgrades`) and `resetAttribute` both check `startingVa
 
 ### 5. Port conflicts are a recurring token waste
 
-Preview server often crashes because port 4173 is already in use from a prior run. Use the `test:run` script (`bash scripts/test.sh`) which kills the port first. Or use Playwright's `webServer` config (see `playwright.config.ts`).
+Port 4173 can still be left busy by old runs. Use the `test:run` script (`bash scripts/test.sh`) which kills the port first. Playwright's `webServer` config then starts and stops the Vite dev server itself.
 
-### 6. Setup order matters — select height and archetype first
+### 6. Tests run against Vite dev server on purpose
 
-Cap calculations require both `build.height` AND `build.primaryArchetype` to be set (guarded in `caps.ts`). Tests should always select these before interacting with sliders.
+Some e2e tests use the dev/test-only `window.__builderStore` hook. The hook is available in Vite dev mode and when `VITE_E2E=true`, but it is not exposed in normal production preview/build output. Do not switch Playwright back to `vite preview` unless the tests are rewritten as black-box UI-only tests.
 
 ### 7. Badge detection is case-sensitive
 
@@ -56,24 +56,29 @@ Default Playwright timeout is 15,000ms. Tests with 49 keyboard presses (15ms eac
 ## Running Tests
 
 ```bash
-# Using the safe script (kills port 4173 first):
+# Using the safe script (kills port 4173 first, then lets Playwright start Vite):
 npm run test:run
 
 # With custom port:
 bash scripts/test.sh 4173
 
-# Standard Playwright (requires preview server running separately):
+# Standard Playwright (uses webServer from playwright.config.ts):
 npm test
+
+# Unit regression tests for pure calculator utilities:
+npm run test:unit
 ```
 
 ## Test Structure
 
 - `e2e/smoke.spec.ts` — 3 quick smoke tests (title, sections loaded)
-- `e2e/app.spec.ts` — 31 full e2e tests across all features
+- `e2e/app.spec.ts` — 37 full e2e tests across all features
+- `src/utils/*.test.ts` — Vitest unit tests for badge parsing, caps, cost, import parsing, share decoding, and sanitization
 - Browser: Chromium only, headless, 1 worker (state leaking between tests)
 
-## Recap — 34 tests, all passing as of May 25, 2026
+## Recap — all passing as of May 27, 2026
 
 ```
-[chromium] ✓ 34 passed (45.4s)
+Playwright: [chromium] ✓ 40 passed
+Vitest: 6 files, 17 tests passed
 ```

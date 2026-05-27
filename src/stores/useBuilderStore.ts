@@ -9,8 +9,10 @@ interface BuilderState {
   build: BuildSetup
   attributes: Record<string, number>
   startingValues: Record<string, number>
+  touchedStartingValues: Record<string, true>
   ucBalance: number
   previouslyUnlocked: Record<string, Tier>
+  saveAnchorName: string
   savedPlayers: string[]
 
   setBuild: (setup: Partial<BuildSetup>) => void
@@ -18,10 +20,12 @@ interface BuilderState {
   setStartingValue: (name: string, value: number) => void
   setStartingValuesBatch: (values: Record<string, number>) => void
   setPreviouslyUnlockedBatch: (badges: Record<string, Tier>) => void
+  replacePreviouslyUnlocked: (badges: Record<string, Tier>) => void
+  importPlayerAttributes: (playerName: string, values: Record<string, number>, ownedBadges: Record<string, Tier>) => void
   setUCBalance: (balance: number) => void
   loadPlayerBuild: (name: string) => boolean
   resetBuild: () => void
-  triggerSave: () => void
+  triggerSave: (manual?: boolean) => void
   deletePlayerBuild: (name: string) => void
   refreshSavedPlayers: () => void
   resetAttribute: (name: string) => void
@@ -38,12 +42,46 @@ const defaultBuild: BuildSetup = {
   weightLbs: '',
 }
 
+const rawAttrs = attributesData as unknown as Record<string, { label: string; attributes: { name: string; default: number }[] }>
+const attributeNames = Array.from(new Set(
+  Object.entries(rawAttrs)
+    .filter(([key]) => key !== '_comment')
+    .flatMap(([, cat]) => cat.attributes.map((attr) => attr.name)),
+))
+
+function deriveStartingValues(
+  build: BuildSetup,
+  current: Record<string, number>,
+  touched: Record<string, true>,
+): Record<string, number> {
+  const next: Record<string, number> = {}
+  for (const name of attributeNames) {
+    next[name] = touched[name] && current[name] !== undefined
+      ? current[name]
+      : getAttributeBase(name, build)
+  }
+  return next
+}
+
+function clampAttributesForBuild(
+  build: BuildSetup,
+  attributes: Record<string, number>,
+): Record<string, number> {
+  const next: Record<string, number> = {}
+  for (const [name, value] of Object.entries(attributes)) {
+    next[name] = clampAttribute(value, 25, getAttributeCap(name, build))
+  }
+  return next
+}
+
 export const useBuilderStore = create<BuilderState>((set, get) => ({
   build: defaultBuild,
   attributes: {},
   startingValues: {},
+  touchedStartingValues: {},
   ucBalance: 0,
   previouslyUnlocked: {},
+  saveAnchorName: '',
   savedPlayers: [],
 
   setBuild: (setup) => {
@@ -56,28 +94,19 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     if (setup.weakness !== undefined) sanitized.weakness = setup.weakness
     if (setup.weightLbs !== undefined) sanitized.weightLbs = setup.weightLbs
 
-    const { build: currentBuild, startingValues: currentSV } = get()
+    const { build: currentBuild, startingValues: currentSV, touchedStartingValues, attributes } = get()
     const newBuild = { ...currentBuild, ...sanitized }
-
-    const hasStartingValues = Object.keys(currentSV).length > 0
-    if (!hasStartingValues) {
-      const rawAttrs = attributesData as unknown as Record<string, { label: string; attributes: { name: string; default: number }[] }>
-      const cats = Object.entries(rawAttrs).filter(([k]) => k !== '_comment')
-      const newStartingValues: Record<string, number> = {}
-      for (const [, cat] of cats) {
-        for (const attr of cat.attributes) {
-          newStartingValues[attr.name] = getAttributeBase(attr.name, newBuild)
-        }
-      }
-      set({ build: newBuild, startingValues: newStartingValues })
-    } else {
-      set({ build: newBuild })
-    }
+    set({
+      build: newBuild,
+      startingValues: deriveStartingValues(newBuild, currentSV, touchedStartingValues),
+      attributes: clampAttributesForBuild(newBuild, attributes),
+    })
   },
 
   setAttribute: (name, value) => {
     const { build } = get()
-    const cap = build.height && build.primaryArchetype ? getAttributeCap(name, build) : 99
+    const hasCap = !!(build.height || build.weightClass || build.primaryArchetype || build.secondaryArchetype || build.weakness)
+    const cap = hasCap ? getAttributeCap(name, build) : 99
     const clamped = clampAttribute(value, 25, cap)
     set((state) => ({
       attributes: { ...state.attributes, [name]: clamped },
@@ -88,6 +117,7 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     const clamped = clampAttribute(value)
     set((state) => ({
       startingValues: { ...state.startingValues, [name]: clamped },
+      touchedStartingValues: { ...state.touchedStartingValues, [name]: true },
     }))
   },
 
@@ -98,12 +128,36 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     }
     set((state) => ({
       startingValues: { ...state.startingValues, ...clamped },
+      touchedStartingValues: {
+        ...state.touchedStartingValues,
+        ...Object.fromEntries(Object.keys(clamped).map((name) => [name, true])),
+      },
     }))
   },
 
   setPreviouslyUnlockedBatch: (badges) => {
     set((state) => ({
       previouslyUnlocked: { ...state.previouslyUnlocked, ...badges },
+    }))
+  },
+
+  replacePreviouslyUnlocked: (badges) => {
+    set({ previouslyUnlocked: { ...badges } })
+  },
+
+  importPlayerAttributes: (playerName, values, ownedBadges) => {
+    const clamped: Record<string, number> = {}
+    for (const [name, val] of Object.entries(values)) {
+      clamped[name] = clampAttribute(val)
+    }
+
+    set((state) => ({
+      build: playerName ? { ...state.build, playerName: sanitizePlayerName(playerName) } : state.build,
+      startingValues: clamped,
+      touchedStartingValues: Object.fromEntries(Object.keys(clamped).map((name) => [name, true])),
+      attributes: {},
+      previouslyUnlocked: { ...ownedBadges },
+      saveAnchorName: '',
     }))
   },
 
@@ -125,9 +179,13 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
       set({
         build,
         startingValues: { ...saved.startingValues },
-        attributes: {},
+        touchedStartingValues: saved.touchedStartingValues ?? Object.fromEntries(
+          Object.keys(saved.startingValues).map((key) => [key, true]),
+        ),
+        attributes: { ...(saved.attributes ?? {}) },
         ucBalance: saved.ucBalance,
         previouslyUnlocked: saved.previouslyUnlocked ?? {},
+        saveAnchorName: saved.playerName,
       })
       return true
     } catch {
@@ -140,15 +198,19 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
       build: { ...defaultBuild },
       attributes: {},
       startingValues: {},
+      touchedStartingValues: {},
       ucBalance: 0,
       previouslyUnlocked: {},
+      saveAnchorName: '',
     })
   },
 
-  triggerSave: () => {
-    const { build, startingValues, ucBalance, previouslyUnlocked } = get()
+  triggerSave: (manual = false) => {
+    const { build, startingValues, attributes, ucBalance, previouslyUnlocked, touchedStartingValues, saveAnchorName } = get()
     if (!build.playerName.trim()) return
-    saveBuild(build.playerName, build, startingValues, ucBalance, previouslyUnlocked)
+    if (!manual && saveAnchorName.toLowerCase() !== build.playerName.trim().toLowerCase()) return
+    saveBuild(build.playerName, build, startingValues, attributes, ucBalance, previouslyUnlocked, touchedStartingValues)
+    set({ saveAnchorName: build.playerName.trim() })
     get().refreshSavedPlayers()
   },
 
