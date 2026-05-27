@@ -9,7 +9,11 @@ import { generateBuildRating } from '../utils/rating'
 import { buildShareUrl } from '../utils/share'
 
 export function SubmissionOutput() {
-  const { build, attributes, startingValues, ucBalance, previouslyUnlocked } = useBuilderStore()
+  const build = useBuilderStore((s) => s.build)
+  const attributes = useBuilderStore((s) => s.attributes)
+  const startingValues = useBuilderStore((s) => s.startingValues)
+  const ucBalance = useBuilderStore((s) => s.ucBalance)
+  const previouslyUnlocked = useBuilderStore((s) => s.previouslyUnlocked)
   const [copied, setCopied] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
   const [copyError, setCopyError] = useState('')
@@ -73,9 +77,9 @@ export function SubmissionOutput() {
   }
 
   return (
-    <div className="rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-4 sm:p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
+    <div className="premium-card rounded-2xl border border-uba-gold/10 p-4 sm:p-6">
       <div className="mb-1 flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-gold">
+        <h2 className="premium-label text-sm font-bold uppercase text-uba-gold">
           Submission
         </h2>
         <div className="h-px flex-1 ml-4 bg-gradient-to-r from-uba-gold/40 to-transparent" />
@@ -105,12 +109,12 @@ export function SubmissionOutput() {
 
           {unlockedBadges.length > 0 && (
             <div className="rounded-lg border border-uba-blue/30 bg-uba-blue/10 px-3 py-2">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-uba-blue-light mb-1">Badges Unlocked</p>
+              <p className="premium-label text-[11px] font-bold uppercase text-uba-blue-light mb-1">New Badge Unlocks</p>
               <div className="flex flex-wrap gap-1.5">
                 {unlockedBadges.map((b) => (
                   <span
                     key={b.name}
-                    className="rounded-md bg-gradient-to-r px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-black"
+                    className="premium-chip rounded-md bg-gradient-to-r px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-black"
                     style={{
                       backgroundImage: b.newlyUnlocked === 'Bronze' ? 'linear-gradient(to right, #92400e, #d97706)' :
                         b.newlyUnlocked === 'Silver' ? 'linear-gradient(to right, #64748b, #cbd5e1)' :

@@ -7,7 +7,10 @@ import { useBuilderStore } from '../stores/useBuilderStore'
 import { computeAllUpgrades } from '../utils/cost'
 
 export function BudgetTracker() {
-  const { ucBalance, setUCBalance, attributes, startingValues } = useBuilderStore()
+  const ucBalance = useBuilderStore((s) => s.ucBalance)
+  const setUCBalance = useBuilderStore((s) => s.setUCBalance)
+  const attributes = useBuilderStore((s) => s.attributes)
+  const startingValues = useBuilderStore((s) => s.startingValues)
 
   const upgrades = useMemo(
     () => computeAllUpgrades(startingValues, attributes),
@@ -28,9 +31,9 @@ export function BudgetTracker() {
   }
 
   return (
-    <div className="rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-4 sm:p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
+    <div className="premium-card premium-glass premium-data-card rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-4 sm:p-6">
       <div className="mb-1 flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-gold">
+        <h2 className="premium-label text-sm font-bold uppercase text-uba-gold">
           UC Budget
         </h2>
         <div className="h-px flex-1 ml-4 bg-gradient-to-r from-uba-gold/40 to-transparent" />
@@ -56,17 +59,17 @@ export function BudgetTracker() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-uba-border/60 bg-uba-surface/80 px-4 py-2.5 text-center">
-          <div className="text-[11px] font-medium uppercase tracking-wider text-uba-text-dim">Spent</div>
+        <div className="metric-card rounded-xl border border-uba-border/60 bg-uba-surface/80 px-4 py-2.5 text-center">
+          <div className="premium-muted text-[11px] font-semibold uppercase tracking-wider text-uba-text-dim">Spent</div>
           <div className="text-base font-bold text-uba-text tabular-nums">{totalCost.toLocaleString()}</div>
         </div>
 
-        <div className={`rounded-xl border px-4 py-2.5 text-center transition-colors ${
+        <div className={`metric-card rounded-xl border px-4 py-2.5 text-center transition-colors ${
           overBudget
             ? 'border-uba-danger/30 bg-uba-danger/10'
             : 'border-uba-gold/20 bg-uba-gold/5'
         }`}>
-          <div className="text-[11px] font-medium uppercase tracking-wider text-uba-gold">Remaining</div>
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-uba-gold">Remaining</div>
           <div className={`text-base font-bold tabular-nums ${overBudget ? 'text-uba-danger' : 'text-uba-gold'}`}>
             {remaining.toLocaleString()}
           </div>
@@ -79,13 +82,13 @@ export function BudgetTracker() {
         </div>
       )}
 
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-uba-border/40">
+      <div className="premium-progress-track mt-3 h-1.5 overflow-hidden rounded-full bg-uba-border/40">
         <motion.div
-          className={`h-full rounded-full transition-colors ${
-            overBudget ? 'bg-uba-danger' : 'bg-gradient-to-r from-uba-blue to-uba-gold'
+          className={`premium-progress-fill h-full w-full rounded-full transition-colors ${
+            overBudget ? 'bg-uba-danger' : 'bg-gradient-to-r from-uba-gold to-uba-blue-light'
           }`}
           initial={false}
-          animate={{ width: `${pct}%` }}
+          animate={{ scaleX: pct / 100 }}
           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
         />
       </div>

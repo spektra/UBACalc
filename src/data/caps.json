@@ -22,7 +22,7 @@
     "description": "Cap modifiers per archetype status. primary gets 99, secondary gets 95, neutral gets 90, weakness gets 75.",
     "primary": { "cap": 99, "base": 80, "color": "blue" },
     "secondary": { "cap": 95, "base": 70, "color": "purple" },
-    "neutral": { "cap": 90, "base": 50, "color": "cyan" },
+    "neutral": { "cap": 90, "base": 50, "color": "blue" },
     "weakness": { "cap": 75, "base": 40, "color": "red" }
   },
   "positionHeightRanges": {

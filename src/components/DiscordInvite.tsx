@@ -11,7 +11,7 @@ export function DiscordInvite() {
       transition={{ delay: 1.5, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ scale: 1.08 }}
       whileTap={{ scale: 0.95 }}
-      className="fixed bottom-4 right-3 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2 rounded-2xl border border-uba-gold/30 bg-uba-card/80 px-3 py-2 sm:px-4 sm:py-3 text-sm font-medium text-uba-text shadow-lg backdrop-blur-xl transition-all duration-300 hover:border-uba-gold/60 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.25)]"
+      className="premium-chip fixed bottom-4 right-3 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2 rounded-2xl border border-uba-gold/30 bg-uba-card/90 px-3 py-2 sm:px-4 sm:py-3 text-sm font-semibold text-uba-text shadow-lg shadow-black/30 transition-all duration-300 hover:border-uba-gold/60 hover:shadow-[0_0_30px_-8px_rgba(242,211,153,0.34)]"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

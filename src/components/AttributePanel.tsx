@@ -18,20 +18,26 @@ interface AttrCategory {
 }
 
 const CAP_COLORS: Record<string, string> = {
-  blue: '#024CA6',
-  purple: '#8B5CF6',
-  magenta: '#D946EF',
-  cyan: '#06B6D4',
-  green: '#10B981',
+  blue: '#2563EB',
+  purple: '#7C3AED',
+  magenta: '#C026D3',
+  green: '#16A34A',
   orange: '#F97316',
   red: '#EF4444',
-  grey: '#6B7280',
+  grey: '#F8FAFC',
   yellow: '#EAB308',
-  darkGreen: '#059669',
+  darkGreen: '#15803D',
+  'dark green': '#15803D',
 }
 
 export function AttributePanel() {
-  const { build, attributes, setAttribute, startingValues, setStartingValue, resetAttribute, resetAllAttributes } = useBuilderStore()
+  const build = useBuilderStore((s) => s.build)
+  const attributes = useBuilderStore((s) => s.attributes)
+  const setAttribute = useBuilderStore((s) => s.setAttribute)
+  const startingValues = useBuilderStore((s) => s.startingValues)
+  const setStartingValue = useBuilderStore((s) => s.setStartingValue)
+  const resetAttribute = useBuilderStore((s) => s.resetAttribute)
+  const resetAllAttributes = useBuilderStore((s) => s.resetAllAttributes)
   const [revertCooldown, setRevertCooldown] = useState(false)
 
   const rawAttrs = attributesData as unknown as Record<string, AttrCategory>
@@ -91,9 +97,9 @@ export function AttributePanel() {
   }, [attributes, startingValues])
 
   return (
-    <div className="rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-4 sm:p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
+    <div className="premium-card premium-glass premium-data-card rounded-2xl border border-uba-gold/10 p-4 sm:p-6">
       <div className="mb-1 flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-gold">
+        <h2 className="premium-label text-sm font-bold uppercase text-uba-gold">
           Attributes
         </h2>
         <div className="flex items-center gap-2">
@@ -109,19 +115,32 @@ export function AttributePanel() {
           <div className="h-px w-8 bg-gradient-to-r from-uba-border/40 to-transparent" />
         </div>
       </div>
-      <p className="mt-2 text-[11px] leading-relaxed text-uba-text-dim">
+      <p className="premium-muted mt-2 text-[11px] leading-relaxed text-uba-text-dim">
         Shared attributes use one value and one UC cost everywhere they appear.
       </p>
 
       <div className="mt-5 space-y-5">
-        {categories.map(([key, cat]) => (
+        {categories.map(([key, cat]) => {
+          const categoryColor = CAP_COLORS[cat.color ?? 'blue'] ?? CAP_COLORS.blue
+          const categoryStyle = {
+            color: categoryColor,
+            textShadow: `0 0 12px ${categoryColor}66`,
+          } as CSSProperties
+
+          return (
           <div key={key}>
             <div className="mb-2 flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full" style={{ backgroundColor: CAP_COLORS[cat.color ?? "blue"] }} />
-              <h3 className="text-xs font-semibold uppercase tracking-[0.1em] text-uba-gold">
+              <div
+                className="h-2.5 w-2.5 rounded-full shadow-[0_0_14px_var(--category-color)]"
+                style={{ '--category-color': categoryColor, backgroundColor: categoryColor } as CSSProperties}
+              />
+              <h3 className="premium-label text-xs font-bold uppercase" style={categoryStyle}>
                 {cat.label}
               </h3>
-              <div className="h-px flex-1 bg-gradient-to-r from-uba-border/30 to-transparent" />
+              <div
+                className="h-px flex-1"
+                style={{ background: `linear-gradient(to right, ${categoryColor}66, transparent)` }}
+              />
             </div>
 
             <div className="space-y-2.5">
@@ -133,15 +152,16 @@ export function AttributePanel() {
                 const cap = hasCap ? getAttributeCap(attr.name, build) : 99
                 const capColor = hasCap ? getCapColor(attr.name, build) : 'blue'
                 const hexColor = CAP_COLORS[capColor] || CAP_COLORS.blue
+                const sliderColor = categoryColor
                 const upgradeCost = isUpgraded ? computeUpgradeCost(startVal, currentVal) : 0
 
                 const startPct = ((startVal - 25) / (cap - 25)) * 100
                 const currentPct = ((currentVal - 25) / (cap - 25)) * 100
                 const sliderStyle = {
-                  '--slider-glow': hexColor,
+                  '--slider-glow': sliderColor,
                   background: isUpgraded
-                    ? `linear-gradient(to right, ${hexColor}40 0%, ${hexColor} ${startPct}%, var(--uba-track-upgrade) ${startPct}%, var(--uba-track-upgrade) ${currentPct}%, var(--uba-track-base) ${currentPct}%)`
-                    : `linear-gradient(to right, ${hexColor} 0%, ${hexColor} ${currentPct}%, var(--uba-track-base) ${currentPct}%)`,
+                    ? `linear-gradient(to right, color-mix(in srgb, ${sliderColor} 58%, white) 0%, ${sliderColor} ${startPct}%, color-mix(in srgb, ${sliderColor} 70%, white) ${startPct}%, color-mix(in srgb, ${sliderColor} 70%, white) ${currentPct}%, var(--uba-track-base) ${currentPct}%)`
+                    : `linear-gradient(to right, color-mix(in srgb, ${sliderColor} 64%, white) 0%, ${sliderColor} ${currentPct}%, var(--uba-track-base) ${currentPct}%)`,
                 } as CSSProperties
 
                 return (
@@ -151,7 +171,7 @@ export function AttributePanel() {
                         <span className="text-uba-text-dim [.light_&]:font-semibold">{attr.name}</span>
                         {sharedAttributes.has(attr.name) && (
                           <span
-                            className="rounded-full border border-uba-border/50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-uba-text-dim"
+                            className="premium-chip rounded-full border border-uba-border/50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-uba-text-dim"
                             title={`${attr.name} is shared across categories. Editing it here updates the same value everywhere.`}
                           >
                             Shared
@@ -159,7 +179,7 @@ export function AttributePanel() {
                         )}
                         {hasCap && (
                           <span
-                            className="rounded px-1 py-0.5 text-[10px] font-medium uppercase tracking-wider"
+                            className="premium-chip rounded px-1 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
                             style={{ backgroundColor: `${hexColor}20`, color: hexColor }}
                             title={`Attribute cap for ${attr.name} with this build: ${cap}`}
                           >
@@ -245,7 +265,8 @@ export function AttributePanel() {
               })}
             </div>
           </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

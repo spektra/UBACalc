@@ -7,8 +7,13 @@ import { useThemeStore } from '../stores/useThemeStore'
 import { useBuilderStore } from '../stores/useBuilderStore'
 
 export function Header({ onImportClick }: { onImportClick?: () => void }) {
-  const { theme, toggle } = useThemeStore()
-  const { build, attributes, startingValues, ucBalance, previouslyUnlocked } = useBuilderStore()
+  const theme = useThemeStore((s) => s.theme)
+  const toggle = useThemeStore((s) => s.toggle)
+  const build = useBuilderStore((s) => s.build)
+  const attributes = useBuilderStore((s) => s.attributes)
+  const startingValues = useBuilderStore((s) => s.startingValues)
+  const ucBalance = useBuilderStore((s) => s.ucBalance)
+  const previouslyUnlocked = useBuilderStore((s) => s.previouslyUnlocked)
 
   const hasUnsaved = useMemo(() => {
     if (!build.playerName.trim()) return false
@@ -17,7 +22,7 @@ export function Header({ onImportClick }: { onImportClick?: () => void }) {
     try {
       const builds = JSON.parse(saved)
       const existing = Array.isArray(builds)
-        ? builds.find((b: { playerName: string }) => b.playerName?.toLowerCase() === build.playerName.toLowerCase())
+        ? builds.find((b: { playerName: string }) => b.playerName?.toLowerCase() === build.playerName.trim().toLowerCase())
         : null
       if (!existing) return true
       const currentBuild = JSON.stringify(build)
@@ -41,7 +46,7 @@ export function Header({ onImportClick }: { onImportClick?: () => void }) {
   }, [build, attributes, startingValues, previouslyUnlocked, ucBalance])
 
   return (
-    <header className="relative z-10 border-b border-uba-border/50 backdrop-blur-xl">
+    <header className="relative z-10 border-b border-uba-border/50 bg-uba-canvas/80 shadow-[0_10px_28px_rgba(0,0,0,0.16)]">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-2 sm:px-6 sm:py-3">
         <div className="flex items-center gap-1.5 sm:gap-3">
           <div className="relative">

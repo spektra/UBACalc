@@ -31,7 +31,10 @@ const BADGE_ATTR_NAMES = [
 ]
 
 export function BadgeFeed() {
-  const { attributes, previouslyUnlocked, startingValues, build } = useBuilderStore()
+  const attributes = useBuilderStore((s) => s.attributes)
+  const previouslyUnlocked = useBuilderStore((s) => s.previouslyUnlocked)
+  const startingValues = useBuilderStore((s) => s.startingValues)
+  const build = useBuilderStore((s) => s.build)
   const [showNewOnly, setShowNewOnly] = useState(false)
   const [sessionUnlocked, setSessionUnlocked] = useState<Set<string>>(new Set())
 
@@ -40,6 +43,8 @@ export function BadgeFeed() {
   const prevTiersRef = useRef<Record<string, Tier | null> | null>(null)
   const bannerQueueRef = useRef<{ name: string; tier: Tier }[]>([])
   const bannerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const nextBannerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const glowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const sessionBaselineRef = useRef<Record<string, Tier | null> | null>(null)
 
   const effectiveAttrs = useMemo(
@@ -88,17 +93,19 @@ export function BadgeFeed() {
     setDisplayBanner(next)
     bannerTimerRef.current = setTimeout(() => {
       setDisplayBanner(null)
-      setTimeout(fn, 300)
+      nextBannerTimerRef.current = setTimeout(fn, 300)
     }, 3000)
   }, [])
 
   useEffect(() => {
     const prev = prevTiersRef.current
     const newAchievements: { name: string; tier: Tier }[] = []
+    const newRef: Record<string, Tier | null> = {}
 
     for (const r of results) {
       const prevTier = prev ? prev[r.name] : undefined
       const currTier = r.highestEarned
+      newRef[r.name] = currTier
       if (prev !== null && currTier && currTier !== prevTier) {
         newAchievements.push({ name: r.name, tier: currTier })
       }
@@ -119,7 +126,8 @@ export function BadgeFeed() {
         return next
       })
 
-      setTimeout(() => {
+      if (glowTimerRef.current) clearTimeout(glowTimerRef.current)
+      glowTimerRef.current = setTimeout(() => {
         setGlowingBadges((current) => {
           const next = new Set(current)
           for (const name of names) next.delete(name)
@@ -129,20 +137,23 @@ export function BadgeFeed() {
 
       const alreadyQueued = new Set(bannerQueueRef.current.map((a) => a.name))
       const deduped = newAchievements.filter((a) => !alreadyQueued.has(a.name))
-      if (deduped.length === 0) return
-      bannerQueueRef.current.push(...deduped)
-      if (!bannerTimerRef.current) flushBannerQueue()
+      if (deduped.length > 0) {
+        bannerQueueRef.current.push(...deduped)
+        if (!bannerTimerRef.current) flushBannerQueue()
+      }
     }
 
-    const newRef: Record<string, Tier | null> = {}
-    for (const r of results) newRef[r.name] = r.highestEarned
     prevTiersRef.current = newRef
   }, [results, flushBannerQueue])
 
   useEffect(() => {
     return () => {
       if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current)
+      if (nextBannerTimerRef.current) clearTimeout(nextBannerTimerRef.current)
+      if (glowTimerRef.current) clearTimeout(glowTimerRef.current)
       bannerTimerRef.current = null
+      nextBannerTimerRef.current = null
+      glowTimerRef.current = null
     }
   }, [])
 
@@ -163,9 +174,9 @@ export function BadgeFeed() {
 
   if (!hasAttributes) {
     return (
-      <div className="rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-4 sm:p-6 backdrop-blur-sm">
+      <div className="premium-card rounded-2xl border border-uba-gold/10 p-4 sm:p-6">
         <div className="mb-1 flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-text-muted">
+          <h2 className="premium-label text-sm font-bold uppercase text-uba-text-muted">
             Badges
           </h2>
           <div className="h-px flex-1 ml-4 bg-gradient-to-r from-uba-border/40 to-transparent" />
@@ -185,13 +196,13 @@ export function BadgeFeed() {
 
   return (
     <>
-      <div className="rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-4 sm:p-6 backdrop-blur-sm">
+      <div className="premium-card rounded-2xl border border-uba-gold/10 p-4 sm:p-6">
         <div className="mb-1 flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-text-muted">
+          <h2 className="premium-label text-sm font-bold uppercase text-uba-text-muted">
             Badges
           </h2>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-uba-gold">{badgeCount} unlocked</span>
+            <span className="premium-chip rounded-full border border-uba-gold/25 bg-uba-gold/10 px-2 py-0.5 text-xs font-semibold text-uba-gold">{badgeCount} unlocked</span>
             <div className="h-px flex-1 ml-2 bg-gradient-to-r from-uba-border/40 to-transparent" />
           </div>
         </div>
@@ -199,7 +210,7 @@ export function BadgeFeed() {
         <div className="mt-4 flex gap-1.5">
           <button
             onClick={() => setShowNewOnly(false)}
-            className={`rounded-lg px-3 py-1 text-xs transition-all ${
+            className={`premium-chip rounded-lg px-3 py-1 text-xs font-medium transition-all ${
               !showNewOnly
                 ? 'bg-uba-blue/20 text-uba-blue-light'
                 : 'text-uba-text-dim hover:text-uba-text-muted'
@@ -209,7 +220,7 @@ export function BadgeFeed() {
           </button>
           <button
             onClick={() => setShowNewOnly(true)}
-            className={`rounded-lg px-3 py-1 text-xs transition-all ${
+            className={`premium-chip rounded-lg px-3 py-1 text-xs font-medium transition-all ${
               showNewOnly
                 ? 'bg-uba-gold/20 text-uba-gold'
                 : 'text-uba-text-dim hover:text-uba-text-muted'
@@ -240,7 +251,7 @@ export function BadgeFeed() {
                     animate={isNew ? { scale: 1, opacity: 1, y: 0 } : undefined}
                     exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
                     transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                    className={`rounded-xl border p-3 transition-all ${
+                    className={`rounded-xl border p-3 transition-all duration-200 hover:-translate-y-0.5 ${
                       tier
                         ? `${TIER_BG[tier]} ${isNew ? 'ring-2 ring-uba-gold shadow-lg shadow-uba-gold/20' : ''}`
                         : fneState === 'LOCKED'
@@ -265,7 +276,7 @@ export function BadgeFeed() {
                             initial={isNew ? { scale: 0 } : undefined}
                             animate={isNew ? { scale: [0, 1.3, 1] } : undefined}
                             transition={{ duration: 0.5, ease: 'easeOut' }}
-                            className={`rounded-md bg-gradient-to-r ${TIER_COLORS[tier]} px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-black`}
+                            className={`premium-chip rounded-md bg-gradient-to-r ${TIER_COLORS[tier]} px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-black`}
                           >
                             {tier}
                           </motion.span>
@@ -274,11 +285,11 @@ export function BadgeFeed() {
                     </div>
 
                     {fneState === 'ACHIEVABLE' && !tier && r.progress > 0 && (
-                      <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-uba-border/40">
+                      <div className="premium-progress-track mt-1.5 h-1 overflow-hidden rounded-full bg-uba-border/40">
                         <motion.div
-                          className="h-full rounded-full bg-uba-blue"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${r.progress * 100}%` }}
+                          className="premium-progress-fill h-full w-full rounded-full bg-gradient-to-r from-uba-gold to-uba-blue-light"
+                          initial={{ scaleX: 0 }}
+                          animate={{ scaleX: r.progress }}
                           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                         />
                       </div>
@@ -286,9 +297,9 @@ export function BadgeFeed() {
 
                     {tier && isNew && (
                       <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        className="mt-1.5 text-xs text-uba-gold/80"
+                        initial={{ opacity: 0, scaleY: 0.85 }}
+                        animate={{ opacity: 1, scaleY: 1 }}
+                        className="mt-1.5 origin-top text-xs font-medium text-uba-gold/80"
                       >
                         New badge unlocked!
                       </motion.div>

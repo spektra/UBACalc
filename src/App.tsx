@@ -37,8 +37,8 @@ const fadeUp = {
 function App() {
   useAutoSave()
   useAudioGreeting()
-  const { theme } = useThemeStore()
-  const { setBuild, setUCBalance, setStartingValue, setAttribute } = useBuilderStore()
+  const theme = useThemeStore((s) => s.theme)
+  const restoreSharedBuild = useBuilderStore((s) => s.restoreSharedBuild)
   const [isImportOpen, setIsImportOpen] = useState(false)
 
   useEffect(() => {
@@ -51,16 +51,7 @@ function App() {
     if (window.location.hash) {
       const data = decodeBuild(window.location.hash)
       if (data) {
-        setBuild(data.b)
-        setUCBalance(data.u)
-        for (const [name, val] of Object.entries(data.s)) {
-          setStartingValue(name, val)
-        }
-        if (data.a) {
-          for (const [name, val] of Object.entries(data.a)) {
-            setAttribute(name, val)
-          }
-        }
+        restoreSharedBuild(data.b, data.s, data.a, data.u)
         window.location.hash = ''
       }
     }
@@ -101,10 +92,10 @@ function App() {
             </span>
             <div className="h-px w-12 bg-gradient-to-l from-transparent to-uba-gold/40" />
           </div>
-          <h1 className="bg-gradient-to-b from-uba-gold via-uba-gold to-uba-gold/60 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl lg:text-6xl pb-1.5">
+          <h1 className="hero-gradient-text pb-1.5 text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
             Build Your Player
           </h1>
-          <p className="mx-auto mt-3 max-w-xl text-base text-uba-text-muted sm:text-lg">
+          <p className="premium-muted mx-auto mt-3 max-w-xl text-base font-medium text-uba-text-muted sm:text-lg">
             Set your archetype, allocate attributes, and track your UC budget in real time.
           </p>
         </motion.div>

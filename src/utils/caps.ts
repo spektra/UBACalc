@@ -151,7 +151,7 @@ function capValueToColor(cap: number): string {
   if (cap >= 99) return 'blue'
   if (cap >= 95) return 'purple'
   if (cap >= 94) return 'magenta'
-  if (cap >= 90) return 'cyan'
+  if (cap >= 90) return 'blue'
   if (cap >= 85) return 'green'
   if (cap >= 80) return 'orange'
   if (cap >= 75) return 'red'
@@ -167,7 +167,7 @@ export function getCapColor(attrName: string, build: BuildSetup): string {
   }
 
   const mod = archetypeMods[resolveBestStatus(attrName, build)]
-  return mod?.color ?? 'cyan'
+  return mod?.color ?? 'blue'
 }
 
 function getPhysicalCap(attrName: string, build: BuildSetup): number {

@@ -7,8 +7,15 @@ import buildOptions from '../data/buildOptions.json'
 const { heights, weightClasses, archetypes } = buildOptions
 
 export function BuildSetupForm() {
-  const { build, setBuild, loadPlayerBuild, resetBuild, triggerSave, deletePlayerBuild } = useBuilderStore()
+  const build = useBuilderStore((s) => s.build)
+  const setBuild = useBuilderStore((s) => s.setBuild)
+  const loadPlayerBuild = useBuilderStore((s) => s.loadPlayerBuild)
+  const resetBuild = useBuilderStore((s) => s.resetBuild)
+  const triggerSave = useBuilderStore((s) => s.triggerSave)
+  const deletePlayerBuild = useBuilderStore((s) => s.deletePlayerBuild)
+  const clearPlayerHistory = useBuilderStore((s) => s.clearPlayerHistory)
   const [saved, setSaved] = useState(false)
+  const [historyCleared, setHistoryCleared] = useState(false)
   const [dismissed, setDismissed] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -43,6 +50,17 @@ export function BuildSetupForm() {
     // suggestion updates are now handled by useMemo
   }
 
+  function handleClearPlayerHistory() {
+    const confirmed = window.confirm(
+      'Clear all saved player/build history from this browser? This cannot be undone.',
+    )
+    if (!confirmed) return
+    clearPlayerHistory()
+    setDismissed(true)
+    setHistoryCleared(true)
+    setTimeout(() => setHistoryCleared(false), 2500)
+  }
+
   function handleArchetypeChange(field: 'primaryArchetype' | 'secondaryArchetype' | 'weakness', value: string) {
     setBuild({
       [field]: value,
@@ -59,13 +77,13 @@ export function BuildSetupForm() {
       (field !== 'weakness' && build.weakness === value)
   }
 
-  const selectClass = "w-full rounded-xl border border-uba-border/60 bg-uba-surface/80 px-3 py-2.5 text-sm text-uba-text outline-none transition-all duration-200 focus:border-uba-blue/60 focus:shadow-[0_0_12px_-4px_rgba(2,76,166,0.15)] appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%238A8A92%22%3E%3Cpath%20d%3D%22M7%2010l5%205%205-5z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:20px] bg-[right_8px_center] bg-no-repeat pr-8"
-  const labelClass = "mb-1.5 block text-xs font-medium uppercase tracking-wider text-uba-text-dim"
+  const selectClass = "w-full rounded-xl border border-uba-border/60 bg-uba-surface/80 px-3 py-2.5 text-sm font-medium text-uba-text outline-none transition-all duration-200 focus:border-uba-gold/70 focus:shadow-[0_0_18px_-5px_rgba(242,211,153,0.45)] appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%238A8A92%22%3E%3Cpath%20d%3D%22M7%2010l5%205%205-5z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:20px] bg-[right_8px_center] bg-no-repeat pr-8"
+  const labelClass = "premium-label mb-1.5 block text-xs font-semibold uppercase text-uba-text-dim"
 
   return (
-    <div className="group rounded-2xl border border-uba-gold/10 bg-uba-card/80 p-4 sm:p-6 backdrop-blur-sm transition-all duration-300 hover:border-uba-gold/20 hover:shadow-[0_0_30px_-8px_rgba(230,198,147,0.08)]">
+    <div className="premium-card premium-glass group rounded-2xl border border-uba-gold/10 p-4 sm:p-6">
       <div className="mb-1 flex items-center justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-gold">
+        <h2 className="premium-label text-sm font-bold uppercase text-uba-gold">
           Build Setup
         </h2>
         <div className="h-px flex-1 ml-4 bg-gradient-to-r from-uba-border/40 to-transparent" />
@@ -90,7 +108,7 @@ export function BuildSetupForm() {
           {showDropdown && (
             <div
               ref={dropdownRef}
-              className="absolute z-20 mt-1 w-full overflow-hidden rounded-xl border border-uba-border/60 bg-uba-surface shadow-lg backdrop-blur-xl"
+               className="absolute z-20 mt-1 w-full overflow-hidden rounded-xl border border-uba-border/60 bg-uba-surface shadow-lg shadow-black/30"
             >
               {suggestions.map((name) => (
                 <div
@@ -164,11 +182,12 @@ export function BuildSetupForm() {
                   value={build.weightLbs}
                   onChange={(e) => {
                     const raw = e.target.value
-                    setBuild({ weightLbs: raw })
                     const lbs = parseInt(raw, 10)
                     if (!isNaN(lbs) && lbs >= 160 && lbs <= 300) {
                       const klass = lbsToWeightClass(lbs)
                       if (klass) setBuild({ weightClass: klass, weightLbs: raw })
+                    } else {
+                      setBuild({ weightLbs: raw })
                     }
                   }}
                   placeholder="lbs"
@@ -235,16 +254,29 @@ export function BuildSetupForm() {
         <div className="flex gap-2 pt-1">
           <button
             onClick={handleSave}
-            className="flex-1 rounded-xl border border-uba-gold/30 bg-uba-gold/10 px-3 py-2 text-xs font-medium text-uba-gold transition-all duration-200 hover:bg-uba-gold/20 active:scale-[0.98]"
+            className="premium-chip flex-1 rounded-xl border border-uba-gold/30 bg-uba-gold/10 px-3 py-2 text-xs font-semibold text-uba-gold transition-all duration-200 hover:bg-uba-gold/20 active:scale-[0.98]"
           >
             {saved ? 'Saved!' : 'Save Build'}
           </button>
           <button
             onClick={resetBuild}
-            className="rounded-xl border border-uba-border/50 bg-uba-surface/60 px-3 py-2 text-xs text-uba-gold transition-all duration-200 hover:bg-uba-surface active:scale-[0.98]"
+            className="rounded-xl border border-uba-border/50 bg-uba-surface/60 px-3 py-2 text-xs font-medium text-uba-gold transition-all duration-200 hover:bg-uba-surface active:scale-[0.98]"
           >
             Reset
           </button>
+        </div>
+
+        <div className="rounded-xl border border-uba-danger/25 bg-uba-danger/5 p-3">
+          <button
+            type="button"
+            onClick={handleClearPlayerHistory}
+            className="w-full rounded-lg border border-uba-danger/40 bg-uba-danger/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-uba-danger transition-all duration-200 hover:bg-uba-danger/20 hover:shadow-[0_0_16px_-6px_rgba(239,68,68,0.55)] active:scale-[0.98]"
+          >
+            {historyCleared ? 'Saved Player History Cleared' : 'Clear All Saved Player History'}
+          </button>
+          <p className="mt-2 text-[11px] leading-relaxed text-uba-text-dim">
+            Removes every saved player/build from this browser only. Current sliders stay on screen until you reset or load another build.
+          </p>
         </div>
       </div>
     </div>

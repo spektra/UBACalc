@@ -17,7 +17,8 @@ export function SheetImportDrawer({ open, onClose }: Props) {
   const [text, setText] = useState('')
   const [result, setResult] = useState<{ ok: boolean; msg: string } | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const { importPlayerAttributes, replacePreviouslyUnlocked } = useBuilderStore()
+  const importPlayerAttributes = useBuilderStore((s) => s.importPlayerAttributes)
+  const replacePreviouslyUnlocked = useBuilderStore((s) => s.replacePreviouslyUnlocked)
 
   const handleApply = useCallback(() => {
     if (tab === 'attributes') {
@@ -61,7 +62,7 @@ export function SheetImportDrawer({ open, onClose }: Props) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-black/50"
             onClick={handleClose}
           />
 
@@ -70,10 +71,10 @@ export function SheetImportDrawer({ open, onClose }: Props) {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="fixed right-0 top-0 z-50 h-full w-full w-full sm:max-w-md border-l border-uba-gold/20 bg-uba-card p-4 sm:p-6 shadow-2xl"
+            className="fixed right-0 top-0 z-50 h-full w-full sm:max-w-md border-l border-uba-gold/20 bg-uba-card p-4 sm:p-6 shadow-2xl shadow-black/40"
           >
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-uba-text-muted">
+              <h2 className="premium-label text-sm font-bold uppercase text-uba-text-muted">
                 Paste from Sheet
               </h2>
               <button

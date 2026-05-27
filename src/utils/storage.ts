@@ -3,6 +3,13 @@
 // we just return empty results and move on.
 
 import type { BuildSetup, Tier } from '../types'
+import {
+  sanitizeAttributeRecord,
+  sanitizeBuildSetup,
+  sanitizeTierRecord,
+  sanitizeTouchedRecord,
+  sanitizeUC,
+} from './validation'
 
 const STORAGE_KEY = 'uba-saved-builds'
 const MAX_BUILDS = 50
@@ -34,19 +41,44 @@ function setRaw(data: SavedBuild[]): void {
   }
 }
 
+function normalizeSavedBuild(input: unknown): SavedBuild | null {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return null
+  const candidate = input as Partial<SavedBuild>
+  if (typeof candidate.playerName !== 'string') return null
+
+  const playerName = sanitizeBuildSetup({ playerName: candidate.playerName }).playerName
+  if (!playerName) return null
+
+  const build = sanitizeBuildSetup({ ...candidate.build, playerName })
+  const startingValues = sanitizeAttributeRecord(candidate.startingValues)
+  const attributes = sanitizeAttributeRecord(candidate.attributes)
+  const previouslyUnlocked = sanitizeTierRecord(candidate.previouslyUnlocked)
+  const touchedStartingValues = sanitizeTouchedRecord(candidate.touchedStartingValues)
+  const updatedAt = typeof candidate.updatedAt === 'string' && !Number.isNaN(Date.parse(candidate.updatedAt))
+    ? candidate.updatedAt
+    : new Date(0).toISOString()
+
+  return {
+    playerName,
+    build,
+    startingValues,
+    attributes,
+    ucBalance: sanitizeUC(candidate.ucBalance),
+    previouslyUnlocked,
+    touchedStartingValues,
+    updatedAt,
+  }
+}
+
 export function loadAllBuilds(): SavedBuild[] {
   try {
     const raw = getRaw()
     if (!raw) return []
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
-    return parsed.filter(
-      (b: unknown): b is SavedBuild =>
-        typeof b === 'object' &&
-        b !== null &&
-        typeof (b as SavedBuild).playerName === 'string' &&
-        typeof (b as SavedBuild).build === 'object',
-    )
+    return parsed
+      .map(normalizeSavedBuild)
+      .filter((b): b is SavedBuild => b !== null)
   } catch {
     return []
   }
@@ -54,7 +86,8 @@ export function loadAllBuilds(): SavedBuild[] {
 
 export function loadBuild(name: string): SavedBuild | null {
   const builds = loadAllBuilds()
-  return builds.find((b) => b.playerName.toLowerCase() === name.toLowerCase()) ?? null
+  const normalized = name.trim().toLowerCase()
+  return builds.find((b) => b.playerName.toLowerCase() === normalized) ?? null
 }
 
 export function searchBuilds(query: string): SavedBuild[] {
@@ -72,23 +105,25 @@ export function saveBuild(
   previouslyUnlocked?: Record<string, Tier>,
   touchedStartingValues?: Record<string, true>,
 ): void {
-  if (!playerName.trim()) return
+  const cleanPlayerName = sanitizeBuildSetup({ playerName }).playerName
+  if (!cleanPlayerName) return
 
   try {
     const builds = loadAllBuilds()
+    const cleanBuild = sanitizeBuildSetup({ ...build, playerName: cleanPlayerName })
     const entry: SavedBuild = {
-      playerName: playerName.trim(),
-      build,
-      startingValues,
-      attributes,
-      ucBalance,
-      previouslyUnlocked: previouslyUnlocked || {},
-      touchedStartingValues: touchedStartingValues || {},
+      playerName: cleanPlayerName,
+      build: cleanBuild,
+      startingValues: sanitizeAttributeRecord(startingValues),
+      attributes: sanitizeAttributeRecord(attributes),
+      ucBalance: sanitizeUC(ucBalance),
+      previouslyUnlocked: sanitizeTierRecord(previouslyUnlocked),
+      touchedStartingValues: sanitizeTouchedRecord(touchedStartingValues),
       updatedAt: new Date().toISOString(),
     }
 
     const idx = builds.findIndex(
-      (b) => b.playerName.toLowerCase() === playerName.toLowerCase(),
+      (b) => b.playerName.toLowerCase() === cleanPlayerName.toLowerCase(),
     )
 
     if (idx >= 0) {
@@ -112,12 +147,21 @@ export function saveBuild(
 
 export function deleteBuild(name: string): void {
   try {
+    const normalized = name.trim().toLowerCase()
     const builds = loadAllBuilds().filter(
-      (b) => b.playerName.toLowerCase() !== name.toLowerCase(),
+      (b) => b.playerName.toLowerCase() !== normalized,
     )
     setRaw(builds)
   } catch (e) {
     console.warn('Failed to delete build:', e)
+  }
+}
+
+export function clearAllBuilds(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+  } catch (e) {
+    console.warn('Failed to clear saved builds:', e)
   }
 }
 
