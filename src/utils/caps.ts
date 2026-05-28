@@ -25,10 +25,17 @@ interface ArchetypeModifier {
   color: string
 }
 
+interface FixedAttributeCap {
+  cap: number
+  base: number
+  color: string
+}
+
 const rawCaps = capsData as unknown as {
   speedRanges: SpeedRange[]
   weight: { classes: WeightClasses }
   archetype: Record<string, ArchetypeModifier>
+  fixedAttributes: Record<string, FixedAttributeCap>
 }
 
 export const LBS_RANGES: [number, number, string][] = [
@@ -50,6 +57,7 @@ export function lbsToWeightClass(lbs: number): string | null {
 
 const weightClasses = rawCaps.weight.classes
 const archetypeMods = rawCaps.archetype
+const fixedAttributes = rawCaps.fixedAttributes
 const speedRanges = [...rawCaps.speedRanges].sort((a, b) => a.maxInches - b.maxInches)
 
 const rawAttrs = attributesData as unknown as Record<string, AttrCategory>
@@ -113,6 +121,7 @@ function resolveBestStatus(attrName: string, build: BuildSetup): string {
 export function getAttributeCap(attrName: string, build: BuildSetup): number {
   const physicalAttrs = ['Speed', 'Agility', 'Strength', 'Vertical']
   if (physicalAttrs.includes(attrName)) return getPhysicalCap(attrName, build)
+  if (fixedAttributes[attrName]) return fixedAttributes[attrName].cap
 
   const mod = archetypeMods[resolveBestStatus(attrName, build)]
   return mod?.cap ?? 90
@@ -143,6 +152,8 @@ export function getAttributeBase(attrName: string, build: BuildSetup): number {
     return 50
   }
 
+  if (fixedAttributes[attrName]) return fixedAttributes[attrName].base
+
   const mod = archetypeMods[resolveBestStatus(attrName, build)]
   return mod?.base ?? 50
 }
@@ -165,6 +176,8 @@ export function getCapColor(attrName: string, build: BuildSetup): string {
   if (physicalAttrs.includes(attrName)) {
     return capValueToColor(getPhysicalCap(attrName, build))
   }
+
+  if (fixedAttributes[attrName]) return fixedAttributes[attrName].color
 
   const mod = archetypeMods[resolveBestStatus(attrName, build)]
   return mod?.color ?? 'blue'

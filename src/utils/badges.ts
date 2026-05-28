@@ -5,20 +5,20 @@ const TIER_ORDER: Tier[] = ['Bronze', 'Silver', 'Gold', 'HOF', 'Legend']
 
 const SPLIT_OR = ' -or- '
 const SPLIT_AND = ' -and- '
-const SPLIT_AND_CAPS = ' AND '  // non-depth-aware — fine as no data nests AND inside EITHER
+const SPLIT_AND_CAPS = ' AND '
 
-function splitOr(input: string): string[] {
+function splitTopLevel(input: string, delimiter: string): string[] {
   const parts: string[] = []
   let depth = 0
   let current = ''
   let i = 0
   while (i < input.length) {
     if (input[i] === '(') depth++
-    else if (input[i] === ')') depth--
-    if (depth === 0 && input.startsWith(SPLIT_OR, i)) {
+    else if (input[i] === ')') depth = Math.max(0, depth - 1)
+    if (depth === 0 && input.startsWith(delimiter, i)) {
       parts.push(current.trim())
       current = ''
-      i += SPLIT_OR.length
+      i += delimiter.length
       continue
     }
     current += input[i]
@@ -26,6 +26,30 @@ function splitOr(input: string): string[] {
   }
   if (current.trim()) parts.push(current.trim())
   return parts
+}
+
+function stripOuterParens(input: string): string {
+  let s = input.trim()
+
+  while (s.startsWith('(') && s.endsWith(')')) {
+    let depth = 0
+    let wrapsWholeExpression = true
+
+    for (let i = 0; i < s.length; i++) {
+      if (s[i] === '(') depth++
+      else if (s[i] === ')') depth--
+
+      if (depth === 0 && i < s.length - 1) {
+        wrapsWholeExpression = false
+        break
+      }
+    }
+
+    if (!wrapsWholeExpression) break
+    s = s.slice(1, -1).trim()
+  }
+
+  return s
 }
 
 function getAttrValue(condition: string, lookup: Record<string, number>): { threshold: number; attrName: string; value: number } | null {
@@ -38,26 +62,29 @@ function getAttrValue(condition: string, lookup: Record<string, number>): { thre
 }
 
 function evalCondition(condition: string, attrs: Record<string, number>): boolean {
-  const s = condition.trim()
+  const s = stripOuterParens(condition)
 
   if (s.startsWith('EITHER ')) {
-    const inner = s.slice(7)
-    const parts = splitOr(inner)
+    const inner = stripOuterParens(s.slice(7))
+    const parts = splitTopLevel(inner, SPLIT_OR)
     return parts.some((p) => evalCondition(p, attrs))
   }
 
-  if (s.includes(SPLIT_AND_CAPS)) {
-    const parts = s.split(SPLIT_AND_CAPS)
+  const andCapsParts = splitTopLevel(s, SPLIT_AND_CAPS)
+  if (andCapsParts.length > 1) {
+    const parts = andCapsParts
     return parts.every((p) => evalCondition(p, attrs))
   }
 
-  if (s.includes(SPLIT_OR)) {
-    const parts = splitOr(s)
+  const orParts = splitTopLevel(s, SPLIT_OR)
+  if (orParts.length > 1) {
+    const parts = orParts
     return parts.some((p) => evalCondition(p, attrs))
   }
 
-  if (s.includes(SPLIT_AND)) {
-    const parts = s.split(SPLIT_AND)
+  const andParts = splitTopLevel(s, SPLIT_AND)
+  if (andParts.length > 1) {
+    const parts = andParts
     return parts.every((p) => evalCondition(p, attrs))
   }
 
@@ -67,26 +94,29 @@ function evalCondition(condition: string, attrs: Record<string, number>): boolea
 }
 
 function canEverAchieve(condition: string, caps: Record<string, number>): boolean {
-  const s = condition.trim()
+  const s = stripOuterParens(condition)
 
   if (s.startsWith('EITHER ')) {
-    const inner = s.slice(7)
-    const parts = splitOr(inner)
+    const inner = stripOuterParens(s.slice(7))
+    const parts = splitTopLevel(inner, SPLIT_OR)
     return parts.some((p) => canEverAchieve(p, caps))
   }
 
-  if (s.includes(SPLIT_AND_CAPS)) {
-    const parts = s.split(SPLIT_AND_CAPS)
+  const andCapsParts = splitTopLevel(s, SPLIT_AND_CAPS)
+  if (andCapsParts.length > 1) {
+    const parts = andCapsParts
     return parts.every((p) => canEverAchieve(p, caps))
   }
 
-  if (s.includes(SPLIT_OR)) {
-    const parts = splitOr(s)
+  const orParts = splitTopLevel(s, SPLIT_OR)
+  if (orParts.length > 1) {
+    const parts = orParts
     return parts.some((p) => canEverAchieve(p, caps))
   }
 
-  if (s.includes(SPLIT_AND)) {
-    const parts = s.split(SPLIT_AND)
+  const andParts = splitTopLevel(s, SPLIT_AND)
+  if (andParts.length > 1) {
+    const parts = andParts
     return parts.every((p) => canEverAchieve(p, caps))
   }
 
@@ -103,20 +133,47 @@ function parseConditionDetails(
   attrs: Record<string, number>,
   caps: Record<string, number>,
 ): BadgeConditionDetail[] {
-  const s = condition.trim()
+  const seen = new Set<string>()
+  return requirementGroups(condition, attrs, caps).flatMap((group) => group).filter((detail) => {
+    const key = `${detail.attrName}:${detail.threshold}`
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
 
-  if (s.includes(SPLIT_AND_CAPS)) {
-    const parts = s.split(SPLIT_AND_CAPS)
-    return parts.flatMap((p) => parseConditionDetails(p, attrs, caps))
+function combineRequirementGroups(groups: BadgeConditionDetail[][][]): BadgeConditionDetail[][] {
+  return groups.reduce<BadgeConditionDetail[][]>(
+    (combined, nextGroups) => combined.flatMap((group) => nextGroups.map((next) => [...group, ...next])),
+    [[]],
+  )
+}
+
+function requirementGroups(
+  condition: string,
+  attrs: Record<string, number>,
+  caps: Record<string, number>,
+): BadgeConditionDetail[][] {
+  const s = stripOuterParens(condition)
+
+  if (s.startsWith('EITHER ')) {
+    const inner = stripOuterParens(s.slice(7))
+    return splitTopLevel(inner, SPLIT_OR).flatMap((part) => requirementGroups(part, attrs, caps))
   }
 
-  if (s.includes(SPLIT_AND)) {
-    const parts = s.split(SPLIT_AND)
-    return parts.flatMap((p) => parseConditionDetails(p, attrs, caps))
+  const andCapsParts = splitTopLevel(s, SPLIT_AND_CAPS)
+  if (andCapsParts.length > 1) {
+    return combineRequirementGroups(andCapsParts.map((part) => requirementGroups(part, attrs, caps)))
   }
 
-  if (s.startsWith('EITHER ') || s.includes(SPLIT_OR)) {
-    return []
+  const orParts = splitTopLevel(s, SPLIT_OR)
+  if (orParts.length > 1) {
+    return orParts.flatMap((part) => requirementGroups(part, attrs, caps))
+  }
+
+  const andParts = splitTopLevel(s, SPLIT_AND)
+  if (andParts.length > 1) {
+    return combineRequirementGroups(andParts.map((part) => requirementGroups(part, attrs, caps)))
   }
 
   const match = s.match(/^(\d+)\s+(.+)$/)
@@ -126,28 +183,31 @@ function parseConditionDetails(
   const currentValue = attrs[attrName] ?? 0
   const hardCap = caps[attrName] ?? 99
 
-  return [{
+  return [[{
     attrName,
     threshold,
     currentValue,
     hardCap,
     met: currentValue >= threshold,
     cappedBelow: hardCap < threshold,
-  }]
+  }]]
 }
 
 function countConditions(threshold: string): number {
-  const s = threshold.trim()
+  const s = stripOuterParens(threshold)
 
-  if (s.includes(SPLIT_AND_CAPS)) {
-    return s.split(SPLIT_AND_CAPS).length
+  const andCapsParts = splitTopLevel(s, SPLIT_AND_CAPS)
+  if (andCapsParts.length > 1) {
+    return andCapsParts.length
   }
 
-  if (s.includes(SPLIT_AND)) {
-    return s.split(SPLIT_AND).length
+  const andParts = splitTopLevel(s, SPLIT_AND)
+  if (andParts.length > 1) {
+    return andParts.length
   }
 
-  if (s.startsWith('EITHER ') || s.includes(SPLIT_OR)) {
+  const orParts = splitTopLevel(s, SPLIT_OR)
+  if (s.startsWith('EITHER ') || orParts.length > 1) {
     return 1
   }
 
@@ -155,19 +215,22 @@ function countConditions(threshold: string): number {
 }
 
 function countMetConditions(threshold: string, attrs: Record<string, number>): number {
-  const s = threshold.trim()
+  const s = stripOuterParens(threshold)
 
-  if (s.includes(SPLIT_AND_CAPS)) {
-    const parts = s.split(SPLIT_AND_CAPS)
+  const andCapsParts = splitTopLevel(s, SPLIT_AND_CAPS)
+  if (andCapsParts.length > 1) {
+    const parts = andCapsParts
     return parts.filter((p) => evalCondition(p, attrs)).length
   }
 
-  if (s.includes(SPLIT_AND)) {
-    const parts = s.split(SPLIT_AND)
+  const andParts = splitTopLevel(s, SPLIT_AND)
+  if (andParts.length > 1) {
+    const parts = andParts
     return parts.filter((p) => evalCondition(p, attrs)).length
   }
 
-  if (s.startsWith('EITHER ') || s.includes(SPLIT_OR)) {
+  const orParts = splitTopLevel(s, SPLIT_OR)
+  if (s.startsWith('EITHER ') || orParts.length > 1) {
     return evalCondition(threshold, attrs) ? 1 : 0
   }
 
@@ -192,6 +255,7 @@ export function checkBadges(
       const currentMet = evalCondition(threshold, attrs)
       const feasible = canEverAchieve(threshold, caps)
       const conditions = parseConditionDetails(threshold, attrs, caps)
+      const groups = requirementGroups(threshold, attrs, caps)
 
       let state: BadgeTierState
       if (currentMet) {
@@ -203,7 +267,7 @@ export function checkBadges(
         state = 'LOCKED'
       }
 
-      tiers.push({ tier, state, conditions })
+      tiers.push({ tier, state, threshold, conditions, requirementGroups: groups })
     }
 
     const prev = previouslyUnlocked[badge.name] ?? null

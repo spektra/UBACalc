@@ -25,6 +25,18 @@
     "neutral": { "cap": 90, "base": 50, "color": "blue" },
     "weakness": { "cap": 75, "base": 40, "color": "red" }
   },
+  "fixedAttributes": {
+    "description": "Attributes with fixed caps/bases that are not controlled by archetype or height/weight tables.",
+    "Shot IQ": { "cap": 99, "base": 50, "color": "grey" },
+    "Pass IQ": { "cap": 99, "base": 50, "color": "grey" },
+    "Help Defense IQ": { "cap": 99, "base": 50, "color": "grey" },
+    "Hands": { "cap": 99, "base": 50, "color": "grey" },
+    "Pass Perception": { "cap": 99, "base": 50, "color": "grey" },
+    "Defensive Consistency": { "cap": 99, "base": 50, "color": "grey" },
+    "Offensive Consistency": { "cap": 99, "base": 50, "color": "grey" },
+    "Stamina": { "cap": 99, "base": 50, "color": "grey" },
+    "Hustle": { "cap": 99, "base": 50, "color": "grey" }
+  },
   "positionHeightRanges": {
     "PG": ["5'8\"", "6'7\""],
     "SG": ["6'1\"", "6'9\""],

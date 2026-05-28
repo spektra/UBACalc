@@ -8,9 +8,17 @@ describe('sheet import utilities', () => {
   test('parses the documented import sample attributes', () => {
     const parsed = parsePastedAttributes(sample)
     expect(parsed.playerName).toBe('Marius de Romanus')
-    expect(parsed.parsed).toBeGreaterThan(25)
+    expect(parsed.parsed).toBe(34)
     expect(parsed.startingValues['Driving Layup']).toBe(85)
     expect(parsed.startingValues['Mid Range']).toBe(70)
+    expect(parsed.startingValues['Shot IQ']).toBe(80)
+    expect(parsed.startingValues['Pass IQ']).toBe(80)
+    expect(parsed.startingValues['Hands']).toBe(60)
+    expect(parsed.startingValues['Stamina']).toBe(80)
+    expect(parsed.startingValues['Hustle']).toBe(55)
+    expect(parsed.startingValues['Defensive Consistency']).toBe(80)
+    expect(parsed.startingValues['Help Defense IQ']).toBe(80)
+    expect(parsed.startingValues['Offensive Consistency']).toBe(80)
   })
 
   test('parses the documented import sample badge tiers', () => {

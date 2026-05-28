@@ -23,7 +23,7 @@ The layout breaks attributes into explicit groupings. These groups are evaluated
 
 ### 🎯 Shooting
 * **Attributes Affected:** Mid Range, 3PT, Free Throw (FT) only.
-* *Note:* Shot IQ defaults to an 80 baseline for all prospects; current veteran mental stats are fixed on 26.
+* *Note:* Shot IQ is imported and upgraded as a Mental attribute, not capped by Shooting archetype.
 
 ### 🪓 Slashing
 * **Attributes Affected:** Driving Layup, Driving Dunk, Draw Foul, Speed With Ball (SWB).
@@ -32,14 +32,19 @@ The layout breaks attributes into explicit groupings. These groups are evaluated
 * **Attributes Affected:** Pass Accuracy, Pass Vision, Ball Handle, Speed With Ball (SWB).
 
 ### 🛡️ Defense
-* **Attributes Affected:** Steal, Block, Perimeter Defense, Interior Defense, Pass Perception.
-* *Note:* Help Defense IQ is pinned at a baseline of 80 for everyone.
+* **Attributes Affected:** Steal, Block, Perimeter Defense, Interior Defense, Pass Perception, Defensive Consistency.
+* *Note:* Pass Perception and Defensive Consistency are shared with Mental and use fixed caps from `caps.json`. Help Defense IQ is Mental-only.
 
 ### 🧱 Rebounding & Inside Finish
-* **Attributes Affected:** Offensive Rebound, Defensive Rebound, Standing Dunk, Close Shot.
+* **Attributes Affected:** Offensive Rebound, Defensive Rebound, Standing Dunk, Close Shot, Hands, Vertical.
+* *Note:* Hands is shared with Physical and uses a fixed cap. Vertical is shared with Physical and remains height/weight-capped.
 
 ### 💼 Post Scoring
 * **Attributes Affected:** Close Shot, Standing Dunk, Post Hook, Post Control, Post Fade.
+
+### 🧠 Mental
+* **Attributes Affected:** Shot IQ, Pass IQ, Help Defense IQ, Pass Perception, Defensive Consistency, Offensive Consistency, Hustle.
+* *Note:* These are fixed-cap attributes configured in `caps.json`, not archetype-capped.
 
 ---
 
@@ -93,3 +98,5 @@ Very Heavy:     275 - 300 lbs   | Strength 99/75, Vertical 75/40
   Starting value (base) is never penalized.
 - **Strength**: cap/base determined by weight class.
 - **Vertical**: cap/base determined by weight class (heavier = lower vertical ceiling).
+- **Stamina, Hustle & Hands**: fixed-cap physical attributes configured in `caps.json`. Hustle is shared with Mental; Hands is shared with Rebounding.
+- **Vertical**: shared with Rebounding and Physical, but always uses the height/weight physical matrix.

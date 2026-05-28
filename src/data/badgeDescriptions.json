@@ -1,0 +1,162 @@
+{
+  "Deadeye": {
+    "category": "Shooting / Outside Scoring",
+    "description": "Jump shots taken with a defender closing out receive less of a penalty from a shot contest."
+  },
+  "Limitless Range": {
+    "category": "Shooting / Outside Scoring",
+    "description": "Extends the range from which a player can shoot three-pointers effectively from deep."
+  },
+  "Mini Marksman": {
+    "category": "Shooting / Outside Scoring",
+    "description": "Elevates the likelihood of making perimeter shots over taller defenders."
+  },
+  "Set Shot Specialist": {
+    "category": "Shooting / Outside Scoring",
+    "description": "Boosts the success rate and attributes when knocking down stand-still jump shots."
+  },
+  "Shifty Shooter": {
+    "category": "Shooting / Outside Scoring",
+    "description": "Improves a player's ability to successfully make off-the-dribble, high-difficulty jump shots."
+  },
+  "Aerial Wizard": {
+    "category": "Inside Scoring / Finishing",
+    "description": "Increases the ability to finish an alley-oop from a teammate, or putback a finish off an offensive rebound."
+  },
+  "Float Game": {
+    "category": "Inside Scoring / Finishing",
+    "description": "Improves a player's ability to successfully make floaters and teardrops while driving."
+  },
+  "Hook Specialist": {
+    "category": "Inside Scoring / Finishing",
+    "description": "Improves a player's ability to convert post hooks from the inside block position."
+  },
+  "Layup Mixmaster": {
+    "category": "Inside Scoring / Finishing",
+    "description": "Improves a player's ability to successfully finish fancy, complex, or acrobatic layup animations."
+  },
+  "Paint Prodigy": {
+    "category": "Inside Scoring / Finishing",
+    "description": "Improves a player's ability to quickly and efficiently score while going to work inside the paint."
+  },
+  "Physical Finisher": {
+    "category": "Inside Scoring / Finishing",
+    "description": "Improves a player's ability to battle through defensive contact and convert contact layups."
+  },
+  "Post Fade Phenom": {
+    "category": "Inside Scoring / Finishing",
+    "description": "Improves a player's ability to successfully make post fades and mid-range hop shots."
+  },
+  "Post Powerhouse": {
+    "category": "Inside Scoring / Finishing",
+    "description": "Strengthens a player's success at backing down defenders and shifting them with dropsteps."
+  },
+  "Post-Up Poet": {
+    "category": "Inside Scoring / Finishing",
+    "description": "Raises the chances of faking out or spinning past defenders when performing moves in the post."
+  },
+  "Posterizer": {
+    "category": "Inside Scoring / Finishing",
+    "description": "Increases the likelihood of throwing down a driving contact dunk directly on your defender."
+  },
+  "Rise Up": {
+    "category": "Inside Scoring / Finishing",
+    "description": "Increases the likelihood of dunking or posterizing opponents when standing completely still under the basket."
+  },
+  "Ankle Assassin": {
+    "category": "Playmaking",
+    "description": "Increases the ability to break down the defender, stagger them, or cross them up during dribble chains."
+  },
+  "Bail Out": {
+    "category": "Playmaking",
+    "description": "Passing out of a mid-air jump shot or layup yields fewer errant passes, and aids passing out of double teams."
+  },
+  "Break Starter": {
+    "category": "Playmaking",
+    "description": "Improves accuracy of deep, fast outlet passes made up the court immediately following a defensive rebound."
+  },
+  "Dimer": {
+    "category": "Playmaking",
+    "description": "When operating in the half-court, passes delivered to open teammates yield an offensive shot percentage boost."
+  },
+  "Handles for Days": {
+    "category": "Playmaking",
+    "description": "Reduces the stamina hit taken when performing consecutive dribble moves, allowing longer combo chains."
+  },
+  "Lightning Launch": {
+    "category": "Playmaking",
+    "description": "Speeds up acceleration bursts and explosive first steps when launching an attack from the perimeter."
+  },
+  "Strong Handle": {
+    "category": "Playmaking",
+    "description": "Reduces the likelihood of being bumped, physically bothered, or slowed down by defenders when dribbling."
+  },
+  "Unpluckable": {
+    "category": "Playmaking",
+    "description": "Decreases the success rate of defenders attempting to poke the ball free or strip it during dribbles."
+  },
+  "Versatile Visionary": {
+    "category": "Playmaking",
+    "description": "Improves a player's ability to thread tight passes and execute precision alley-oops quickly and on time."
+  },
+  "Challenger": {
+    "category": "Defense",
+    "description": "Improves the defensive impact and effectiveness of well-timed contests against perimeter shooters."
+  },
+  "Glove": {
+    "category": "Defense",
+    "description": "Increases the success rate of stealing from active ball-handlers or stripping shooters mid-layup."
+  },
+  "Interceptor": {
+    "category": "Defense",
+    "description": "Greatly increases the frequency of successfully tipped, deflected, or cleanly intercepted passes in passing lanes."
+  },
+  "High-Flying Denier": {
+    "category": "Defense",
+    "description": "Boosts the speed and leaping ability of a defensive player in anticipation of a transition block attempt."
+  },
+  "Immovable Enforcer": {
+    "category": "Defense",
+    "description": "Improves physical strength when bumping ball handlers, cutting off drives, and matching finishers down low."
+  },
+  "Off-Ball Pest": {
+    "category": "Defense",
+    "description": "Makes it easier to stick to matchups off-ball by allowing defensive grabs and resisting ankle-breaker moves."
+  },
+  "On-Ball Menace": {
+    "category": "Defense",
+    "description": "Hounds, clamps, and physically bodies up opposing players while defending them tightly on the perimeter."
+  },
+  "Paint Patroller": {
+    "category": "Defense",
+    "description": "Increases a player's vertical reach and recovery time to block or heavily contest shots at the rim."
+  },
+  "Pick Dodger": {
+    "category": "Defense",
+    "description": "Improves navigation around screens. At high levels, allows a player to physically blow through screen setups."
+  },
+  "Post Lockdown": {
+    "category": "Defense",
+    "description": "Strengthens defense against post moves and significantly increases the chance of stripping a post scorer."
+  },
+  "Boxout Beast": {
+    "category": "Rebounding",
+    "description": "Improves a player's physical ability to box out opponents and maintain critical leverage for rebounds."
+  },
+  "Rebound Chaser": {
+    "category": "Rebounding",
+    "description": "Improves tracking speed and jump distance, allowing players to secure rebounds from farther away."
+  },
+  "Brick Wall": {
+    "category": "General Offense / All Around",
+    "description": "Increases screen effectiveness and actively drains physical energy from defenders upon impact."
+  },
+  "Slippery Off-Ball": {
+    "category": "General Offense / All Around",
+    "description": "Helps offensive players smoothly navigate heavy traffic and avoid being bumped when running off screens."
+  },
+  "Pogo Stick": {
+    "category": "General Offense / All Around",
+    "description": "Allows players to quickly bounce back up for a consecutive jump immediately after a rebound, block, or contest."
+  }
+}

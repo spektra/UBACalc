@@ -1,8 +1,8 @@
 {
-  "_comment": "UBA attribute categories and their contained attributes. Physical attributes (Speed, Agility, Strength, Vertical) are calculated from height/weight and are not archetype-capped. shared attributes (e.g. Close Shot, Speed With Ball) use the highest applicable cap.",
+  "_comment": "UBA attribute categories and their contained attributes. Shared attributes appear in multiple categories but store one value by name. Physical matrix attributes (Speed, Agility, Strength, Vertical) are calculated from height/weight; fixed attributes use caps.json.",
   "shooting": {
     "label": "Shooting",
-    "_comment": "Capped by Primary/Secondary/Weakness archetype. Shot IQ defaults to 80 and is not configurable.",
+    "_comment": "Capped by Primary/Secondary/Weakness archetype.",
     "attributes": [
       {
         "name": "Mid Range",
@@ -67,7 +67,7 @@
   },
   "defense": {
     "label": "Defense",
-    "_comment": "Help Defense IQ is pinned at 80 baseline and is not configurable.",
+    "_comment": "Capped by Primary/Secondary/Weakness archetype unless an attribute has a fixed cap in caps.json. Pass Perception and Defensive Consistency are shared with Mental.",
     "attributes": [
       {
         "name": "Steal",
@@ -88,13 +88,17 @@
       {
         "name": "Pass Perception",
         "default": 50
+      },
+      {
+        "name": "Defensive Consistency",
+        "default": 50
       }
     ],
     "color": "blue"
   },
   "rebounding": {
     "label": "Rebounding & Inside Finish",
-    "_comment": "Close Shot and Standing Dunk shared with Post Scoring.",
+    "_comment": "Close Shot and Standing Dunk shared with Post Scoring. Hands and Vertical are shared here for inside/rebounding context.",
     "attributes": [
       {
         "name": "Offensive Rebound",
@@ -110,6 +114,14 @@
       },
       {
         "name": "Close Shot",
+        "default": 50
+      },
+      {
+        "name": "Hands",
+        "default": 50
+      },
+      {
+        "name": "Vertical",
         "default": 50
       }
     ],
@@ -142,9 +154,44 @@
     ],
     "color": "purple"
   },
+  "mental": {
+    "label": "Mental",
+    "_comment": "League import mental attributes. These use fixed caps from caps.json, not archetype caps. Pass Perception and Defensive Consistency are shared with Defense; Hustle is shared with Physical.",
+    "attributes": [
+      {
+        "name": "Shot IQ",
+        "default": 50
+      },
+      {
+        "name": "Pass IQ",
+        "default": 50
+      },
+      {
+        "name": "Help Defense IQ",
+        "default": 50
+      },
+      {
+        "name": "Pass Perception",
+        "default": 50
+      },
+      {
+        "name": "Defensive Consistency",
+        "default": 50
+      },
+      {
+        "name": "Offensive Consistency",
+        "default": 50
+      },
+      {
+        "name": "Hustle",
+        "default": 50
+      }
+    ],
+    "color": "cyan"
+  },
   "physical": {
     "label": "Physical",
-    "_comment": "These are capped by height/weight, not archetype. Speed and Agility get penalties from weight class.",
+    "_comment": "Speed, Agility, Strength, and Vertical are capped by height/weight, not archetype. Stamina, Hustle, and Hands use fixed caps from caps.json. Vertical is shared with Rebounding; Hustle is shared with Mental; Hands is shared with Rebounding.",
     "attributes": [
       {
         "name": "Speed",
@@ -160,6 +207,18 @@
       },
       {
         "name": "Vertical",
+        "default": 50
+      },
+      {
+        "name": "Stamina",
+        "default": 50
+      },
+      {
+        "name": "Hustle",
+        "default": 50
+      },
+      {
+        "name": "Hands",
         "default": 50
       }
     ],

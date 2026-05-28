@@ -9,6 +9,7 @@ import { useBuilderStore } from '../stores/useBuilderStore'
 import { computeUpgradeCost } from '../utils/cost'
 import { getAttributeCap, getCapColor } from '../utils/caps'
 import attributesData from '../data/attributes.json'
+import attributeDescriptionsData from '../data/attributeDescriptions.json'
 
 interface AttrCategory {
   label: string
@@ -17,9 +18,16 @@ interface AttrCategory {
   attributes: { name: string; default: number }[]
 }
 
+interface AttributeDescription {
+  abbreviation: string
+  category: string
+  description: string
+}
+
 const CAP_COLORS: Record<string, string> = {
   blue: '#2563EB',
   purple: '#7C3AED',
+  cyan: '#06B6D4',
   magenta: '#C026D3',
   green: '#16A34A',
   orange: '#F97316',
@@ -39,8 +47,11 @@ export function AttributePanel() {
   const resetAttribute = useBuilderStore((s) => s.resetAttribute)
   const resetAllAttributes = useBuilderStore((s) => s.resetAllAttributes)
   const [revertCooldown, setRevertCooldown] = useState(false)
+  const [startDrafts, setStartDrafts] = useState<Record<string, string>>({})
+  const [openAttributeHelp, setOpenAttributeHelp] = useState<string | null>(null)
 
   const rawAttrs = attributesData as unknown as Record<string, AttrCategory>
+  const attributeDescriptions = attributeDescriptionsData as Record<string, AttributeDescription>
   const categories = Object.entries(rawAttrs).filter(([key]) => key !== '_comment')
   const sharedAttributes = useMemo(() => {
     const counts = new Map<string, number>()
@@ -66,15 +77,28 @@ export function AttributePanel() {
   }, [revertCooldown, resetAllAttributes])
 
   function handleStartInput(name: string, raw: string) {
+    if (!/^\d*$/.test(raw)) return
+    setStartDrafts((drafts) => ({ ...drafts, [name]: raw }))
+  }
+
+  function commitStartInput(name: string, raw: string) {
     const val = parseInt(raw, 10)
-    if (isNaN(val)) return
-    setStartingValue(name, val)
+    if (!isNaN(val)) setStartingValue(name, val)
+    setStartDrafts((drafts) => {
+      const { [name]: _draft, ...rest } = drafts
+      void _draft
+      return rest
+    })
   }
 
   function handleSliderInput(name: string, raw: string) {
     const val = parseInt(raw, 10)
     if (isNaN(val)) return
     setAttribute(name, val)
+  }
+
+  function attributeHelpId(categoryKey: string, name: string): string {
+    return `attr-help-${categoryKey}-${name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`
   }
 
   function handleKeyDown(name: string, e: React.KeyboardEvent, currentVal: number) {
@@ -118,6 +142,9 @@ export function AttributePanel() {
       <p className="premium-muted mt-2 text-[11px] leading-relaxed text-uba-text-dim">
         Shared attributes use one value and one UC cost everywhere they appear.
       </p>
+      <p className="premium-muted mt-1 text-[10px] leading-relaxed text-uba-text-dim/80">
+        Badge and attribute descriptions are compiled from community and internet sources, may be debated, and are best used with your own judgement.
+      </p>
 
       <div className="mt-5 space-y-5">
         {categories.map(([key, cat]) => {
@@ -147,6 +174,7 @@ export function AttributePanel() {
               {cat.attributes.map((attr) => {
                 const currentVal = attributes[attr.name] ?? startingValues[attr.name] ?? attr.default
                 const startVal = startingValues[attr.name] ?? attr.default
+                const startDraft = startDrafts[attr.name]
                 const isUpgraded = currentVal > startVal
                 const hasCap = !!(build.height || build.weightClass || build.primaryArchetype || build.secondaryArchetype || build.weakness)
                 const cap = hasCap ? getAttributeCap(attr.name, build) : 99
@@ -154,6 +182,10 @@ export function AttributePanel() {
                 const hexColor = CAP_COLORS[capColor] || CAP_COLORS.blue
                 const sliderColor = categoryColor
                 const upgradeCost = isUpgraded ? computeUpgradeCost(startVal, currentVal) : 0
+                const description = attributeDescriptions[attr.name]
+                const helpKey = `${key}:${attr.name}`
+                const helpOpen = openAttributeHelp === helpKey
+                const helpId = attributeHelpId(key, attr.name)
 
                 const startPct = ((startVal - 25) / (cap - 25)) * 100
                 const currentPct = ((currentVal - 25) / (cap - 25)) * 100
@@ -169,6 +201,19 @@ export function AttributePanel() {
                     <div className="mb-1 flex items-center justify-between text-xs">
                       <div className="flex items-center gap-1.5">
                         <span className="text-uba-text-dim [.light_&]:font-semibold">{attr.name}</span>
+                        {description && (
+                          <button
+                            type="button"
+                            aria-label={`${helpOpen ? 'Hide' : 'Show'} ${attr.name} description`}
+                            aria-expanded={helpOpen}
+                            aria-controls={helpId}
+                            onClick={() => setOpenAttributeHelp((current) => (current === helpKey ? null : helpKey))}
+                            className="premium-chip rounded-full border border-uba-border/50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-uba-text-dim transition-all hover:border-uba-gold/40 hover:text-uba-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-uba-gold/50"
+                            title={`${description.abbreviation}: ${description.description}`}
+                          >
+                            Info
+                          </button>
+                        )}
                         {sharedAttributes.has(attr.name) && (
                           <span
                             className="premium-chip rounded-full border border-uba-border/50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-uba-text-dim"
@@ -205,8 +250,26 @@ export function AttributePanel() {
                             type="number"
                             min={25}
                             max={cap}
-                            value={startVal}
+                            value={startDraft ?? startVal}
+                            onFocus={(e) => {
+                              e.currentTarget.select()
+                              setStartDrafts((drafts) => ({ ...drafts, [attr.name]: String(startVal) }))
+                            }}
                             onChange={(e) => handleStartInput(attr.name, e.target.value)}
+                            onBlur={(e) => commitStartInput(attr.name, e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                commitStartInput(attr.name, e.currentTarget.value)
+                                e.currentTarget.blur()
+                              } else if (e.key === 'Escape') {
+                                setStartDrafts((drafts) => {
+                                  const { [attr.name]: _draft, ...rest } = drafts
+                                  void _draft
+                                  return rest
+                                })
+                                e.currentTarget.blur()
+                              }
+                            }}
                             className="w-11 rounded-md border border-uba-border/40 bg-uba-surface/60 px-1 py-0.5 text-center text-xs text-uba-text outline-none transition-all focus:border-uba-blue/60 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                         </div>
@@ -230,6 +293,22 @@ export function AttributePanel() {
                         </div>
                       </div>
                     </div>
+                    {description && helpOpen && (
+                      <div
+                        id={helpId}
+                        className="mb-2 rounded-lg border border-uba-gold/15 bg-uba-canvas/45 px-3 py-2 text-[11px] leading-relaxed shadow-inner shadow-black/10"
+                      >
+                        <div className="mb-1 flex flex-wrap items-center gap-1.5">
+                          <span className="premium-chip rounded-md border border-uba-gold/25 bg-uba-gold/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-uba-gold">
+                            {description.abbreviation}
+                          </span>
+                          <span className="text-[10px] uppercase tracking-[0.12em] text-uba-text-dim">
+                            {description.category}
+                          </span>
+                        </div>
+                        <p className="text-uba-text-muted">{description.description}</p>
+                      </div>
+                    )}
                     <input
                       type="range"
                       min={25}

@@ -3,7 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useBuilderStore } from '../stores/useBuilderStore'
 import { checkBadges } from '../utils/badges'
 import { getAttributeCap } from '../utils/caps'
-import type { BadgeTierState, Tier } from '../types'
+import badgeDescriptionsData from '../data/badgeDescriptions.json'
+import type { BadgeConditionDetail, BadgeTierResult, BadgeTierState, Tier } from '../types'
+
+interface BadgeDescription {
+  category: string
+  description: string
+}
+
+const badgeDescriptions = badgeDescriptionsData as Record<string, BadgeDescription>
 
 const TIER_COLORS: Record<string, string> = {
   Bronze: 'from-amber-700 to-amber-500',
@@ -36,6 +44,7 @@ export function BadgeFeed() {
   const startingValues = useBuilderStore((s) => s.startingValues)
   const build = useBuilderStore((s) => s.build)
   const [showNewOnly, setShowNewOnly] = useState(false)
+  const [expandedBadge, setExpandedBadge] = useState<string | null>(null)
   const [sessionUnlocked, setSessionUnlocked] = useState<Set<string>>(new Set())
 
   const [glowingBadges, setGlowingBadges] = useState<Set<string>>(new Set())
@@ -172,6 +181,20 @@ export function BadgeFeed() {
     return null
   }
 
+  function nextTargetTier(tiers: BadgeTierResult[]): BadgeTierResult {
+    return tiers.find((tr) => tr.state !== 'EARNED') ?? tiers[tiers.length - 1]
+  }
+
+  function conditionText(condition: BadgeConditionDetail): string {
+    if (condition.met) return 'Met'
+    if (condition.cappedBelow) return `Cap ${condition.hardCap}`
+    return `+${condition.threshold - condition.currentValue} needed`
+  }
+
+  function detailId(name: string): string {
+    return `badge-detail-${name.replace(/\s+/g, '-').toLowerCase()}`
+  }
+
   if (!hasAttributes) {
     return (
       <div className="premium-card rounded-2xl border border-uba-gold/10 p-4 sm:p-6">
@@ -188,6 +211,9 @@ export function BadgeFeed() {
           </p>
           <p className="mt-1 text-xs text-uba-text-dim">
             Bronze · Silver · Gold · HOF · Legend
+          </p>
+          <p className="mt-3 text-[11px] text-uba-text-dim">
+            Once badges appear, click one to view next-tier requirements.
           </p>
         </div>
       </div>
@@ -229,6 +255,12 @@ export function BadgeFeed() {
             New unlocks
           </button>
         </div>
+        <p className="premium-muted mt-2 text-[11px] leading-relaxed text-uba-text-dim">
+          Click any badge row to view next-tier requirements and exact attribute gaps.
+        </p>
+        <p className="premium-muted mt-1 text-[10px] leading-relaxed text-uba-text-dim/80">
+          Badge descriptions are community-sourced and may vary by opinion.
+        </p>
 
         <div className="mt-3 max-h-[60vh] sm:max-h-80 space-y-1.5 overflow-y-auto pr-1">
           <AnimatePresence mode="popLayout">
@@ -242,16 +274,28 @@ export function BadgeFeed() {
                 const isNew = sessionUnlocked.has(r.name)
                 const tier = r.highestEarned
                 const fneState = firstNonEarnedState(r.tiers)
+                const badgeDescription = badgeDescriptions[r.name]
 
                 return (
                   <motion.div
                     key={r.name}
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={expandedBadge === r.name}
+                    aria-controls={detailId(r.name)}
+                    onClick={() => setExpandedBadge((current) => (current === r.name ? null : r.name))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setExpandedBadge((current) => (current === r.name ? null : r.name))
+                      }
+                    }}
                     layout
                     initial={isNew ? { scale: 0.8, opacity: 0, y: -10 } : undefined}
                     animate={isNew ? { scale: 1, opacity: 1, y: 0 } : undefined}
                     exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
                     transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                    className={`rounded-xl border p-3 transition-all duration-200 hover:-translate-y-0.5 ${
+                    className={`group cursor-pointer rounded-xl border p-3 outline-none transition-all duration-200 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-uba-gold/60 ${
                       tier
                         ? `${TIER_BG[tier]} ${isNew ? 'ring-2 ring-uba-gold shadow-lg shadow-uba-gold/20' : ''}`
                         : fneState === 'LOCKED'
@@ -266,6 +310,9 @@ export function BadgeFeed() {
                         {r.name}
                       </span>
                       <div className="flex items-center gap-2">
+                        <span className="premium-chip rounded-full border border-uba-border/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-uba-text-dim transition-all group-hover:border-uba-gold/30 group-hover:text-uba-gold">
+                          {expandedBadge === r.name ? 'Hide requirements' : 'View requirements'} {expandedBadge === r.name ? '^' : 'v'}
+                        </span>
                         {fneState === 'LOCKED' && !tier && (
                           <span className="text-xs text-uba-text-dim" title="Permanently locked due to attribute caps">
                             🔒
@@ -304,6 +351,66 @@ export function BadgeFeed() {
                         New badge unlocked!
                       </motion.div>
                     )}
+
+                    {expandedBadge === r.name && (() => {
+                      const target = nextTargetTier(r.tiers)
+                      const complete = r.tiers.every((tr) => tr.state === 'EARNED')
+                      const groups = target.requirementGroups.length > 0 ? target.requirementGroups : [target.conditions]
+
+                      return (
+                        <div
+                          id={detailId(r.name)}
+                          className="mt-3 rounded-lg border border-uba-border/50 bg-uba-canvas/50 p-3"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <div className="text-xs font-bold uppercase tracking-[0.14em] text-uba-gold">
+                                {complete ? 'Top tier earned' : `Next target: ${target.tier}`}
+                              </div>
+                              <div className="mt-1 text-[11px] leading-relaxed text-uba-text-dim">
+                                {complete ? 'All configured tiers are already unlocked.' : target.threshold}
+                              </div>
+                            </div>
+                            <span className={`premium-chip rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${target.state === 'LOCKED' ? 'border border-uba-danger/30 text-uba-danger' : 'border border-uba-gold/25 text-uba-gold'}`}>
+                              {target.state.toLowerCase()}
+                            </span>
+                          </div>
+
+                          {badgeDescription && (
+                            <div className="mt-3 rounded-md border border-uba-gold/15 bg-uba-gold/5 p-2">
+                              <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-uba-gold/85">
+                                {badgeDescription.category}
+                              </div>
+                              <p className="text-[11px] leading-relaxed text-uba-text-muted">
+                                {badgeDescription.description}
+                              </p>
+                            </div>
+                          )}
+
+                          {!complete && groups.map((group, idx) => (
+                            <div key={`${target.tier}-${idx}`} className="mt-2 rounded-md border border-uba-border/40 bg-uba-surface/40 p-2">
+                              {groups.length > 1 && (
+                                <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.12em] text-uba-blue-light">
+                                  Option {idx + 1}
+                                </div>
+                              )}
+                              <div className="space-y-1">
+                                {group.map((condition) => (
+                                  <div key={`${condition.attrName}-${condition.threshold}`} className="flex items-center justify-between gap-2 text-xs">
+                                    <span className="text-uba-text-muted">
+                                      {condition.attrName} <span className="text-uba-text-dim">{condition.currentValue}/{condition.threshold}</span>
+                                    </span>
+                                    <span className={condition.met ? 'text-emerald-400' : condition.cappedBelow ? 'text-uba-danger' : 'text-uba-gold'}>
+                                      {conditionText(condition)}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    })()}
                   </motion.div>
                 )
               })}

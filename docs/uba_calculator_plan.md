@@ -20,7 +20,7 @@ Fully client-side. No backend. All game parameters in flat JSON for season-to-se
 | Analytics | Cloudflare Web Analytics (free, no cookies) |
 | Error Tracking | Client-side `window.onerror` + `unhandledrejection` → localStorage logger |
 | PWA | Service worker + manifest (installable, app-shell/runtime caching) |
-| Testing | Playwright 1.60 (Chromium, headless, 40 e2e/smoke tests) + Vitest 4 unit tests |
+| Testing | Playwright 1.60 (Chromium, headless, 48 e2e/smoke tests) + Vitest 4 unit tests |
 | Donations | Ko-fi floating button ("Tip Marius") |
 
 ---
@@ -29,7 +29,7 @@ Fully client-side. No backend. All game parameters in flat JSON for season-to-se
 
 ### Phase 1: Core Calculator (MVP) ✅ Built
 - [x] Build setup form — player name, height dropdown, weight class, weight lbs input (160-275), primary/secondary archetypes, weakness
-- [x] 31 attribute sliders across 7 categories (Shooting, Slashing, Playmaking, Defense, Rebounding, Post Scoring, Physical)
+- [x] 34 unique attributes across 8 categories, with shared sliders repeated where useful for context
 - [x] UC budget tracker — running total vs balance, over-budget warning, clear/reset
 - [x] Badge unlock detection — 40 badges, Bronze/Silver/Gold/HOF thresholds from `badges.json`
 - [x] Submission output — formatted text with copy button, per-attribute upgrade lines
@@ -74,7 +74,7 @@ Fully client-side. No backend. All game parameters in flat JSON for season-to-se
 
 - **E2E Framework:** Playwright 1.60, Chromium only, headless, 1 worker
 - **Unit Framework:** Vitest 4 for pure utility regression tests
-- **Coverage:** 40 Playwright tests passing + 17 Vitest unit tests passing
+- **Coverage:** 48 Playwright tests + 23 Vitest unit tests
 - **Key testing quirks** documented in `docs/playwright-notes.md`:
   - `fill()` on range sliders and number inputs does NOT trigger React 19 onChange reliably → tests use keyboard events where needed
   - Playwright owns the Vite dev server through `webServer`; tests can use the dev/test-only `window.__builderStore` hook without exposing it in production preview
@@ -102,7 +102,7 @@ Full audit of all 24 source files, 4 doc files, 4 data files, 2 test files, and 
 - Consistent error handling throughout (try/catch on all localStorage calls, graceful fallbacks)
 - All game parameters in JSON files — zero hardcoded badge thresholds or caps in components
 - Consistent card styling with Tailwind: `rounded-2xl border border-uba-gold/10 bg-uba-card/80 backdrop-blur-sm`
-- 40 Playwright tests passing reliably
+- 47 Playwright tests passing reliably
 - Good TypeScript usage — few `any` types, proper interfaces for all game data
 - Strong data validation in sheet import (`findDataLine`, `isReasonableValue` guards)
 
@@ -151,9 +151,11 @@ Full audit of all 24 source files, 4 doc files, 4 data files, 2 test files, and 
 | File | Purpose |
 |---|---|
 | `badges.json` | 40 badges with Bronze/Silver/Gold/HOF threshold conditions |
-| `attributes.json` | 31 attributes in 6 archetype categories + 1 physical category |
-| `caps.json` | Height/weight cap tables + archetype cap modifiers (Primary=99, Secondary=95, Neutral=90, Weakness=75) |
-| `costScale.json` | UC cost brackets: 40-50 (50), 51-60 (100), 61-70 (200), 71-80 (400), 81-90 (800), 91-99 (1600) |
+| `badgeDescriptions.json` | Community-sourced badge category and description copy shown inside badge requirement disclosures |
+| `attributes.json` | 34 unique attributes in 6 archetype categories + Mental + Physical; shared attributes can appear in multiple categories |
+| `attributeDescriptions.json` | Compact slider help text for actual calculator attributes only; excludes non-slider metadata like durability, potential, and intangibles |
+| `caps.json` | Height/weight cap tables + archetype cap modifiers (Primary=99, Secondary=95, Neutral=90, Weakness=75) + fixed caps for Mental/Stamina/Hustle/Hands |
+| `costScale.json` | UC cost brackets by destination rating: 40-50 (50), 51-60 (100), 61-70 (200), 71-79 (400), 80-90 (1600), 91-99 (3200) |
 | `sheetColumns.json` | Column→attribute mapping for 35-column league export |
 | `badgeColumns.json` | Column→badge name mapping for 41-column badge import |
 | `buildOptions.json` | Build setup dropdown options: heights, weight classes, archetypes |

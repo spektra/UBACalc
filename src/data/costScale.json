@@ -1,11 +1,11 @@
 {
-  "_comment": "UC cost per attribute point by rating bracket. Yes, 91-99 really costs 1,600 UC per point. NBA 2K leagues are not kind to your wallet.",
+  "_comment": "UC cost per attribute point by destination rating bracket. High tiers: 80-90 costs 1,600 UC per point; 91-99 costs 3,200 UC per point.",
   "brackets": [
     { "range": "40-50", "costPerPoint": 50 },
     { "range": "51-60", "costPerPoint": 100 },
     { "range": "61-70", "costPerPoint": 200 },
-    { "range": "71-80", "costPerPoint": 400 },
-    { "range": "81-90", "costPerPoint": 800 },
-    { "range": "91-99", "costPerPoint": 1600 }
+    { "range": "71-79", "costPerPoint": 400 },
+    { "range": "80-90", "costPerPoint": 1600 },
+    { "range": "91-99", "costPerPoint": 3200 }
   ]
 }

@@ -19,7 +19,9 @@ export interface BadgeConditionDetail {
 export interface BadgeTierResult {
   tier: Tier
   state: BadgeTierState
+  threshold: string
   conditions: BadgeConditionDetail[]
+  requirementGroups: BadgeConditionDetail[][]
 }
 
 export interface BadgeResult {

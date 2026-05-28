@@ -29,6 +29,14 @@ describe('cap utilities', () => {
     expect(getAttributeBase('Speed', heavy)).toBe(60)
   })
 
+  test('uses fixed caps for mental and non-matrix physical attributes', () => {
+    const weakDefense = build({ weakness: 'Defense' })
+    expect(getAttributeCap('Pass Perception', weakDefense)).toBe(99)
+    expect(getAttributeCap('Shot IQ', build({ weakness: 'Shooting' }))).toBe(99)
+    expect(getAttributeCap('Stamina', build({ height: "7'4\"", weightClass: 'Very Heavy' }))).toBe(99)
+    expect(getAttributeBase('Hustle', build())).toBe(50)
+  })
+
   test('maps pounds to league weight class', () => {
     expect(lbsToWeightClass(160)).toBe('Very Light')
     expect(lbsToWeightClass(250)).toBe('Above Average')

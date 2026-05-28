@@ -1,0 +1,172 @@
+{
+  "Close Shot": {
+    "abbreviation": "CLOSE",
+    "category": "Scoring / Finishing",
+    "description": "Ability to shoot when standing still out to 10 feet from the basket. Determines effectiveness with post hooks, post shots, standing alley-oops, and putback layups."
+  },
+  "Driving Layup": {
+    "abbreviation": "LAYUP",
+    "category": "Inside Scoring / Finishing",
+    "description": "Ability to successfully complete regular, contact, alley-oop, and putback layup attempts while moving towards the basket."
+  },
+  "Driving Dunk": {
+    "abbreviation": "DUNK",
+    "category": "Inside Scoring / Finishing",
+    "description": "Ability to successfully complete regular, contact, alley-oop, and putback dunk attempts while driving towards the basket."
+  },
+  "Standing Dunk": {
+    "abbreviation": "STDUNK",
+    "category": "Inside Scoring / Finishing",
+    "description": "Ability to successfully complete regular, contact, alley-oop, and putback dunk attempts while standing still under the basket. Crucial for big men."
+  },
+  "Post Control": {
+    "abbreviation": "POSTC",
+    "category": "Inside Scoring / Finishing",
+    "description": "Determines success when performing spins, drives, drop steps, and other moves from the post position. Combines with strength and size to back down defenders."
+  },
+  "Post Fade": {
+    "abbreviation": "PFADE",
+    "category": "Inside Scoring",
+    "description": "Determines a player's effectiveness and success rate when executing fadeaway shots from the post position."
+  },
+  "Post Hook": {
+    "abbreviation": "PHOOK",
+    "category": "Inside Scoring",
+    "description": "Determines a player's ability to successfully execute hook shots while operating from the post position."
+  },
+  "Draw Foul": {
+    "abbreviation": "FOUL",
+    "category": "Inside Scoring",
+    "description": "Determines the ability to bait or naturally attract shooting and blocking fouls from defenders when driving to the basket or taking close shots."
+  },
+  "Hands": {
+    "abbreviation": "HANDS",
+    "category": "Inside Scoring",
+    "description": "Determines a player's ability to secure and control the basketball. Influences effectiveness in catching passes and cleanly finishing plays."
+  },
+  "Mid Range": {
+    "abbreviation": "MID",
+    "category": "Outside Scoring / Shooting",
+    "description": "Ability to make shots of all types from mid-range distance, including pull-ups, step-backs, and post fadeaway attempts."
+  },
+  "3PT": {
+    "abbreviation": "3PT",
+    "category": "Outside Scoring / Shooting",
+    "description": "Determines the player's ability to successfully make shots of all types from three-point distance."
+  },
+  "Free Throw": {
+    "abbreviation": "FT",
+    "category": "Outside Scoring / Shooting",
+    "description": "Ability to successfully make free throw attempts. Higher ratings broaden the release window, making the shot timing significantly easier."
+  },
+  "Shot IQ": {
+    "abbreviation": "SHOTIQ",
+    "category": "Outside Scoring / IQ",
+    "description": "Governs shot selection. High Shot IQ helps AI players identify open or balanced looks and avoid forcing heavily contested heaves or driving blindly into traffic."
+  },
+  "Pass Accuracy": {
+    "abbreviation": "PASS",
+    "category": "Playmaking",
+    "description": "Ability to throw the ball accurately in all situations (bounce, chest, lob, overhead, flashy, alley-oop), especially under defensive pressure."
+  },
+  "Ball Handle": {
+    "abbreviation": "BALL",
+    "category": "Playmaking",
+    "description": "Determines skill and control while dribbling. Dictates the advanced moves allowed and controls how well a player secures the ball against steal attempts."
+  },
+  "Speed With Ball": {
+    "abbreviation": "SPD/BALL",
+    "category": "Playmaking",
+    "description": "Determines how fast a player can launch into a dribble from a standstill, run, or sprint while actively controlling the ball."
+  },
+  "Pass IQ": {
+    "abbreviation": "PASSIQ",
+    "category": "Playmaking / IQ",
+    "description": "Governs AI court vision and decision-making, influencing how effectively a player identifies the best passing options while minimizing turnover risks."
+  },
+  "Pass Vision": {
+    "abbreviation": "VISION",
+    "category": "Playmaking",
+    "description": "The player's ability to quickly recognize and anticipate passing opportunities across the court for open teammates, reducing turnover-heavy animations."
+  },
+  "Interior Defense": {
+    "abbreviation": "ID",
+    "category": "Defense",
+    "description": "Ability to defend the paint effectively both on and off the ball, lock down opponents down low, and contest shots near the rim."
+  },
+  "Perimeter Defense": {
+    "abbreviation": "PD",
+    "category": "Defense",
+    "description": "Effectiveness in guarding opponents on the perimeter. Influences lateral containment, staying in front of drivers, contesting outside shots, and preventing cuts."
+  },
+  "Steal": {
+    "abbreviation": "STEAL",
+    "category": "Defense",
+    "description": "Ability to intercept or deflect passes in lanes and cleanly take the ball away from opposing ball-handlers in all situations."
+  },
+  "Block": {
+    "abbreviation": "BLOCK",
+    "category": "Defense",
+    "description": "Determines the probability of successfully contesting or blocking all types of shots, particularly near the basket."
+  },
+  "Pass Perception": {
+    "abbreviation": "PSPER",
+    "category": "Defense",
+    "description": "Determines a player's ability to anticipate and react to passing lanes, leading to quicker, more responsive interception and disruption animations."
+  },
+  "Defensive Consistency": {
+    "abbreviation": "DCNST",
+    "category": "Defense",
+    "description": "Maintains defensive focus over time. Prevents players from getting caught flat-footed, blowing rotation assignments, or losing badge effectiveness."
+  },
+  "Help Defense IQ": {
+    "abbreviation": "HELPDIQ",
+    "category": "Defense",
+    "description": "Dictates how smartly a player provides help defense, collapsing into the paint to contest driving layups or rotating to cover open perimeter shooters."
+  },
+  "Offensive Consistency": {
+    "abbreviation": "OCNST",
+    "category": "Outside Scoring / Mental",
+    "description": "Dictates how quickly a player gets hot, how long they sustain it, and how heavily shooting percentages drop during a slumping stretch."
+  },
+  "Offensive Rebound": {
+    "abbreviation": "OREB",
+    "category": "Rebounding",
+    "description": "Ability to track and secure offensive rebounds. Combines with vertical to unlock elite reach content and controls boxing out or navigating around box outs."
+  },
+  "Defensive Rebound": {
+    "abbreviation": "DREB",
+    "category": "Rebounding",
+    "description": "Ability to track and secure defensive rebounds. Combines with vertical to unlock elite reach content and controls boxing out or navigating around box outs."
+  },
+  "Speed": {
+    "abbreviation": "SPEED",
+    "category": "Athleticism / Physicals",
+    "description": "Determines how fast a player can run or sprint around the court without the ball during transitions, fast breaks, and off-ball tracking."
+  },
+  "Agility": {
+    "abbreviation": "AGILITY",
+    "category": "Athleticism / Physicals",
+    "description": "Governs off-ball bursts, quick direction changes, cuts, and defensive lateral movement needed to stay in front of shifty ball-handlers."
+  },
+  "Strength": {
+    "abbreviation": "STR",
+    "category": "Athleticism / Physicals",
+    "description": "Controls physical contact battles. Dictates success when absorbing contact, holding ground defensively, backing down opponents, or resisting a post back-down."
+  },
+  "Vertical": {
+    "abbreviation": "VERT",
+    "category": "Athleticism / Physicals",
+    "description": "Determines leaping ability. Acts as a gatekeeper for elite dunk animations and pairs with rebounding/blocking attributes to reach peak ball heights."
+  },
+  "Stamina": {
+    "abbreviation": "STAM",
+    "category": "Athleticism / Physicals",
+    "description": "Represents the player's total energy pool. Low stamina triggers fatigue, which drastically reduces speed, attribute ratings, and shot execution success."
+  },
+  "Hustle": {
+    "abbreviation": "HSTL",
+    "category": "Athleticism / Physicals",
+    "description": "Dictates reaction time, effort, and tenacity when diving for loose balls, securing 50/50 possessions, or saving errant plays from going out of bounds."
+  }
+}

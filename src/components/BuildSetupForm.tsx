@@ -14,9 +14,12 @@ export function BuildSetupForm() {
   const triggerSave = useBuilderStore((s) => s.triggerSave)
   const deletePlayerBuild = useBuilderStore((s) => s.deletePlayerBuild)
   const clearPlayerHistory = useBuilderStore((s) => s.clearPlayerHistory)
+  const savedPlayers = useBuilderStore((s) => s.savedPlayers)
+  const refreshSavedPlayers = useBuilderStore((s) => s.refreshSavedPlayers)
   const [saved, setSaved] = useState(false)
   const [historyCleared, setHistoryCleared] = useState(false)
   const [dismissed, setDismissed] = useState(false)
+  const [selectedProfile, setSelectedProfile] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -38,16 +41,31 @@ export function BuildSetupForm() {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
+  useEffect(() => {
+    refreshSavedPlayers()
+  }, [refreshSavedPlayers])
+
+  useEffect(() => {
+    setSelectedProfile((current) => (current && savedPlayers.includes(current) ? current : savedPlayers[0] ?? ''))
+  }, [savedPlayers])
+
   function handleSelect(name: string) {
     loadPlayerBuild(name)
+    setSelectedProfile(name)
+    setDismissed(true)
+  }
+
+  function handleLoadSelected() {
+    if (!selectedProfile) return
+    handleSelect(selectedProfile)
   }
 
   function handleSave() {
     if (!build.playerName.trim()) return
     triggerSave(true)
     setSaved(true)
+    setSelectedProfile(build.playerName.trim())
     setTimeout(() => setSaved(false), 2000)
-    // suggestion updates are now handled by useMemo
   }
 
   function handleClearPlayerHistory() {
@@ -56,6 +74,7 @@ export function BuildSetupForm() {
     )
     if (!confirmed) return
     clearPlayerHistory()
+    setSelectedProfile('')
     setDismissed(true)
     setHistoryCleared(true)
     setTimeout(() => setHistoryCleared(false), 2500)
@@ -101,7 +120,7 @@ export function BuildSetupForm() {
             value={build.playerName}
             onChange={(e) => setBuild({ playerName: e.target.value })}
             onFocus={() => setDismissed(false)}
-            placeholder="Enter player name (auto-loads saved builds)..."
+            placeholder="Type name to auto-load saved player"
             maxLength={40}
             className="w-full rounded-xl border border-uba-border/60 bg-uba-surface/80 px-4 py-2.5 text-sm text-uba-text placeholder:text-uba-text-dim/40 outline-none transition-all duration-200 focus:border-uba-blue/60 focus:shadow-[0_0_12px_-4px_rgba(2,76,166,0.15)]"
           />
@@ -126,7 +145,7 @@ export function BuildSetupForm() {
                     tabIndex={-1}
                     aria-label={`Delete ${name}`}
                     title={`Delete ${name}`}
-                    onClick={(e) => { e.stopPropagation(); deletePlayerBuild(name); }}
+                    onClick={(e) => { e.stopPropagation(); deletePlayerBuild(name) }}
                     className="ml-2 rounded p-1 text-uba-text-dim opacity-0 transition-all group-hover/item:opacity-100 hover:opacity-100 hover:text-uba-danger focus:opacity-100 focus:text-uba-danger"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
@@ -137,6 +156,46 @@ export function BuildSetupForm() {
               ))}
             </div>
           )}
+        </div>
+
+        <div className="rounded-xl border border-uba-blue/20 bg-uba-blue/5 p-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <label htmlFor="savedProfile" className={labelClass}>
+                Saved Profiles
+              </label>
+              <p className="text-[11px] leading-relaxed text-uba-text-dim">
+                Load a saved build here, or type a saved player name above.
+              </p>
+            </div>
+            <span className="premium-chip hidden rounded-full border border-uba-blue/30 bg-uba-blue/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-uba-blue-light sm:inline">
+              Recall
+            </span>
+          </div>
+          <div className="mt-2 flex gap-2">
+            <select
+              id="savedProfile"
+              value={selectedProfile}
+              onFocus={refreshSavedPlayers}
+              onChange={(e) => setSelectedProfile(e.target.value)}
+              disabled={savedPlayers.length === 0}
+              className={selectClass + " flex-1 disabled:cursor-not-allowed disabled:opacity-50"}
+            >
+              {savedPlayers.length === 0 ? (
+                <option value="">No saved profiles yet</option>
+              ) : savedPlayers.map((name: string) => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={handleLoadSelected}
+              disabled={!selectedProfile}
+              className="premium-chip rounded-xl border border-uba-blue/30 bg-uba-blue/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-uba-blue-light transition-all duration-200 hover:bg-uba-blue/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Load
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">

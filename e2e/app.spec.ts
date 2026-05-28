@@ -71,35 +71,34 @@ test.describe('Build Setup Form', () => {
 
   test('can input player name', async ({ page }) => {
     await page.goto('/')
-    const input = page.getByPlaceholder(/Enter player name/)
+    const input = page.getByPlaceholder(/auto-load saved player/)
     await input.fill('TestPlayer')
     await expect(input).toHaveValue('TestPlayer')
   })
 
   test('can save and load a build', async ({ page }) => {
     await page.goto('/')
-    await page.getByPlaceholder(/Enter player name/).fill('SaveTest')
+    await page.getByPlaceholder(/auto-load saved player/).fill('SaveTest')
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Weight').selectOption('Average')
     await page.getByLabel('Primary Strength').selectOption('Shooting')
     await page.getByText('Save Build').click()
     await page.getByText('Saved!').waitFor()
-    await page.getByText('Reset').click()
+    await page.getByRole('button', { name: 'Reset' }).click()
     await page.waitForTimeout(200)
-    await page.getByPlaceholder(/Enter player name/).fill('SaveTest')
-    await page.waitForTimeout(200)
-    await page.getByText('SaveTest').click()
+    await expect(page.getByText('Load a saved build here')).toBeVisible()
+    await page.getByRole('button', { name: 'Load' }).click()
     await expect(page.getByLabel('Height')).toHaveValue("6'6\"")
   })
 
   test('reset button clears all selections', async ({ page }) => {
     await page.goto('/')
-    await page.getByPlaceholder(/Enter player name/).fill('ResetTest')
+    await page.getByPlaceholder(/auto-load saved player/).fill('ResetTest')
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Weight').selectOption('Above Average')
     await page.getByLabel('Primary Strength').selectOption('Shooting')
-    await page.getByText('Reset').click()
-    await expect(page.getByPlaceholder(/Enter player name/)).toHaveValue('')
+    await page.getByRole('button', { name: 'Reset' }).click()
+    await expect(page.getByPlaceholder(/auto-load saved player/)).toHaveValue('')
     await expect(page.getByLabel('Height')).toHaveValue('')
     await expect(page.getByLabel('Weight')).toHaveValue('')
     await expect(page.getByLabel('Primary Strength')).toHaveValue('')
@@ -146,6 +145,24 @@ test.describe('Attribute Panel', () => {
     await expect(page.getByText('Mid Range')).toBeVisible()
     await expect(page.getByText('3PT')).toBeVisible()
     await expect(page.getByText('Free Throw')).toBeVisible()
+    await expect(page.getByText('Shot IQ').first()).toBeVisible()
+    await expect(page.getByText('Pass IQ').first()).toBeVisible()
+    await expect(page.getByText('Help Defense IQ').first()).toBeVisible()
+    await expect(page.getByText('Hands').first()).toBeVisible()
+    await expect(page.getByText('Stamina').first()).toBeVisible()
+    await expect(page.getByText('Hustle').first()).toBeVisible()
+    await expect(page.getByText('Defensive Consistency').first()).toBeVisible()
+    await expect(page.getByText('Offensive Consistency').first()).toBeVisible()
+  })
+
+  test('shows compact attribute descriptions', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.getByText(/descriptions are compiled from community and internet sources/i)).toBeVisible()
+
+    await page.getByRole('button', { name: 'Show Mid Range description' }).click()
+    await expect(page.getByText('MID', { exact: true })).toBeVisible()
+    await expect(page.getByText(/Ability to make shots of all types from mid-range distance/i)).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Hide Mid Range description' })).toBeVisible()
   })
 
   test('slider respects cap from archetype', async ({ page }) => {
@@ -191,6 +208,27 @@ test.describe('Attribute Panel', () => {
     const star = inputs.nth(1)
     await star.fill('65')
     await expect(star).toHaveValue('65')
+  })
+
+  test('start value input does not clamp while typing', async ({ page }) => {
+    await page.goto('/')
+    await page.getByLabel('Height').selectOption("6'6\"")
+    await page.getByLabel('Primary Strength').selectOption('Shooting')
+    const start = page.getByRole('spinbutton').nth(1)
+
+    await start.click()
+    await page.keyboard.press('Backspace')
+    await expect(start).toHaveValue('')
+    await start.blur()
+    await expect(start).toHaveValue('80')
+
+    await start.click()
+    await page.keyboard.type('9')
+    await expect(start).toHaveValue('9')
+    await page.keyboard.type('0')
+    await expect(start).toHaveValue('90')
+    await start.blur()
+    await expect(start).toHaveValue('90')
   })
 
   test('shows cap badge when build has height and archetype', async ({ page }) => {
@@ -332,6 +370,27 @@ test.describe('Badge Feed', () => {
     await page.waitForTimeout(300)
     await expect(page.getByText('Bronze').first()).toBeVisible()
   })
+
+  test('shows next-tier badge requirements when clicked', async ({ page }) => {
+    await page.goto('/')
+    await page.getByLabel('Height').selectOption("6'6\"")
+    await page.getByLabel('Primary Strength').selectOption('Playmaking')
+    await setStore(page, 'Pass Accuracy', 70)
+    await setStore(page, 'Pass Vision', 60)
+    await page.waitForTimeout(300)
+
+    await expect(page.getByText(/Click any badge row to view next-tier requirements/i)).toBeVisible()
+    await expect(page.getByText('View requirements').first()).toBeVisible()
+    await page.getByText('Break Starter').click()
+    await expect(page.getByText('Hide requirements')).toBeVisible()
+    await expect(page.getByText('Next target: Bronze')).toBeVisible()
+    await expect(page.getByText(/Improves accuracy of deep, fast outlet passes/i)).toBeVisible()
+    await expect(page.getByText('Pass Accuracy').last()).toBeVisible()
+    await expect(page.getByText('70/65')).toBeVisible()
+    await expect(page.getByText('Pass Vision').last()).toBeVisible()
+    await expect(page.getByText('60/65')).toBeVisible()
+    await expect(page.getByText('+5 needed')).toBeVisible()
+  })
 })
 
 test.describe('Submission Output', () => {
@@ -363,7 +422,7 @@ test.describe('Submission Output', () => {
 
   test('shows share button when build has player name', async ({ page }) => {
     await page.goto('/')
-    const input = page.getByPlaceholder(/Enter player name/)
+    const input = page.getByPlaceholder(/auto-load saved player/)
     await input.fill('ShareTest')
     const heightSelect = page.getByLabel('Height')
     await heightSelect.selectOption("6'6\"")
@@ -416,7 +475,7 @@ test.describe('Header', () => {
 test.describe('Share URL', () => {
   test('can encode build to URL and decode back', async ({ page }) => {
     await page.goto('/')
-    const input = page.getByPlaceholder(/Enter player name/)
+    const input = page.getByPlaceholder(/auto-load saved player/)
     await input.fill('ShareEncodeTest')
     const heightSelect = page.getByLabel('Height')
     await heightSelect.selectOption("6'6\"")
@@ -463,6 +522,14 @@ test.describe('Sheet Import', () => {
         hasFloatGame: s.previouslyUnlocked['Float Game'] || null,
         hasPosterizer: s.previouslyUnlocked['Posterizer'] || null,
         dd: s.startingValues['Driving Dunk'],
+        shotIq: s.startingValues['Shot IQ'],
+        passIq: s.startingValues['Pass IQ'],
+        hands: s.startingValues.Hands,
+        stamina: s.startingValues.Stamina,
+        hustle: s.startingValues.Hustle,
+        defensiveConsistency: s.startingValues['Defensive Consistency'],
+        helpDefenseIq: s.startingValues['Help Defense IQ'],
+        offensiveConsistency: s.startingValues['Offensive Consistency'],
       }
     })
     console.log('After import:', JSON.stringify(state))
@@ -472,6 +539,14 @@ test.describe('Sheet Import', () => {
     // Posterizer should NOT be owned (DD=70, need 80)
     expect(state.hasPosterizer).toBeNull()
     expect(state.dd).toBe(70)
+    expect(state.shotIq).toBe(70)
+    expect(state.passIq).toBe(70)
+    expect(state.hands).toBe(70)
+    expect(state.stamina).toBe(65)
+    expect(state.hustle).toBe(60)
+    expect(state.defensiveConsistency).toBe(80)
+    expect(state.helpDefenseIq).toBe(75)
+    expect(state.offensiveConsistency).toBe(70)
 
     // Now move DD to 80 and check Posterizer shows as new
     await page.evaluate(() => {
@@ -584,6 +659,7 @@ test.describe('Sheet Import', () => {
   })
 
   test('saves and reloads imported attributes, upgrades, and badge history', async ({ page }) => {
+    test.slow()
     await page.goto('/')
     await page.getByLabel('Height').selectOption('6\'6"')
     await page.getByLabel('Weight').selectOption('Average')
@@ -604,9 +680,8 @@ test.describe('Sheet Import', () => {
 
     await page.getByText('Save Build').click()
     await page.getByText('Saved!').waitFor()
-    await page.getByText('Reset').click()
-    await page.getByPlaceholder(/Enter player name/).fill('Nova Slash')
-    await page.getByText('Nova Slash').click()
+    await page.getByRole('button', { name: 'Reset' }).click()
+    await page.getByRole('button', { name: 'Load' }).click()
 
     const reloaded = await page.evaluate(() => {
       const s = window.__builderStore.getState()
@@ -665,7 +740,7 @@ test.describe('Sheet Import', () => {
 
   test('typing an existing saved name does not auto-overwrite that saved build', async ({ page }) => {
     await page.goto('/')
-    await page.getByPlaceholder(/Enter player name/).fill('Overwrite Guard')
+    await page.getByPlaceholder(/auto-load saved player/).fill('Overwrite Guard')
     await page.getByLabel('Height').selectOption('6\'3"')
     await page.getByLabel('Primary Strength').selectOption('Shooting')
     await page.evaluate(() => {
@@ -675,13 +750,13 @@ test.describe('Sheet Import', () => {
     await page.getByText('Save Build').click()
     await page.getByText('Saved!').waitFor()
 
-    await page.getByText('Reset').click()
-    await page.getByPlaceholder(/Enter player name/).fill('Overwrite Guard')
+    await page.getByRole('button', { name: 'Reset' }).click()
+    await page.getByPlaceholder(/auto-load saved player/).fill('Overwrite Guard')
     await page.getByLabel('Height').selectOption('7\'0"')
     await page.waitForTimeout(1800)
-    await page.getByText('Reset').click()
-    await page.getByPlaceholder(/Enter player name/).fill('Overwrite Guard')
-    await page.getByText('Overwrite Guard').click()
+    await page.getByRole('button', { name: 'Reset' }).click()
+    await page.getByPlaceholder(/auto-load saved player/).fill('Overwrite Guard')
+    await page.getByRole('button', { name: 'Load' }).click()
 
     const loaded = await page.evaluate(() => {
       const s = window.__builderStore.getState()

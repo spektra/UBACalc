@@ -136,8 +136,10 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
   },
 
   setStartingValue: (name, value) => {
-    const clamped = clampAttribute(value)
-    const { startingValues, touchedStartingValues } = get()
+    const { build, startingValues, touchedStartingValues } = get()
+    const hasCap = !!(build.height || build.weightClass || build.primaryArchetype || build.secondaryArchetype || build.weakness)
+    const cap = hasCap ? getAttributeCap(name, build) : 99
+    const clamped = clampAttribute(value, 25, cap)
     if (startingValues[name] === clamped && touchedStartingValues[name]) return
     set((state) => ({
       startingValues: { ...state.startingValues, [name]: clamped },
