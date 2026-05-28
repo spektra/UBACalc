@@ -1,7 +1,11 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 
 const importSample = readFileSync(new URL('../docs/ImportSample.md', import.meta.url), 'utf8')
+
+async function gotoApp(page: Page) {
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
+}
 
 function sampleSection(playerName) {
   const start = importSample.indexOf(`## ${playerName}`)
@@ -40,7 +44,7 @@ async function setStore(page, key, value) {
 
 test.describe('Build Setup Form', () => {
   test('renders all dropdowns and inputs', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await expect(page.getByLabel('Height')).toBeVisible()
     await expect(page.getByLabel('Weight')).toBeVisible()
     await expect(page.getByLabel('Primary Strength')).toBeVisible()
@@ -49,35 +53,46 @@ test.describe('Build Setup Form', () => {
   })
 
   test('can select height from dropdown', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     const select = page.getByLabel('Height')
     await select.selectOption("6'6\"")
     await expect(select).toHaveValue("6'6\"")
   })
 
   test('can select weight class', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     const select = page.getByLabel('Weight')
     await select.selectOption('Average')
     await expect(select).toHaveValue('Average')
   })
 
   test('can select archetype', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     const primary = page.getByLabel('Primary Strength')
     await primary.selectOption('Shooting')
     await expect(primary).toHaveValue('Shooting')
   })
 
   test('can input player name', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     const input = page.getByPlaceholder(/auto-load saved player/)
     await input.fill('TestPlayer')
     await expect(input).toHaveValue('TestPlayer')
   })
 
+  test('triggers hidden basketball rain from the UBA logo', async ({ page }) => {
+    await gotoApp(page)
+    const logo = page.getByRole('button', { name: 'UBA logo' })
+    for (let i = 0; i < 9; i++) {
+      await logo.click()
+    }
+    await expect(page.getByTestId('basketball-rain')).toHaveCount(0)
+    await logo.click()
+    await expect(page.getByTestId('basketball-rain')).toBeVisible()
+  })
+
   test('can save and load a build', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByPlaceholder(/auto-load saved player/).fill('SaveTest')
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Weight').selectOption('Average')
@@ -92,7 +107,7 @@ test.describe('Build Setup Form', () => {
   })
 
   test('reset button clears all selections', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByPlaceholder(/auto-load saved player/).fill('ResetTest')
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Weight').selectOption('Above Average')
@@ -107,14 +122,14 @@ test.describe('Build Setup Form', () => {
 
 test.describe('UC Budget Tracker', () => {
   test('can input UC balance', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     const input = page.getByRole('spinbutton').first()
     await input.fill('50000')
     await expect(input).toHaveValue('50000')
   })
 
   test('shows 0 spent with no upgrades', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await expect(page.getByText(/Spent/)).toBeVisible()
     const cost = await page.evaluate(() => {
       const els = document.querySelectorAll('.tabular-nums')
@@ -127,7 +142,7 @@ test.describe('UC Budget Tracker', () => {
   })
 
   test('shows over budget warning', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     const input = page.getByRole('spinbutton').first()
     await input.fill('1000')
     await page.getByLabel('Height').selectOption("6'6\"")
@@ -137,11 +152,56 @@ test.describe('UC Budget Tracker', () => {
     await page.waitForTimeout(300)
     await expect(page.getByText(/over budget/i).first()).toBeVisible()
   })
+
+  test('compares two saved upgrade paths', async ({ page }) => {
+    await gotoApp(page)
+    await page.getByRole('spinbutton').first().fill('50000')
+
+    await setStore(page, '3PT', 80)
+    await expect(page.getByRole('heading', { name: 'Path Compare' })).toBeVisible()
+    await page.getByRole('button', { name: 'Save to Path A' }).click()
+    await expect(page.getByText('3PT 50 to 80')).toBeVisible()
+    await expect.poll(async () => page.evaluate(() => Object.keys(window.__builderStore.getState().attributes).length)).toBe(0)
+
+    await setStore(page, 'Mid Range', 90)
+    await page.getByRole('button', { name: 'Save to Path B' }).click()
+    await expect(page.getByText('Mid Range 50 to 90')).toBeVisible()
+    await expect(page.getByText(/UC less\b/).first()).toBeVisible()
+
+    await page.getByRole('button', { name: 'Restore Path A' }).click()
+    const restored = await page.evaluate(() => window.__builderStore.getState().attributes)
+    expect(restored['3PT']).toBe(80)
+    expect(restored['Mid Range']).toBeUndefined()
+  })
+
+  test('finds and applies a badge upgrade suggestion', async ({ page }) => {
+    await gotoApp(page)
+    await page.evaluate(() => { window.__builderStore.getState().setUCBalance(6000) })
+
+    await expect(page.getByText(/owned badges are treated as already owned/i)).toBeVisible()
+    await page.getByRole('button', { name: 'Find Upgrade' }).click()
+
+    await expect(page.getByText(/Aim for/)).toBeVisible()
+    await expect(page.getByText(/Chosen because it unlocks/)).toBeVisible()
+    await expect(page.getByText('Suggested moves')).toBeVisible()
+    await page.getByRole('button', { name: 'Apply to Current Build' }).click()
+    await expect(page.getByText(/Suggestion applied to current build/i)).toBeVisible()
+
+    const applied = await page.evaluate(() => Object.keys(window.__builderStore.getState().attributes).length)
+    expect(applied).toBeGreaterThan(0)
+    await page.getByRole('button', { name: 'Save to Path A' }).click()
+    await expect.poll(async () => page.evaluate(() => Object.keys(window.__builderStore.getState().attributes).length)).toBe(0)
+
+    const firstPath = await page.getByText(/Aim for/).count()
+    expect(firstPath).toBe(0)
+    await page.getByRole('button', { name: 'Find Upgrade' }).click()
+    await expect(page.getByText(/Aim for/)).toBeVisible()
+  })
 })
 
 test.describe('Attribute Panel', () => {
   test('shows attribute sliders', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await expect(page.getByText('Mid Range')).toBeVisible()
     await expect(page.getByText('3PT')).toBeVisible()
     await expect(page.getByText('Free Throw')).toBeVisible()
@@ -156,7 +216,7 @@ test.describe('Attribute Panel', () => {
   })
 
   test('shows compact attribute descriptions', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await expect(page.getByText(/descriptions are compiled from community and internet sources/i)).toBeVisible()
 
     await page.getByRole('button', { name: 'Show Mid Range description' }).click()
@@ -166,7 +226,7 @@ test.describe('Attribute Panel', () => {
   })
 
   test('slider respects cap from archetype', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Primary Strength').selectOption('Shooting')
     await page.waitForTimeout(200)
@@ -176,7 +236,7 @@ test.describe('Attribute Panel', () => {
   })
 
   test('weakness cap is 75', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Primary Strength').selectOption('Shooting')
     await page.getByLabel('Weakness').selectOption('Playmaking')
@@ -201,7 +261,7 @@ test.describe('Attribute Panel', () => {
   })
 
   test('can set starting value via spinbutton', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Primary Strength').selectOption('Shooting')
     const inputs = page.getByRole('spinbutton')
@@ -211,7 +271,7 @@ test.describe('Attribute Panel', () => {
   })
 
   test('start value input does not clamp while typing', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Primary Strength').selectOption('Shooting')
     const start = page.getByRole('spinbutton').nth(1)
@@ -232,7 +292,7 @@ test.describe('Attribute Panel', () => {
   })
 
   test('shows cap badge when build has height and archetype', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Primary Strength').selectOption('Shooting')
     await page.waitForTimeout(200)
@@ -242,7 +302,7 @@ test.describe('Attribute Panel', () => {
   })
 
   test('cost label shows upgrade cost', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Primary Strength').selectOption('Shooting')
     await setStart(page, "Mid Range", 60)
@@ -252,7 +312,7 @@ test.describe('Attribute Panel', () => {
   })
 
   test('per-slider revert button resets to default', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Primary Strength').selectOption('Shooting')
     await setStart(page, 'Mid Range', 55)
@@ -270,7 +330,7 @@ test.describe('Attribute Panel', () => {
   })
 
   test('shorter player has higher speed cap than taller player', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByLabel('Height').selectOption("5'9\"")
     await page.getByLabel('Primary Strength').selectOption('Shooting')
     await page.waitForTimeout(200)
@@ -312,7 +372,7 @@ test.describe('Attribute Panel', () => {
   })
 
   test('heavier weight reduces agility cap', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Primary Strength').selectOption('Shooting')
     await page.getByLabel('Weight').selectOption('Average')
@@ -357,12 +417,12 @@ test.describe('Attribute Panel', () => {
 
 test.describe('Badge Feed', () => {
   test('shows empty state before any attributes set', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await expect(page.getByText('Set attribute values to check badge unlocks.')).toBeVisible()
   })
 
   test('shows unlocked badges after setting attributes high enough', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Primary Strength').selectOption('Shooting')
     await setStore(page, 'Close Shot', 90)
@@ -372,7 +432,7 @@ test.describe('Badge Feed', () => {
   })
 
   test('shows next-tier badge requirements when clicked', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Primary Strength').selectOption('Playmaking')
     await setStore(page, 'Pass Accuracy', 70)
@@ -391,16 +451,33 @@ test.describe('Badge Feed', () => {
     await expect(page.getByText('60/65')).toBeVisible()
     await expect(page.getByText('+5 needed')).toBeVisible()
   })
+
+  test('does not mark owned Aerial Wizard as a new unlock when upgrading dunk', async ({ page }) => {
+    await gotoApp(page)
+    await page.getByLabel('Height').selectOption("6'6\"")
+    await page.evaluate(() => {
+      window.__builderStore.getState().replacePreviouslyUnlocked({ 'Aerial Wizard': 'Bronze' })
+    })
+    await setStore(page, 'Vertical', 70)
+    await setStore(page, 'Driving Dunk', 80)
+    await page.waitForTimeout(300)
+
+    const aerialWizard = page.getByRole('button').filter({ hasText: 'Aerial Wizard' })
+    await expect(aerialWizard).toBeVisible()
+    await expect(aerialWizard).not.toContainText('New badge unlocked!')
+    await page.getByRole('button', { name: 'New unlocks' }).click()
+    await expect(page.getByRole('button').filter({ hasText: 'Aerial Wizard' })).toHaveCount(0)
+  })
 })
 
 test.describe('Submission Output', () => {
   test('shows empty state with no upgrades', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await expect(page.getByText(/Adjust attribute sliders above the starting values/)).toBeVisible()
   })
 
   test('shows upgrade text after modifying sliders', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Primary Strength').selectOption('Shooting')
     await setStart(page, 'Mid Range', 60)
@@ -410,7 +487,7 @@ test.describe('Submission Output', () => {
   })
 
   test('shows build rating text', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Primary Strength').selectOption('Shooting')
     await setStart(page, 'Mid Range', 60)
@@ -421,7 +498,7 @@ test.describe('Submission Output', () => {
   })
 
   test('shows share button when build has player name', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     const input = page.getByPlaceholder(/auto-load saved player/)
     await input.fill('ShareTest')
     const heightSelect = page.getByLabel('Height')
@@ -437,12 +514,12 @@ test.describe('Submission Output', () => {
 
 test.describe('Theme Toggle', () => {
   test('theme toggle button exists', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await expect(page.getByTitle(/Switch to/)).toBeVisible()
   })
 
   test('clicking theme toggle switches classes on html', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     const html = page.locator('html')
     const initialClass = await html.getAttribute('class')
     await page.getByTitle(/Switch to/).click()
@@ -453,13 +530,13 @@ test.describe('Theme Toggle', () => {
 
 test.describe('Discord Invite', () => {
   test('discord link is visible', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     const discord = page.getByText(/Join the UBA Discord/)
     await expect(discord).toBeVisible()
   })
 
   test('discord link has correct href', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     const link = page.getByRole('link', { name: /Join the UBA Discord/ })
     await expect(link).toHaveAttribute('href', 'https://discord.gg/EBmvWjtnx')
   })
@@ -467,14 +544,14 @@ test.describe('Discord Invite', () => {
 
 test.describe('Header', () => {
   test('header shows app title', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await expect(page.getByText('UBA Upgrade Calculator')).toBeVisible()
   })
 })
 
 test.describe('Share URL', () => {
   test('can encode build to URL and decode back', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     const input = page.getByPlaceholder(/auto-load saved player/)
     await input.fill('ShareEncodeTest')
     const heightSelect = page.getByLabel('Height')
@@ -493,19 +570,19 @@ test.describe('Share URL', () => {
 
 test.describe('Sheet Import', () => {
   test('floating import button is visible', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     const btn = page.locator('button[title="Import player attributes from Google Sheets"]')
     await expect(btn).toBeVisible()
   })
 
   test('opens drawer on click', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.locator('button[title="Import player attributes from Google Sheets"]').click({ force: true })
     await expect(page.getByText('Paste from Sheet')).toBeVisible()
   })
 
   test('imports attributes from pasted data and sets previouslyUnlocked', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Primary Strength').selectOption('Shooting')
     await page.locator('button[title="Import player attributes from Google Sheets"]').click({ force: true })
@@ -585,7 +662,7 @@ test.describe('Sheet Import', () => {
   })
 
   test('imports documented sample players with varied build styles', async ({ page }) => {
-    test.setTimeout(45_000)
+    test.setTimeout(120_000)
 
     const players = [
       {
@@ -621,7 +698,7 @@ test.describe('Sheet Import', () => {
     ]
 
     for (const player of players) {
-      await page.goto('/')
+      await gotoApp(page)
       await page.getByLabel('Height').selectOption(player.height)
       await page.getByLabel('Weight').selectOption(player.weight)
       await page.getByLabel('Primary Strength').selectOption(player.primary)
@@ -660,7 +737,7 @@ test.describe('Sheet Import', () => {
 
   test('saves and reloads imported attributes, upgrades, and badge history', async ({ page }) => {
     test.slow()
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByLabel('Height').selectOption('6\'6"')
     await page.getByLabel('Weight').selectOption('Average')
     await page.getByLabel('Primary Strength').selectOption('Slashing')
@@ -700,7 +777,7 @@ test.describe('Sheet Import', () => {
   })
 
   test('importing a second player replaces prior imported upgrades and badge history', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
 
     await page.locator('button[title="Import player attributes from Google Sheets"]').click({ force: true })
     await page.locator('textarea').fill(sampleRow('Nova Slash', 'Attribute'))
@@ -739,7 +816,7 @@ test.describe('Sheet Import', () => {
   })
 
   test('typing an existing saved name does not auto-overwrite that saved build', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByPlaceholder(/auto-load saved player/).fill('Overwrite Guard')
     await page.getByLabel('Height').selectOption('6\'3"')
     await page.getByLabel('Primary Strength').selectOption('Shooting')
@@ -775,7 +852,7 @@ test.describe('Sheet Import', () => {
 
 test.describe('Badge previouslyUnlocked', () => {
   test('import + upgrade shows Posterizer as new, Float Game not new', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Primary Strength').selectOption('Shooting')
 
@@ -814,14 +891,14 @@ test.describe('Badge previouslyUnlocked', () => {
 
 test.describe('Badge Import', () => {
   test('badge tab exists and can import badges', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.locator('button[title="Import player attributes from Google Sheets"]').click()
     await page.getByRole('button', { name: 'Badges' }).click()
     await expect(page.getByPlaceholder(/Paste badge data/)).toBeVisible()
   })
 
   test('imports badge tiers into previouslyUnlocked', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.getByLabel('Height').selectOption("6'6\"")
     await page.getByLabel('Primary Strength').selectOption('Shooting')
     await page.locator('button[title="Import player attributes from Google Sheets"]').click()
@@ -844,8 +921,33 @@ test.describe('Badge Import', () => {
     expect(state.posterizer).toBeNull()
   })
 
+  test('imported owned Aerial Wizard is not re-announced after a dunk upgrade', async ({ page }) => {
+    await gotoApp(page)
+    await page.locator('button[title="Import player attributes from Google Sheets"]').click()
+    await page.getByRole('button', { name: 'Badges' }).click()
+    const textarea = page.locator('textarea')
+    // Name, Float Game empty, Posterizer empty, Rise Up empty, Aerial Wizard Bronze
+    await textarea.fill('TestPlayer\t\t\t\tBronze')
+    await page.getByText('Apply Import').click()
+    await page.waitForTimeout(300)
+
+    const imported = await page.evaluate(() => window.__builderStore.getState().previouslyUnlocked['Aerial Wizard'] ?? null)
+    expect(imported).toBe('Bronze')
+    await closeImportDrawer(page)
+
+    await setStore(page, 'Vertical', 70)
+    await setStore(page, 'Driving Dunk', 80)
+    await page.waitForTimeout(300)
+
+    const aerialWizard = page.getByRole('button').filter({ hasText: 'Aerial Wizard' })
+    await expect(aerialWizard).toBeVisible()
+    await expect(aerialWizard).not.toContainText('New badge unlocked!')
+    await page.getByRole('button', { name: 'New unlocks' }).click()
+    await expect(page.getByRole('button').filter({ hasText: 'Aerial Wizard' })).toHaveCount(0)
+  })
+
   test('badge import replaces old owned badges instead of merging stale badges', async ({ page }) => {
-    await page.goto('/')
+    await gotoApp(page)
     await page.locator('button[title="Import player attributes from Google Sheets"]').click({ force: true })
     await clickDrawerButton(page, 'Badges')
     await page.locator('textarea').fill(sampleRow('Nova Slash', 'Badge'))

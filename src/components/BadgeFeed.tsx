@@ -115,8 +115,8 @@ export function BadgeFeed() {
       const prevTier = prev ? prev[r.name] : undefined
       const currTier = r.highestEarned
       newRef[r.name] = currTier
-      if (prev !== null && currTier && currTier !== prevTier) {
-        newAchievements.push({ name: r.name, tier: currTier })
+      if (prev !== null && r.newlyUnlocked && r.newlyUnlocked !== prevTier) {
+        newAchievements.push({ name: r.name, tier: r.newlyUnlocked })
       }
     }
 
@@ -265,11 +265,7 @@ export function BadgeFeed() {
         <div className="mt-3 max-h-[60vh] sm:max-h-80 space-y-1.5 overflow-y-auto pr-1">
           <AnimatePresence mode="popLayout">
             {results
-              .filter((r) => !showNewOnly || (
-                sessionBaselineRef.current !== null &&
-                r.highestEarned !== null &&
-                r.highestEarned !== (sessionBaselineRef.current[r.name] ?? null)
-              ))
+              .filter((r) => !showNewOnly || sessionUnlocked.has(r.name))
               .map((r) => {
                 const isNew = sessionUnlocked.has(r.name)
                 const tier = r.highestEarned
@@ -416,11 +412,7 @@ export function BadgeFeed() {
               })}
           </AnimatePresence>
 
-          {showNewOnly && !results.some((r) =>
-            sessionBaselineRef.current !== null &&
-            r.highestEarned !== null &&
-            r.highestEarned !== (sessionBaselineRef.current[r.name] ?? null)
-          ) && (
+          {showNewOnly && !results.some((r) => sessionUnlocked.has(r.name)) && (
             <div className="py-8 text-center text-sm text-uba-text-dim">
               No new badges unlocked yet.
             </div>

@@ -8,7 +8,7 @@ export default defineConfig({
   fullyParallel: false,
   retries: 0,
   workers: 1,
-  timeout: 15000,
+  timeout: 30000,
   use: {
     baseURL,
     trace: 'on-first-retry',
@@ -18,7 +18,7 @@ export default defineConfig({
     command: `npx vite --host 127.0.0.1 --port ${port}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
-    timeout: 30000,
+    timeout: 60000,
     stdout: 'ignore',
     stderr: 'pipe',
   },

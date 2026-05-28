@@ -20,7 +20,7 @@ Fully client-side. No backend. All game parameters in flat JSON for season-to-se
 | Analytics | Cloudflare Web Analytics (free, no cookies) |
 | Error Tracking | Client-side `window.onerror` + `unhandledrejection` → localStorage logger |
 | PWA | Service worker + manifest (installable, app-shell/runtime caching) |
-| Testing | Playwright 1.60 (Chromium, headless, 48 e2e/smoke tests) + Vitest 4 unit tests |
+| Testing | Playwright 1.60 (Chromium, headless, 53 e2e/smoke tests) + Vitest 4 unit tests |
 | Donations | Ko-fi floating button ("Tip Marius") |
 
 ---
@@ -31,6 +31,8 @@ Fully client-side. No backend. All game parameters in flat JSON for season-to-se
 - [x] Build setup form — player name, height dropdown, weight class, weight lbs input (160-275), primary/secondary archetypes, weakness
 - [x] 34 unique attributes across 8 categories, with shared sliders repeated where useful for context
 - [x] UC budget tracker — running total vs balance, over-budget warning, clear/reset
+- [x] Upgrade path comparison — compact Path A / Path B snapshots for comparing UC spend, remaining budget, top upgrades, and new badge upside
+- [x] Badge upgrade suggestion — compact finder that recommends the best single upgrade package by new badge tiers within remaining UC, with Try Another and save-to-slot reset flow
 - [x] Badge unlock detection — 40 badges, Bronze/Silver/Gold/HOF thresholds from `badges.json`
 - [x] Submission output — formatted text with copy button, per-attribute upgrade lines
 
@@ -74,7 +76,7 @@ Fully client-side. No backend. All game parameters in flat JSON for season-to-se
 
 - **E2E Framework:** Playwright 1.60, Chromium only, headless, 1 worker
 - **Unit Framework:** Vitest 4 for pure utility regression tests
-- **Coverage:** 48 Playwright tests + 23 Vitest unit tests
+- **Coverage:** 53 Playwright tests + 26 Vitest unit tests
 - **Key testing quirks** documented in `docs/playwright-notes.md`:
   - `fill()` on range sliders and number inputs does NOT trigger React 19 onChange reliably → tests use keyboard events where needed
   - Playwright owns the Vite dev server through `webServer`; tests can use the dev/test-only `window.__builderStore` hook without exposing it in production preview
@@ -89,6 +91,7 @@ Fully client-side. No backend. All game parameters in flat JSON for season-to-se
 - `caps.json` has an unused `positionHeightRanges` field — leftover from original spec, never referenced in code
 - Share URL uses `btoa(encodeURIComponent(json))` — theoretically can throw on characters outside BMP (> U+FFFF), but practically impossible with JSON-encoded build data
 - Shared attributes such as `Speed With Ball`, `Close Shot`, and `Standing Dunk` intentionally appear in multiple UI categories but are stored/costed once by attribute name
+- Previously-owned badge baseline is sacred: imported/saved `previouslyUnlocked` badges are the source of truth for what the player already owns. UI banners, glows, "New unlocks" filters, recommendation logic, and future hardening must use `checkBadges().newlyUnlocked` instead of independently diffing visible badge tiers. Regression case to preserve: imported/owned `Aerial Wizard Bronze` must not be announced as new when later upgrading `Driving Dunk 70 -> 80` with `Vertical 70`.
 - Summer mode `--uba-track-upgrade` CSS var is hardcoded blue in `.light` block instead of using the gold/orange summer palette
 
 ---
@@ -102,7 +105,7 @@ Full audit of all 24 source files, 4 doc files, 4 data files, 2 test files, and 
 - Consistent error handling throughout (try/catch on all localStorage calls, graceful fallbacks)
 - All game parameters in JSON files — zero hardcoded badge thresholds or caps in components
 - Consistent card styling with Tailwind: `rounded-2xl border border-uba-gold/10 bg-uba-card/80 backdrop-blur-sm`
-- 47 Playwright tests passing reliably
+- 53 Playwright tests passing reliably
 - Good TypeScript usage — few `any` types, proper interfaces for all game data
 - Strong data validation in sheet import (`findDataLine`, `isReasonableValue` guards)
 
@@ -193,7 +196,7 @@ Save/load, share URL, auto-save, audio greeting, build rating, sheet import, wei
 - [ ] League admin audit of `caps.json` and `badges.json` data accuracy
 - [ ] Multi-player save/load profiles
 - [ ] Tendency change calculator
-- [ ] "Recommend an Upgrade" button with reasoning
+- [x] "Recommend an Upgrade" button with reasoning
 - [x] Unit tests for core utilities (`badges.ts`, `caps.ts`, `cost.ts`, `sheetImport.ts`, `share.ts`, `sanitize.ts`)
 - [ ] Refactor `storage.ts` `saveBuild()` to accept a `SavedBuild` object
 - [ ] Add `findDataLine`-equivalent validation to badge sheet import

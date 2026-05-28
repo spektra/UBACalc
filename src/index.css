@@ -125,6 +125,23 @@ body {
   }
 }
 
+@keyframes basketball-fall {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -80px, 0) rotate(0deg) scale(0.86);
+  }
+  10% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--ball-drift, 0px), 110vh, 0) rotate(760deg) scale(1);
+  }
+}
+
 .badge-pop {
   animation: badge-pop 800ms ease-out;
 }
@@ -182,6 +199,20 @@ body {
 .premium-chip {
   animation: fadeInScale 260ms ease-out both;
   box-shadow: 0 0 16px rgba(242, 211, 153, 0.12);
+}
+
+.basketball-egg-ball {
+  position: absolute;
+  top: -48px;
+  display: block;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 230, 150, 0.90), transparent 0.34rem),
+    linear-gradient(90deg, transparent 46%, rgba(70, 32, 12, 0.82) 47%, rgba(70, 32, 12, 0.82) 53%, transparent 54%),
+    linear-gradient(0deg, transparent 46%, rgba(70, 32, 12, 0.82) 47%, rgba(70, 32, 12, 0.82) 53%, transparent 54%),
+    radial-gradient(circle, #f59e0b 0%, #c45b16 74%, #7c2d12 100%);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26), inset -4px -6px 10px rgba(67, 20, 7, 0.36);
+  animation: basketball-fall 3.4s cubic-bezier(0.22, 0.72, 0.28, 1) forwards;
 }
 
 .premium-label {

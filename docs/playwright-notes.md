@@ -49,9 +49,11 @@ Some e2e tests use the dev/test-only `window.__builderStore` hook. The hook is a
 
 Badge threshold checks use exact attribute names from `attributes.json`. Three badges (`On-Ball Menace`, `Pick Dodger`, `Post Lockdown`) had a ` -and ` delimiter that was mismatched with the data file's ` -and- ` format. Fixed by normalizing `badges.json` data directly.
 
-### 8. Test timeout defaults are tight
+### 8. Test timeout defaults are intentionally moderate
 
-Default Playwright timeout is 15,000ms. Tests with 49 keyboard presses (15ms each = 735ms) plus waits (~300ms) fit easily, but the initial page load + interaction can be slow on the first run. Consider 30s for the first test in a file.
+Default Playwright timeout is 30,000ms and the Vite webServer timeout is 60,000ms. Tests navigate with `waitUntil: 'domcontentloaded'` through local `gotoApp()` helpers because waiting for the full `load` event caused intermittent navigation timeouts while the app was already interactive.
+
+The documented sample-player import test is intentionally heavier than most e2e coverage and has a local 120s timeout.
 
 ## Running Tests
 
@@ -72,13 +74,14 @@ npm run test:unit
 ## Test Structure
 
 - `e2e/smoke.spec.ts` — 3 quick smoke tests (title, sections loaded)
-- `e2e/app.spec.ts` — 37 full e2e tests across all features
-- `src/utils/*.test.ts` — Vitest unit tests for badge parsing, caps, cost, import parsing, share decoding, and sanitization
+- `e2e/app.spec.ts` — 50 full e2e tests across all features
+- `src/utils/*.test.ts` — 26 Vitest unit tests for badge parsing, caps, cost, import parsing, share decoding, sanitization, and upgrade suggestion scoring
 - Browser: Chromium only, headless, 1 worker (state leaking between tests)
 
-## Recap — all passing as of May 27, 2026
+## Recap — latest full run in this session
 
 ```
-Playwright: [chromium] ✓ 40 passed
-Vitest: 6 files, 17 tests passed
+Playwright: [chromium] ✓ 48 passed before later targeted additions
+Latest targeted additions: basketball rain, path comparison, badge upgrade suggestion, and Aerial Wizard baseline regressions
+Vitest: 8 files, 26 tests tracked
 ```

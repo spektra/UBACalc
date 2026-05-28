@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { useBuilderStore } from '../stores/useBuilderStore'
-import { searchBuilds } from '../utils/storage'
 import { lbsToWeightClass } from '../utils/caps'
 import buildOptions from '../data/buildOptions.json'
 
@@ -22,11 +21,15 @@ export function BuildSetupForm() {
   const [selectedProfile, setSelectedProfile] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const activeSelectedProfile = selectedProfile && savedPlayers.includes(selectedProfile)
+    ? selectedProfile
+    : savedPlayers[0] ?? ''
 
   const suggestions = useMemo(() => {
-    if (!build.playerName.trim()) return []
-    return searchBuilds(build.playerName).map((b: { playerName: string }) => b.playerName)
-  }, [build.playerName])
+    const query = build.playerName.trim().toLowerCase()
+    if (!query) return []
+    return savedPlayers.filter((name) => name.toLowerCase().includes(query))
+  }, [build.playerName, savedPlayers])
 
   const showDropdown = suggestions.length > 0 && !dismissed
 
@@ -45,10 +48,6 @@ export function BuildSetupForm() {
     refreshSavedPlayers()
   }, [refreshSavedPlayers])
 
-  useEffect(() => {
-    setSelectedProfile((current) => (current && savedPlayers.includes(current) ? current : savedPlayers[0] ?? ''))
-  }, [savedPlayers])
-
   function handleSelect(name: string) {
     loadPlayerBuild(name)
     setSelectedProfile(name)
@@ -56,8 +55,8 @@ export function BuildSetupForm() {
   }
 
   function handleLoadSelected() {
-    if (!selectedProfile) return
-    handleSelect(selectedProfile)
+    if (!activeSelectedProfile) return
+    handleSelect(activeSelectedProfile)
   }
 
   function handleSave() {
@@ -175,7 +174,7 @@ export function BuildSetupForm() {
           <div className="mt-2 flex gap-2">
             <select
               id="savedProfile"
-              value={selectedProfile}
+              value={activeSelectedProfile}
               onFocus={refreshSavedPlayers}
               onChange={(e) => setSelectedProfile(e.target.value)}
               disabled={savedPlayers.length === 0}
@@ -190,7 +189,7 @@ export function BuildSetupForm() {
             <button
               type="button"
               onClick={handleLoadSelected}
-              disabled={!selectedProfile}
+              disabled={!activeSelectedProfile}
               className="premium-chip rounded-xl border border-uba-blue/30 bg-uba-blue/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-uba-blue-light transition-all duration-200 hover:bg-uba-blue/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Load

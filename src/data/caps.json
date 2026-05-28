@@ -26,7 +26,7 @@
     "weakness": { "cap": 75, "base": 40, "color": "red" }
   },
   "fixedAttributes": {
-    "description": "Attributes with fixed caps/bases that are not controlled by archetype or height/weight tables.",
+    "_comment": "Attributes with fixed caps/bases that are not controlled by archetype or height/weight tables.",
     "Shot IQ": { "cap": 99, "base": 50, "color": "grey" },
     "Pass IQ": { "cap": 99, "base": 50, "color": "grey" },
     "Help Defense IQ": { "cap": 99, "base": 50, "color": "grey" },

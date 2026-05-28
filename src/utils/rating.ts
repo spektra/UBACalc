@@ -20,6 +20,22 @@ const ROASTS = [
   "The league sheet admins are going to love this. Mostly because it's funny.",
   "This build is what happens when you let the AI make all your decisions. And the AI was having a stroke.",
   "Your UC wallet is crying. I hope you know that.",
+  "I always say 'Morning' instead of 'Good morning' - if it were a good morning, I'd be sleeping and not talking to people. - Unknown",
+  "I'm not lazy, I'm just in energy-saving mode. - Dancing Snail",
+  "My wallet is like an onion. Every time I open it, it makes me cry. - Unknown",
+  "I finally found a machine at the gym that I like: the vending machine. - Unknown",
+  "My fake plants died because I did not pretend to water them. - Mitch Hedberg",
+  "Our offense is like the Pythagorean Theorem. There is no answer. - Shaquille O'Neal",
+  "The only difference between a good shot and a bad shot is if it goes in or not. - Charles Barkley",
+  "I've had to overcome a lot of diversity. - Drew Gooden",
+  "All series long we've been able to penetrate their bigs, get deep, and suck the D in. - Jason Terry",
+  "We're going to turn this team around 360 degrees. - Jason Kidd",
+  "If I was a Caesar salad, the croutons would be my friends, the lettuce would be my family and the dressing would be my mom. - Kevin Garnett",
+  "If you look at the box score, we won this game. - Paul George",
+  "I never thought I'd lead the NBA in rebounding, but I got a lot of help from my teammates - they did a lot of missing. - Shaquille O'Neal",
+  "I knew I was dog meat. Luckily, I'm the high-priced dog meat that everybody wants. I'm the Alpo of the NBA. - Moses Malone",
+  "I am going to make a shot right here in your face... I didn't mean to leave any time on the clock. - Larry Bird",
+  "We're losing games but our basketball has not been bad basketball, it's been not good enough to win basketball. - George Karl",
 ]
 
 const COMPLIMENTS = [
@@ -29,6 +45,11 @@ const COMPLIMENTS = [
   "This is the kind of build that makes the league sheet look like poetry.",
   "Minimum waste, maximum impact. Alpha move.",
   "Your UC was well-invested. This build is a certified problem for the league.",
+  "The ball is in your court. - Common idiom",
+  "Marius de Romanus might be the greatest basketball player ever. - Marius de Romanus",
+  "You miss 100% of the shots you don't take. - Wayne Gretzky",
+  "Be the ball. - Caddyshack",
+  "When you do things right, people won't be sure you've done anything at all. - Philip J. Fry",
 ]
 
 const MID = [
@@ -36,6 +57,17 @@ const MID = [
   "Solid effort. Nothing flashy, but you'll get minutes. Probably.",
   "This build will definitely play basketball. Whether it plays WELL basketball remains to be seen.",
   "You made choices. Some of them were even good choices. We'll take it.",
+  "If you can't be kind, at least be vague. - Judith Martin",
+  "Always forgive your enemies; nothing annoys them so much. - Oscar Wilde",
+  "I generally avoid temptation unless I can't resist it. - Mae West",
+  "Don't be so humble - you're not that great. - Golda Meir",
+  "Do not take life too seriously. You will never get out of it alive. - Elbert Hubbard",
+  "If plan A doesn't work, the alphabet has 25 more letters. - Claire Cook",
+  "The chief function of the body is to carry the brain around. - Thomas A. Edison",
+  "Life is like a box of chocolates... you never know what you're gonna get. - Forrest Gump",
+  "Wait, I'm having one of those things. You know... a headache with pictures? - Philip J. Fry",
+  "Stupid Flanders! Stupid sexy Flanders! - Homer J. Simpson",
+  "Wait a minute. I'm in no condition to drive. Wait a minute. I don't have to listen to myself. I'm drunk. - Homer J. Simpson",
 ]
 
 function pick<T>(arr: T[]): T {

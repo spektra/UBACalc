@@ -8,6 +8,8 @@ These are project-specific things that were already working and should not be ch
 - Attribute values are keyed by attribute name.
 - Do not reuse the attribute allowlist for badge history validation.
 - `previouslyUnlocked` must survive import, save, load, and share-safe validation so already-owned badges do not appear as new submission unlocks.
+- UI banners, glows, `New unlocks` filters, and recommendation logic must use `checkBadges().newlyUnlocked`; do not independently diff visible tiers.
+- Regression case to preserve: imported or saved `Aerial Wizard Bronze` must not be announced as new after later upgrading `Driving Dunk 70 -> 80` with `Vertical 70`.
 - Add or update a unit test before touching badge-history sanitization, import replacement, save/load normalization, or `checkBadges` newly-unlocked logic.
 
 ## Safe Change Rule

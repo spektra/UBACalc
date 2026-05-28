@@ -12,6 +12,7 @@ import { SheetImportDrawer } from './components/SheetImportDrawer'
 import { BuildSetupForm } from './components/BuildSetupForm'
 import { AttributePanel } from './components/AttributePanel'
 import { BudgetTracker } from './components/BudgetTracker'
+import { UpgradeComparison } from './components/UpgradeComparison'
 import { BadgeFeed } from './components/BadgeFeed'
 import { SubmissionOutput } from './components/SubmissionOutput'
 import wall2k from '/wall2k.png'
@@ -107,6 +108,7 @@ function App() {
 
           <motion.div variants={fadeUp} className="lg:col-span-2 space-y-6">
             <BudgetTracker />
+            <UpgradeComparison />
             <AttributePanel />
           </motion.div>
         </div>

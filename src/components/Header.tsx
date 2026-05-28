@@ -1,10 +1,32 @@
 // Header — app header with logo, title, theme toggle, season label, unsaved changes indicator.
 // the amber dot in the corner tells you if there are unsaved changes since the last auto-save.
 
-import { useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import logo from '/logo.png'
 import { useThemeStore } from '../stores/useThemeStore'
 import { useBuilderStore } from '../stores/useBuilderStore'
+
+interface FallingBall {
+  id: number
+  left: number
+  delay: number
+  duration: number
+  size: number
+  drift: number
+}
+
+const LOGO_EASTER_CLICKS = 10
+
+function makeBasketballs(seed: number): FallingBall[] {
+  return Array.from({ length: 28 }, (_, index) => ({
+    id: seed * 100 + index,
+    left: Math.round(Math.random() * 96),
+    delay: Math.random() * 0.7,
+    duration: 2.6 + Math.random() * 1.6,
+    size: 18 + Math.round(Math.random() * 18),
+    drift: Math.round((Math.random() - 0.5) * 120),
+  }))
+}
 
 export function Header({ onImportClick }: { onImportClick?: () => void }) {
   const theme = useThemeStore((s) => s.theme)
@@ -14,6 +36,25 @@ export function Header({ onImportClick }: { onImportClick?: () => void }) {
   const startingValues = useBuilderStore((s) => s.startingValues)
   const ucBalance = useBuilderStore((s) => s.ucBalance)
   const previouslyUnlocked = useBuilderStore((s) => s.previouslyUnlocked)
+  const clickCountRef = useRef(0)
+  const ballSeedRef = useRef(0)
+  const clearTimerRef = useRef<number | null>(null)
+  const [fallingBalls, setFallingBalls] = useState<FallingBall[]>([])
+
+  useEffect(() => () => {
+    if (clearTimerRef.current !== null) window.clearTimeout(clearTimerRef.current)
+  }, [])
+
+  const handleLogoClick = useCallback(() => {
+    clickCountRef.current += 1
+    if (clickCountRef.current < LOGO_EASTER_CLICKS) return
+
+    clickCountRef.current = 0
+    ballSeedRef.current += 1
+    if (clearTimerRef.current !== null) window.clearTimeout(clearTimerRef.current)
+    setFallingBalls(makeBasketballs(ballSeedRef.current))
+    clearTimerRef.current = window.setTimeout(() => setFallingBalls([]), 5_000)
+  }, [])
 
   const hasUnsaved = useMemo(() => {
     if (!build.playerName.trim()) return false
@@ -50,7 +91,15 @@ export function Header({ onImportClick }: { onImportClick?: () => void }) {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-2 sm:px-6 sm:py-3">
         <div className="flex items-center gap-1.5 sm:gap-3">
           <div className="relative">
-            <img src={logo} alt="UBA" className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg object-cover ring-1 ring-uba-gold/20" />
+            <button
+              type="button"
+              onClick={handleLogoClick}
+              className="rounded-lg outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-uba-gold/60 active:scale-95"
+              aria-label="UBA logo"
+              title="UBA logo"
+            >
+              <img src={logo} alt="" className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg object-cover ring-1 ring-uba-gold/20" />
+            </button>
             {hasUnsaved && (
               <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.6)]" />
             )}
@@ -93,6 +142,24 @@ export function Header({ onImportClick }: { onImportClick?: () => void }) {
           </div>
         </div>
       </div>
+      {fallingBalls.length > 0 && (
+        <div className="pointer-events-none fixed inset-0 z-[80] overflow-hidden" data-testid="basketball-rain" aria-hidden="true">
+          {fallingBalls.map((ball) => (
+            <span
+              key={ball.id}
+              className="basketball-egg-ball"
+              style={{
+                left: `${ball.left}%`,
+                width: `${ball.size}px`,
+                height: `${ball.size}px`,
+                animationDelay: `${ball.delay}s`,
+                animationDuration: `${ball.duration}s`,
+                '--ball-drift': `${ball.drift}px`,
+              } as CSSProperties & Record<'--ball-drift', string>}
+            />
+          ))}
+        </div>
+      )}
     </header>
   )
 }

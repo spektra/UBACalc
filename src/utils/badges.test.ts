@@ -73,4 +73,16 @@ describe('checkBadges', () => {
     expect(result.tiers.find((tier) => tier.tier === 'Bronze')?.state).toBe('EARNED')
     expect(result.tiers.find((tier) => tier.tier === 'Silver')?.state).toBe('EARNED')
   })
+
+  it('does not announce Aerial Wizard as new when the earned tier was already owned', () => {
+    const result = badge(
+      'Aerial Wizard',
+      { Vertical: 70, 'Driving Dunk': 80 },
+      { 'Aerial Wizard': 'Bronze' },
+    )
+
+    expect(result.highestEarned).toBe('Bronze')
+    expect(result.previouslyUnlocked).toBe('Bronze')
+    expect(result.newlyUnlocked).toBeNull()
+  })
 })
